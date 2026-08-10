@@ -26,16 +26,5 @@
         </field>
     </record>
 
-    <record id="hr_kanban_view_applicant_villa_nova" model="ir.ui.view">
-        <field name="name">hr.applicant.kanban.villa.nova.score</field>
-        <field name="model">hr.applicant</field>
-        <field name="inherit_id" ref="hr_recruitment.hr_kanban_view_applicant"/>
-        <field name="arch" type="xml">
-            <xpath expr="//field[@name='categ_ids']" position="after">
-                <field name="x_score_total" invisible="not x_score_total" class="badge text-bg-info"/>
-            </xpath>
-        </field>
-    </record>
-
     </data>
 </odoo>
