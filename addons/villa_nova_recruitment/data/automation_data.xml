@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="0" context="{'lang': 'fr_FR'}">
+
+    <!-- Etape 3 : des qu'une candidature entre dans "Test de prequalification en ligne",
+         le test est envoye automatiquement au candidat, sans action RH. -->
+    <record id="automation_send_prequalification_test" model="base.automation">
+        <field name="name">Villa Nova - Envoi auto du test de préqualification</field>
+        <field name="model_id" ref="hr_recruitment.model_hr_applicant"/>
+        <field name="trigger">on_stage_set</field>
+        <field name="trg_field_ref" ref="stage_test_prequalification"/>
+        <field name="active">True</field>
+    </record>
+
+    <record id="automation_send_prequalification_test_action" model="ir.actions.server">
+        <field name="name">Envoyer le test de préqualification</field>
+        <field name="base_automation_id" ref="automation_send_prequalification_test"/>
+        <field name="model_id" ref="hr_recruitment.model_hr_applicant"/>
+        <field name="state">code</field>
+        <field name="code">records.action_villa_nova_send_prequalification_test()</field>
+    </record>
+
+    </data>
+</odoo>
