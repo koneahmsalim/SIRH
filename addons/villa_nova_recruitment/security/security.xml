@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+
+    <record id="group_direction_generale" model="res.groups">
+        <field name="name">Direction Générale (PDG)</field>
+        <field name="category_id" ref="base.module_category_human_resources_recruitment"/>
+        <field name="comment">Membres habilités à valider les postes et les decisions finales du processus de recrutement (Etapes 1, 4 et 5 de la procedure RH).</field>
+        <field name="implied_ids" eval="[(4, ref('hr_recruitment.group_hr_recruitment_manager'))]"/>
+    </record>
+
+    </data>
+</odoo>

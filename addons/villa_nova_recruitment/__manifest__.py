@@ -5,10 +5,13 @@
     'category': 'Human Resources/Recruitment',
     'author': 'Villa Nova',
     'license': 'LGPL-3',
-    'depends': ['hr_recruitment'],
+    'depends': ['hr_recruitment', 'website_hr_recruitment'],
     'data': [
+        'security/security.xml',
         'data/recruitment_stage_data.xml',
+        'views/hr_job_views.xml',
     ],
+    'post_init_hook': 'post_init_hook',
     'installable': True,
     'application': False,
 }

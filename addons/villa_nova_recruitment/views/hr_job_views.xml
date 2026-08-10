@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+
+    <record id="hr_job_view_form_villa_nova" model="ir.ui.view">
+        <field name="name">hr.job.form.villa.nova.planification</field>
+        <field name="model">hr.job</field>
+        <field name="inherit_id" ref="hr.view_hr_job_form"/>
+        <field name="arch" type="xml">
+
+            <xpath expr="//header" position="inside">
+                <button name="action_submit_for_validation" type="object" string="Soumettre pour validation"
+                        class="oe_highlight" invisible="x_validation_state != 'draft'"/>
+                <button name="action_validate_job" type="object" string="Valider (Direction Générale)"
+                        class="oe_highlight" invisible="x_validation_state != 'to_validate'"
+                        groups="villa_nova_recruitment.group_direction_generale"/>
+                <button name="action_reset_to_draft" type="object" string="Remettre en brouillon"
+                        invisible="x_validation_state == 'draft'"/>
+                <field name="x_validation_state" widget="statusbar" statusbar_visible="draft,to_validate,validated"/>
+            </xpath>
+
+            <xpath expr="//notebook" position="inside">
+                <page string="Planification du recrutement" name="villa_nova_planification">
+                    <group>
+                        <group name="villa_nova_motif" string="Identification du besoin">
+                            <field name="x_motif_recrutement"/>
+                            <field name="x_delai_souhaite"/>
+                            <field name="x_budget_recrutement"/>
+                            <field name="x_currency_id" invisible="1"/>
+                        </group>
+                        <group name="villa_nova_objectifs" string="Objectifs">
+                            <field name="x_objectifs_3_mois"/>
+                            <field name="x_objectifs_1_an"/>
+                        </group>
+                    </group>
+                </page>
+            </xpath>
+
+        </field>
+    </record>
+
+    </data>
+</odoo>
