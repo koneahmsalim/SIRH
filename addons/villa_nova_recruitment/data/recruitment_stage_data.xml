@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="0" context="{'lang': 'fr_FR'}">
+
+    <!-- Etape 3 (debut) - Reception de la candidature -->
+    <record id="hr_recruitment.stage_job0" model="hr.recruitment.stage">
+        <field name="name">Nouvelle candidature</field>
+        <field name="sequence">10</field>
+        <field name="requirements">Candidature reçue par mail et classée par poste.</field>
+    </record>
+
+    <!-- Etape 3 - Screening structure (grille ponderee) -->
+    <record id="hr_recruitment.stage_job1" model="hr.recruitment.stage">
+        <field name="name">Screening CV &amp; lettre</field>
+        <field name="sequence">20</field>
+        <field name="requirements">Grille pondérée : Formation académique (20%), Expérience professionnelle (30%), Compétences techniques (20%), Compétences comportementales (15%), Qualité de la lettre de motivation (15%).</field>
+    </record>
+
+    <!-- Etape 3 - Test de prequalification en ligne (nouvelle etape) -->
+    <record id="stage_test_prequalification" model="hr.recruitment.stage">
+        <field name="name">Test de préqualification en ligne</field>
+        <field name="sequence">30</field>
+        <field name="requirements">Test en ligne adapté au poste : logique et raisonnement, culture générale/technique, alignement avec les valeurs de Villa Nova.</field>
+    </record>
+
+    <!-- Etape 3 - Prequalification telephonique -->
+    <record id="hr_recruitment.stage_job2" model="hr.recruitment.stage">
+        <field name="name">Préqualification téléphonique</field>
+        <field name="sequence">40</field>
+        <field name="requirements">Entretien téléphonique 10-15 min : informations personnelles, intérêt/disponibilité, compatibilité culturelle, motivation. Résultat attendu : shortlist de candidats.</field>
+    </record>
+
+    <!-- Etape 4 - Entretien structure (3 volets) -->
+    <record id="hr_recruitment.stage_job3" model="hr.recruitment.stage">
+        <field name="name">Entretien structuré (RH / Technique / Pratique)</field>
+        <field name="sequence">50</field>
+        <field name="requirements">Méthode STAR. Volet RH (motivation, compatibilité culturelle), volet technique (compétences métier), volet pratique (résolution de problèmes concrets).</field>
+    </record>
+
+    <!-- Etape 4 - Tests pratiques (nouvelle etape) -->
+    <record id="stage_tests_pratiques" model="hr.recruitment.stage">
+        <field name="name">Tests pratiques</field>
+        <field name="sequence">60</field>
+        <field name="requirements">Études de cas liées au poste, résolution de problèmes en temps limité, exercices techniques spécifiques.</field>
+    </record>
+
+    <!-- Etape 4 - Entretien avec le President (nouvelle etape) -->
+    <record id="stage_entretien_president" model="hr.recruitment.stage">
+        <field name="name">Entretien Président</field>
+        <field name="sequence">70</field>
+        <field name="requirements">Évaluation de la vision stratégique, du leadership et du potentiel de croissance au sein du groupe. Livrables : rapport d'entretien, résultats tests, avis PDG.</field>
+    </record>
+
+    <!-- Etape 5 - Verification des references (nouvelle etape) -->
+    <record id="stage_verification_references" model="hr.recruitment.stage">
+        <field name="name">Vérification des références</field>
+        <field name="sequence">80</field>
+        <field name="requirements">Contact des références professionnelles (avec autorisation préalable) pour confirmer expérience et compétences. Dossier complet et conforme avant décision.</field>
+    </record>
+
+    <!-- Etape 6 - Offre d'emploi -->
+    <record id="hr_recruitment.stage_job4" model="hr.recruitment.stage">
+        <field name="name">Offre &amp; Négociation</field>
+        <field name="sequence">90</field>
+        <field name="requirements">Offre écrite (poste, conditions, rémunération, avantages, objectifs court terme). Négociation avec flexibilité RH en accord avec la direction.</field>
+    </record>
+
+    <!-- Etape 6 - Formalisation -->
+    <record id="hr_recruitment.stage_job5" model="hr.recruitment.stage">
+        <field name="name">Contrat signé</field>
+        <field name="sequence">100</field>
+        <field name="hired_stage">True</field>
+        <field name="requirements">Signature du contrat le jour de la prise de fonction. Communication de la date de début, du lieu de travail, des procédures administratives et des politiques de l'entreprise.</field>
+    </record>
+
+    </data>
+</odoo>
