@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1" context="{'lang': 'fr_FR'}">
+
+    <record id="mail_template_prequalification_telephonique" model="mail.template">
+        <field name="name">Villa Nova - Préqualification téléphonique</field>
+        <field name="model_id" ref="hr_recruitment.model_hr_applicant"/>
+        <field name="subject">Villa Nova - Prochaine étape de votre candidature : entretien téléphonique</field>
+        <field name="email_from">{{ (object.job_id.user_id.email_formatted or user.email_formatted) }}</field>
+        <field name="email_to">{{ object.email_from }}</field>
+        <field name="auto_delete" eval="True"/>
+        <field name="body_html" type="html">
+            <div style="margin: 0px; padding: 0px; font-size: 13px;">
+                <p>Bonjour <t t-out="object.partner_name or ''">Candidat</t>,</p>
+                <p>Nous avons le plaisir de vous informer que votre candidature au poste de
+                    <strong><t t-out="object.job_id.name or ''">Poste</t></strong> a été présélectionnée.</p>
+                <p>Un membre de notre équipe RH va prochainement vous contacter pour un court entretien téléphonique
+                    (10 à 15 minutes). N'hésitez pas à répondre à cet email pour nous indiquer vos disponibilités.</p>
+                <p>Cordialement,<br/>L'équipe Ressources Humaines - Villa Nova</p>
+            </div>
+        </field>
+    </record>
+
+    <record id="mail_template_entretien_structure" model="mail.template">
+        <field name="name">Villa Nova - Convocation entretien structuré</field>
+        <field name="model_id" ref="hr_recruitment.model_hr_applicant"/>
+        <field name="subject">Villa Nova - Convocation à un entretien</field>
+        <field name="email_from">{{ (object.job_id.user_id.email_formatted or user.email_formatted) }}</field>
+        <field name="email_to">{{ object.email_from }}</field>
+        <field name="auto_delete" eval="True"/>
+        <field name="body_html" type="html">
+            <div style="margin: 0px; padding: 0px; font-size: 13px;">
+                <p>Bonjour <t t-out="object.partner_name or ''">Candidat</t>,</p>
+                <p>Félicitations, votre candidature au poste de
+                    <strong><t t-out="object.job_id.name or ''">Poste</t></strong> continue d'avancer.</p>
+                <p>Nous allons vous inviter à un entretien structuré comportant un volet RH, un volet technique et un
+                    volet pratique. Notre équipe reviendra vers vous très prochainement pour convenir d'une date, d'une
+                    heure et du format (présentiel ou visioconférence).</p>
+                <p>Cordialement,<br/>L'équipe Ressources Humaines - Villa Nova</p>
+            </div>
+        </field>
+    </record>
+
+    <record id="mail_template_tests_pratiques" model="mail.template">
+        <field name="name">Villa Nova - Tests pratiques</field>
+        <field name="model_id" ref="hr_recruitment.model_hr_applicant"/>
+        <field name="subject">Villa Nova - Tests pratiques à venir</field>
+        <field name="email_from">{{ (object.job_id.user_id.email_formatted or user.email_formatted) }}</field>
+        <field name="email_to">{{ object.email_from }}</field>
+        <field name="auto_delete" eval="True"/>
+        <field name="body_html" type="html">
+            <div style="margin: 0px; padding: 0px; font-size: 13px;">
+                <p>Bonjour <t t-out="object.partner_name or ''">Candidat</t>,</p>
+                <p>Dans le cadre du processus de recrutement pour le poste de
+                    <strong><t t-out="object.job_id.name or ''">Poste</t></strong>, vous serez invité(e) à réaliser des
+                    tests pratiques (étude de cas et/ou exercices techniques en lien avec le poste).</p>
+                <p>Notre équipe vous communiquera prochainement les modalités précises.</p>
+                <p>Cordialement,<br/>L'équipe Ressources Humaines - Villa Nova</p>
+            </div>
+        </field>
+    </record>
+
+    <record id="mail_template_entretien_president" model="mail.template">
+        <field name="name">Villa Nova - Entretien avec la Direction</field>
+        <field name="model_id" ref="hr_recruitment.model_hr_applicant"/>
+        <field name="subject">Villa Nova - Vous êtes convié(e) à un entretien avec la Direction</field>
+        <field name="email_from">{{ (object.job_id.user_id.email_formatted or user.email_formatted) }}</field>
+        <field name="email_to">{{ object.email_from }}</field>
+        <field name="auto_delete" eval="True"/>
+        <field name="body_html" type="html">
+            <div style="margin: 0px; padding: 0px; font-size: 13px;">
+                <p>Bonjour <t t-out="object.partner_name or ''">Candidat</t>,</p>
+                <p>Votre candidature au poste de <strong><t t-out="object.job_id.name or ''">Poste</t></strong> a
+                    franchi une nouvelle étape importante : vous êtes à présent convié(e) à un entretien avec notre
+                    Président.</p>
+                <p>Notre équipe RH reviendra vers vous pour organiser cet échange.</p>
+                <p>Cordialement,<br/>L'équipe Ressources Humaines - Villa Nova</p>
+            </div>
+        </field>
+    </record>
+
+    <record id="mail_template_verification_references" model="mail.template">
+        <field name="name">Villa Nova - Vérification des références</field>
+        <field name="model_id" ref="hr_recruitment.model_hr_applicant"/>
+        <field name="subject">Villa Nova - Vérification de vos références professionnelles</field>
+        <field name="email_from">{{ (object.job_id.user_id.email_formatted or user.email_formatted) }}</field>
+        <field name="email_to">{{ object.email_from }}</field>
+        <field name="auto_delete" eval="True"/>
+        <field name="body_html" type="html">
+            <div style="margin: 0px; padding: 0px; font-size: 13px;">
+                <p>Bonjour <t t-out="object.partner_name or ''">Candidat</t>,</p>
+                <p>Votre candidature au poste de <strong><t t-out="object.job_id.name or ''">Poste</t></strong> est
+                    en phase finale de décision. Avant de poursuivre, nous souhaitons contacter deux ou trois de vos
+                    références professionnelles.</p>
+                <p>Merci de répondre à cet email en nous communiquant leurs coordonnées ainsi que votre autorisation
+                    pour les contacter.</p>
+                <p>Cordialement,<br/>L'équipe Ressources Humaines - Villa Nova</p>
+            </div>
+        </field>
+    </record>
+
+    </data>
+</odoo>

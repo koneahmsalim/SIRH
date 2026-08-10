@@ -20,5 +20,81 @@
         <field name="code">records.action_villa_nova_send_prequalification_test()</field>
     </record>
 
+    <!-- Etapes 4 et 5 : notification candidat + tache assignee, une regle par etape -->
+    <record id="automation_notify_prequalification_telephonique" model="base.automation">
+        <field name="name">Villa Nova - Notif. préqualification téléphonique</field>
+        <field name="model_id" ref="hr_recruitment.model_hr_applicant"/>
+        <field name="trigger">on_stage_set</field>
+        <field name="trg_field_ref" ref="hr_recruitment.stage_job2"/>
+        <field name="active">True</field>
+    </record>
+    <record id="automation_notify_prequalification_telephonique_action" model="ir.actions.server">
+        <field name="name">Notifier le candidat + tâche RH</field>
+        <field name="base_automation_id" ref="automation_notify_prequalification_telephonique"/>
+        <field name="model_id" ref="hr_recruitment.model_hr_applicant"/>
+        <field name="state">code</field>
+        <field name="code">records.action_villa_nova_notify_stage()</field>
+    </record>
+
+    <record id="automation_notify_entretien_structure" model="base.automation">
+        <field name="name">Villa Nova - Notif. entretien structuré</field>
+        <field name="model_id" ref="hr_recruitment.model_hr_applicant"/>
+        <field name="trigger">on_stage_set</field>
+        <field name="trg_field_ref" ref="hr_recruitment.stage_job3"/>
+        <field name="active">True</field>
+    </record>
+    <record id="automation_notify_entretien_structure_action" model="ir.actions.server">
+        <field name="name">Notifier le candidat + tâche Manager</field>
+        <field name="base_automation_id" ref="automation_notify_entretien_structure"/>
+        <field name="model_id" ref="hr_recruitment.model_hr_applicant"/>
+        <field name="state">code</field>
+        <field name="code">records.action_villa_nova_notify_stage()</field>
+    </record>
+
+    <record id="automation_notify_tests_pratiques" model="base.automation">
+        <field name="name">Villa Nova - Notif. tests pratiques</field>
+        <field name="model_id" ref="hr_recruitment.model_hr_applicant"/>
+        <field name="trigger">on_stage_set</field>
+        <field name="trg_field_ref" ref="stage_tests_pratiques"/>
+        <field name="active">True</field>
+    </record>
+    <record id="automation_notify_tests_pratiques_action" model="ir.actions.server">
+        <field name="name">Notifier le candidat + tâche Manager</field>
+        <field name="base_automation_id" ref="automation_notify_tests_pratiques"/>
+        <field name="model_id" ref="hr_recruitment.model_hr_applicant"/>
+        <field name="state">code</field>
+        <field name="code">records.action_villa_nova_notify_stage()</field>
+    </record>
+
+    <record id="automation_notify_entretien_president" model="base.automation">
+        <field name="name">Villa Nova - Notif. entretien Président</field>
+        <field name="model_id" ref="hr_recruitment.model_hr_applicant"/>
+        <field name="trigger">on_stage_set</field>
+        <field name="trg_field_ref" ref="stage_entretien_president"/>
+        <field name="active">True</field>
+    </record>
+    <record id="automation_notify_entretien_president_action" model="ir.actions.server">
+        <field name="name">Notifier le candidat + tâche Direction Générale</field>
+        <field name="base_automation_id" ref="automation_notify_entretien_president"/>
+        <field name="model_id" ref="hr_recruitment.model_hr_applicant"/>
+        <field name="state">code</field>
+        <field name="code">records.action_villa_nova_notify_stage()</field>
+    </record>
+
+    <record id="automation_notify_verification_references" model="base.automation">
+        <field name="name">Villa Nova - Notif. vérification des références</field>
+        <field name="model_id" ref="hr_recruitment.model_hr_applicant"/>
+        <field name="trigger">on_stage_set</field>
+        <field name="trg_field_ref" ref="stage_verification_references"/>
+        <field name="active">True</field>
+    </record>
+    <record id="automation_notify_verification_references_action" model="ir.actions.server">
+        <field name="name">Notifier le candidat + tâche RH</field>
+        <field name="base_automation_id" ref="automation_notify_verification_references"/>
+        <field name="model_id" ref="hr_recruitment.model_hr_applicant"/>
+        <field name="state">code</field>
+        <field name="code">records.action_villa_nova_notify_stage()</field>
+    </record>
+
     </data>
 </odoo>
