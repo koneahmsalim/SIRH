@@ -22,6 +22,17 @@
                         </group>
                     </group>
                 </page>
+                <page string="Décision (Étapes 4-5)" name="villa_nova_decision">
+                    <group>
+                        <group string="Entretien Président" name="villa_nova_avis_president">
+                            <field name="x_avis_president" placeholder="Vision stratégique, leadership, potentiel de croissance..."/>
+                        </group>
+                        <group string="Vérification des références" name="villa_nova_references">
+                            <field name="x_references_verifiees"/>
+                            <field name="x_notes_verification_references"/>
+                        </group>
+                    </group>
+                </page>
             </xpath>
         </field>
     </record>

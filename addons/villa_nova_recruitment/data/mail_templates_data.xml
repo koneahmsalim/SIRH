@@ -121,6 +121,10 @@
                         <li>Date de prise de fonction souhaitée : <t t-out="format_date(object.availability)"/></li>
                     </t>
                 </ul>
+                <t t-if="object.job_id.x_objectifs_3_mois">
+                    <p><strong>Objectifs à court terme :</strong></p>
+                    <p><t t-out="object.job_id.x_objectifs_3_mois"/></p>
+                </t>
                 <p>N'hésitez pas à revenir vers nous si vous souhaitez échanger sur ces conditions : nous restons
                     ouverts à la discussion avant la formalisation du contrat.</p>
                 <p>Cordialement,<br/>L'équipe Ressources Humaines - Villa Nova</p>

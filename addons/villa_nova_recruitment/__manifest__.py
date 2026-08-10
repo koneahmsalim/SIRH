@@ -17,6 +17,7 @@
         'security/security.xml',
         'data/recruitment_stage_data.xml',
         'data/survey_prequalification_data.xml',
+        'data/utm_source_data.xml',
         'data/mail_templates_data.xml',
         'data/automation_data.xml',
         'views/hr_job_views.xml',

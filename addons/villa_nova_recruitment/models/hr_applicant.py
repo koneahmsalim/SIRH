@@ -72,6 +72,20 @@ class HrApplicant(models.Model):
                 + applicant.x_score_lettre_motivation
             )
 
+    # Etape 4 : livrable explicitement cite par la procedure ("Avis PDG") pour
+    # l'entretien avec le President.
+    x_avis_president = fields.Text(
+        string="Avis du Président",
+        help="Vision stratégique, leadership, potentiel de croissance du candidat "
+             "au sein du groupe (à remplir après l'entretien avec le Président).",
+    )
+
+    # Etape 5 : la procedure demande de verifier les references avec
+    # autorisation prealable du candidat (email deja envoye automatiquement) ;
+    # ces champs capturent le resultat de cette verification.
+    x_references_verifiees = fields.Boolean(string="Références vérifiées")
+    x_notes_verification_references = fields.Text(string="Notes de vérification des références")
+
     x_pending_notification_stage_id = fields.Many2one(
         'hr.recruitment.stage',
         string="Étape en attente de notification",

@@ -1,4 +1,4 @@
-from odoo import _, fields, models
+from odoo import _, api, fields, models
 
 
 class HrJob(models.Model):
@@ -13,6 +13,10 @@ class HrJob(models.Model):
         string="Motif du recrutement",
     )
     x_delai_souhaite = fields.Date(string="Délai souhaité pour le recrutement")
+    x_date_cloture = fields.Date(
+        string="Date de clôture des candidatures",
+        help="Date limite de réception des candidatures, à mentionner dans l'annonce.",
+    )
     x_currency_id = fields.Many2one(related='company_id.currency_id', string="Devise")
     x_budget_recrutement = fields.Monetary(
         string="Budget de recrutement alloué", currency_field='x_currency_id',
@@ -31,6 +35,28 @@ class HrJob(models.Model):
         copy=False,
     )
 
+    @api.model_create_multi
+    def create(self, vals_list):
+        jobs = super().create(vals_list)
+        # Le bouton "Nouveau" de l'app Recrutement redirige immediatement vers le
+        # kanban des candidatures du poste, sans jamais montrer l'onglet
+        # Planification ni le bouton "Soumettre pour validation". Sans ce rappel,
+        # une RH pressee peut tres bien ne jamais revenir completer/valider le
+        # poste, qui ne sera alors jamais publie. hr.job n'a pas mail.activity.mixin
+        # (uniquement mail.thread) : on utilise une notification directe plutot
+        # qu'une tache formelle.
+        for job in jobs:
+            job.message_notify(
+                partner_ids=self.env.user.partner_id.ids,
+                subject=_("Poste « %s » créé", job.name),
+                body=_(
+                    "Ce poste n'est pas encore publié. Complétez l'onglet « Planification du "
+                    "recrutement » (délai, budget, objectifs) puis cliquez sur « Soumettre pour "
+                    "validation » pour que la Direction Générale puisse le valider."
+                ),
+            )
+        return jobs
+
     def _get_direction_generale_users(self):
         group = self.env.ref(
             'villa_nova_recruitment.group_direction_generale', raise_if_not_found=False,
@@ -43,21 +69,23 @@ class HrJob(models.Model):
         for job in self:
             if users:
                 job.message_subscribe(partner_ids=users.mapped('partner_id').ids)
-            job.message_post(
-                body=_("Poste soumis à la Direction Générale pour validation avant publication."),
+            motif = dict(job._fields['x_motif_recrutement'].selection).get(
+                job.x_motif_recrutement, '-',
             )
-            for user in users:
-                job.activity_schedule(
-                    'mail.mail_activity_data_todo',
-                    summary=_("Valider le poste : %s", job.name),
-                    note=_(
-                        "Motif : %(motif)s. Merci de valider ce poste pour qu'il soit "
-                        "publié automatiquement sur le site carrière.",
-                        motif=dict(job._fields['x_motif_recrutement'].selection).get(
-                            job.x_motif_recrutement, '-',
-                        ),
+            job.message_post(
+                body=_(
+                    "Poste soumis à la Direction Générale pour validation avant publication. "
+                    "Motif : %(motif)s.", motif=motif,
+                ),
+            )
+            if users:
+                job.message_notify(
+                    partner_ids=users.mapped('partner_id').ids,
+                    subject=_("Poste à valider : %s", job.name),
+                    body=_(
+                        "Motif : %(motif)s. Merci de valider ce poste pour qu'il soit publié "
+                        "automatiquement sur le site carrière.", motif=motif,
                     ),
-                    user_id=user.id,
                 )
 
     def action_validate_job(self):
@@ -67,9 +95,6 @@ class HrJob(models.Model):
             'published_date': fields.Date.context_today(self),
         })
         for job in self:
-            job.activity_ids.filtered(
-                lambda a: a.summary and a.summary.startswith('Valider le poste'),
-            ).action_feedback(feedback=_("Poste validé et publié."))
             job.message_post(body=_("Poste validé par la Direction Générale et publié sur le site carrière."))
 
     def action_reset_to_draft(self):

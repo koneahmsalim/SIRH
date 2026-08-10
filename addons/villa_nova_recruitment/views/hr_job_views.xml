@@ -25,6 +25,7 @@
                         <group name="villa_nova_motif" string="Identification du besoin">
                             <field name="x_motif_recrutement"/>
                             <field name="x_delai_souhaite"/>
+                            <field name="x_date_cloture"/>
                             <field name="x_budget_recrutement"/>
                             <field name="x_currency_id" invisible="1"/>
                         </group>

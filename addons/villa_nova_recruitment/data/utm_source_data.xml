@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+
+    <!-- Etape 2 : "Selection des canaux adaptes au profil recherche" - canaux
+         cites nommement dans la procedure RH, pour pouvoir suivre quel canal
+         amene les candidatures (champ Source, deja natif sur la candidature). -->
+    <record id="utm_source_linkedin_recruiter" model="utm.source">
+        <field name="name">LinkedIn Recruiter</field>
+    </record>
+    <record id="utm_source_educarriere" model="utm.source">
+        <field name="name">Educarriere</field>
+    </record>
+    <record id="utm_source_chasse_directe" model="utm.source">
+        <field name="name">Chasse directe</field>
+    </record>
+    <record id="utm_source_cooptation" model="utm.source">
+        <field name="name">Cooptation (référencement interne)</field>
+    </record>
+
+    </data>
+</odoo>
