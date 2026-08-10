@@ -10,6 +10,7 @@
         'website_hr_recruitment',
         'hr_recruitment_survey',
         'base_automation',
+        'calendar',
     ],
     'data': [
         'security/security.xml',

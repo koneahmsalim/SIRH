@@ -39,5 +39,20 @@
         </field>
     </record>
 
+    <!-- Le bouton "Nouveau" de l'app Recrutement ouvre une popup simplifiee
+         (nom + alias e-mail) avant de rediriger vers le kanban des candidatures
+         du poste : le motif doit donc etre visible des cette popup, sinon la RH
+         ne le voit jamais au moment de la creation. -->
+    <record id="hr_job_simple_form_villa_nova" model="ir.ui.view">
+        <field name="name">hr.job.simple.form.villa.nova.motif</field>
+        <field name="model">hr.job</field>
+        <field name="inherit_id" ref="hr_recruitment.hr_job_simple_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='name']" position="after">
+                <field name="x_motif_recrutement" required="1"/>
+            </xpath>
+        </field>
+    </record>
+
     </data>
 </odoo>

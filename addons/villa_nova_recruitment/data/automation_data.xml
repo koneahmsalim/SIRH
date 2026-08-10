@@ -17,7 +17,7 @@
         <field name="base_automation_id" ref="automation_send_prequalification_test"/>
         <field name="model_id" ref="hr_recruitment.model_hr_applicant"/>
         <field name="state">code</field>
-        <field name="code">records.action_villa_nova_send_prequalification_test()</field>
+        <field name="code">records.action_villa_nova_schedule_notification()</field>
     </record>
 
     <!-- Etapes 4 et 5 : notification candidat + tache assignee, une regle par etape -->
@@ -33,7 +33,7 @@
         <field name="base_automation_id" ref="automation_notify_prequalification_telephonique"/>
         <field name="model_id" ref="hr_recruitment.model_hr_applicant"/>
         <field name="state">code</field>
-        <field name="code">records.action_villa_nova_notify_stage()</field>
+        <field name="code">records.action_villa_nova_schedule_notification()</field>
     </record>
 
     <record id="automation_notify_entretien_structure" model="base.automation">
@@ -48,7 +48,7 @@
         <field name="base_automation_id" ref="automation_notify_entretien_structure"/>
         <field name="model_id" ref="hr_recruitment.model_hr_applicant"/>
         <field name="state">code</field>
-        <field name="code">records.action_villa_nova_notify_stage()</field>
+        <field name="code">records.action_villa_nova_schedule_notification()</field>
     </record>
 
     <record id="automation_notify_tests_pratiques" model="base.automation">
@@ -63,7 +63,7 @@
         <field name="base_automation_id" ref="automation_notify_tests_pratiques"/>
         <field name="model_id" ref="hr_recruitment.model_hr_applicant"/>
         <field name="state">code</field>
-        <field name="code">records.action_villa_nova_notify_stage()</field>
+        <field name="code">records.action_villa_nova_schedule_notification()</field>
     </record>
 
     <record id="automation_notify_entretien_president" model="base.automation">
@@ -78,7 +78,7 @@
         <field name="base_automation_id" ref="automation_notify_entretien_president"/>
         <field name="model_id" ref="hr_recruitment.model_hr_applicant"/>
         <field name="state">code</field>
-        <field name="code">records.action_villa_nova_notify_stage()</field>
+        <field name="code">records.action_villa_nova_schedule_notification()</field>
     </record>
 
     <record id="automation_notify_verification_references" model="base.automation">
@@ -93,7 +93,22 @@
         <field name="base_automation_id" ref="automation_notify_verification_references"/>
         <field name="model_id" ref="hr_recruitment.model_hr_applicant"/>
         <field name="state">code</field>
-        <field name="code">records.action_villa_nova_notify_stage()</field>
+        <field name="code">records.action_villa_nova_schedule_notification()</field>
+    </record>
+
+    <!-- Protection anti glisser-depose accidentel : les regles ci-dessus ne font
+         que programmer la notification (voir action_villa_nova_schedule_notification).
+         Ce cron l'envoie reellement apres le delai de grace, et seulement si le
+         candidat est toujours a l'etape concernee. -->
+    <record id="ir_cron_process_pending_notifications" model="ir.cron">
+        <field name="name">Villa Nova - Envoi différé des notifications de recrutement</field>
+        <field name="model_id" ref="hr_recruitment.model_hr_applicant"/>
+        <field name="state">code</field>
+        <field name="code">model._cron_process_pending_stage_notifications()</field>
+        <field name="interval_number">5</field>
+        <field name="interval_type">minutes</field>
+        <field name="nextcall" eval="time.strftime('%Y-%m-%d %H:%M:%S')"/>
+        <field name="active">True</field>
     </record>
 
     </data>
