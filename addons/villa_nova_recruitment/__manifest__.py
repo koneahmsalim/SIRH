@@ -11,6 +11,7 @@
         'hr_recruitment_survey',
         'base_automation',
         'calendar',
+        'hr_recruitment_skills',
     ],
     'data': [
         'security/security.xml',
@@ -19,6 +20,7 @@
         'data/mail_templates_data.xml',
         'data/automation_data.xml',
         'views/hr_job_views.xml',
+        'views/hr_applicant_views.xml',
     ],
     'post_init_hook': 'post_init_hook',
     'installable': True,

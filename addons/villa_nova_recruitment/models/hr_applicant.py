@@ -11,6 +11,67 @@ NOTIFICATION_GRACE_DELAY = timedelta(minutes=15)
 class HrApplicant(models.Model):
     _inherit = 'hr.applicant'
 
+    # Etape 3 : grille de screening ponderee (Formation 20%, Experience 30%,
+    # Competences techniques 20%, Comportemental 15%, Lettre de motivation 15%).
+    # Chaque champ est note sur son propre poids : le total tombe directement
+    # sur 100, sans calcul de ponderation supplementaire a faire.
+    x_score_formation = fields.Integer(
+        string="Formation académique (/20)",
+        help="Notez la formation du candidat par rapport au poste, sur 20.",
+    )
+    x_score_experience = fields.Integer(
+        string="Expérience professionnelle (/30)",
+        help="Notez l'expérience du candidat par rapport au poste, sur 30.",
+    )
+    x_score_competences_techniques = fields.Integer(
+        string="Compétences techniques (/20)",
+        compute='_compute_x_score_competences_techniques',
+        store=True, readonly=False,
+        help="Calculé automatiquement à partir des compétences requises sur le poste "
+             "(onglet Compétences) comparées à celles du candidat. Modifiable si besoin.",
+    )
+    x_score_comportemental = fields.Integer(
+        string="Compétences comportementales (/15)",
+        help="Notez le savoir-être / soft skills du candidat, sur 15.",
+    )
+    x_score_lettre_motivation = fields.Integer(
+        string="Qualité de la lettre de motivation (/15)",
+        help="Notez la lettre de motivation du candidat, sur 15.",
+    )
+    x_score_total = fields.Integer(
+        string="Score global (/100)",
+        compute='_compute_x_score_total',
+        store=True,
+        help="Somme des 5 critères de la grille de screening. Sert à trier et "
+             "prioriser les candidatures à l'étape Screening CV & lettre.",
+    )
+
+    @api.depends('job_id.skill_ids', 'candidate_id.skill_ids')
+    def _compute_x_score_competences_techniques(self):
+        # applicant.skill_ids est un champ 'related' non stocke sur candidate_id.skill_ids ;
+        # on lit directement la source stockee pour un calcul fiable.
+        for applicant in self:
+            required = applicant.job_id.skill_ids
+            if not required:
+                applicant.x_score_competences_techniques = applicant.x_score_competences_techniques or 0
+                continue
+            matched = required & applicant.candidate_id.skill_ids
+            applicant.x_score_competences_techniques = round(20 * len(matched) / len(required))
+
+    @api.depends(
+        'x_score_formation', 'x_score_experience', 'x_score_competences_techniques',
+        'x_score_comportemental', 'x_score_lettre_motivation',
+    )
+    def _compute_x_score_total(self):
+        for applicant in self:
+            applicant.x_score_total = (
+                applicant.x_score_formation
+                + applicant.x_score_experience
+                + applicant.x_score_competences_techniques
+                + applicant.x_score_comportemental
+                + applicant.x_score_lettre_motivation
+            )
+
     x_pending_notification_stage_id = fields.Many2one(
         'hr.recruitment.stage',
         string="Étape en attente de notification",

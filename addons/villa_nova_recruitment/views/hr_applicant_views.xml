@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+
+    <record id="hr_applicant_view_form_villa_nova" model="ir.ui.view">
+        <field name="name">hr.applicant.form.villa.nova.screening</field>
+        <field name="model">hr.applicant</field>
+        <field name="inherit_id" ref="hr_recruitment.hr_applicant_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//notebook" position="inside">
+                <page string="Screening (grille pondérée)" name="villa_nova_screening">
+                    <group>
+                        <group string="Grille de notation - Étape 3" name="villa_nova_score_detail">
+                            <field name="x_score_formation"/>
+                            <field name="x_score_experience"/>
+                            <field name="x_score_competences_techniques"/>
+                            <field name="x_score_comportemental"/>
+                            <field name="x_score_lettre_motivation"/>
+                        </group>
+                        <group string="Résultat" name="villa_nova_score_total">
+                            <field name="x_score_total" widget="progressbar" options="{'max_value': 100}"/>
+                        </group>
+                    </group>
+                </page>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="hr_kanban_view_applicant_villa_nova" model="ir.ui.view">
+        <field name="name">hr.applicant.kanban.villa.nova.score</field>
+        <field name="model">hr.applicant</field>
+        <field name="inherit_id" ref="hr_recruitment.hr_kanban_view_applicant"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='categ_ids']" position="after">
+                <field name="x_score_total"/>
+                <div t-if="record.x_score_total.raw_value" class="mt-1">
+                    <span class="badge text-bg-info">
+                        Score : <t t-esc="record.x_score_total.raw_value"/>/100
+                    </span>
+                </div>
+            </xpath>
+        </field>
+    </record>
+
+    </data>
+</odoo>
