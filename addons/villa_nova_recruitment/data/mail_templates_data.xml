@@ -99,5 +99,56 @@
         </field>
     </record>
 
+    <record id="mail_template_offre_emploi" model="mail.template">
+        <field name="name">Villa Nova - Offre d'emploi</field>
+        <field name="model_id" ref="hr_recruitment.model_hr_applicant"/>
+        <field name="subject">Villa Nova - Votre offre d'emploi</field>
+        <field name="email_from">{{ (object.job_id.user_id.email_formatted or user.email_formatted) }}</field>
+        <field name="email_to">{{ object.email_from }}</field>
+        <field name="auto_delete" eval="True"/>
+        <field name="body_html" type="html">
+            <div style="margin: 0px; padding: 0px; font-size: 13px;">
+                <p>Bonjour <t t-out="object.partner_name or ''">Candidat</t>,</p>
+                <p>Nous avons le plaisir de vous confirmer que votre candidature au poste de
+                    <strong><t t-out="object.job_id.name or ''">Poste</t></strong> a été retenue. Voici les grandes
+                    lignes de notre proposition :</p>
+                <ul>
+                    <li>Poste : <t t-out="object.job_id.name or ''">Poste</t></li>
+                    <t t-if="object.salary_proposed">
+                        <li>Rémunération proposée : <t t-out="object.salary_proposed"/> <t t-out="object.salary_proposed_extra or ''"/></li>
+                    </t>
+                    <t t-if="object.availability">
+                        <li>Date de prise de fonction souhaitée : <t t-out="format_date(object.availability)"/></li>
+                    </t>
+                </ul>
+                <p>N'hésitez pas à revenir vers nous si vous souhaitez échanger sur ces conditions : nous restons
+                    ouverts à la discussion avant la formalisation du contrat.</p>
+                <p>Cordialement,<br/>L'équipe Ressources Humaines - Villa Nova</p>
+            </div>
+        </field>
+    </record>
+
+    <record id="mail_template_bienvenue_integration" model="mail.template">
+        <field name="name">Villa Nova - Bienvenue / Intégration</field>
+        <field name="model_id" ref="hr_recruitment.model_hr_applicant"/>
+        <field name="subject">Bienvenue chez Villa Nova !</field>
+        <field name="email_from">{{ (object.job_id.user_id.email_formatted or user.email_formatted) }}</field>
+        <field name="email_to">{{ object.email_from }}</field>
+        <field name="auto_delete" eval="True"/>
+        <field name="body_html" type="html">
+            <div style="margin: 0px; padding: 0px; font-size: 13px;">
+                <p>Bonjour <t t-out="object.partner_name or ''">Candidat</t>,</p>
+                <p>Toute l'équipe Villa Nova est ravie de vous accueillir au poste de
+                    <strong><t t-out="object.job_id.name or ''">Poste</t></strong> !</p>
+                <t t-if="object.availability">
+                    <p>Votre prise de fonction est prévue le <strong><t t-out="format_date(object.availability)"/></strong>.</p>
+                </t>
+                <p>Notre équipe RH reviendra vers vous très prochainement avec les informations pratiques
+                    (lieu de travail, procédures administratives, politiques internes) pour préparer votre arrivée.</p>
+                <p>À très bientôt,<br/>L'équipe Ressources Humaines - Villa Nova</p>
+            </div>
+        </field>
+    </record>
+
     </data>
 </odoo>

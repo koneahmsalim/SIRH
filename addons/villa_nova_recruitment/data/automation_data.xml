@@ -96,6 +96,38 @@
         <field name="code">records.action_villa_nova_schedule_notification()</field>
     </record>
 
+    <!-- Etape 6 : offre d'emploi -->
+    <record id="automation_notify_offre" model="base.automation">
+        <field name="name">Villa Nova - Notif. offre d'emploi</field>
+        <field name="model_id" ref="hr_recruitment.model_hr_applicant"/>
+        <field name="trigger">on_stage_set</field>
+        <field name="trg_field_ref" ref="hr_recruitment.stage_job4"/>
+        <field name="active">True</field>
+    </record>
+    <record id="automation_notify_offre_action" model="ir.actions.server">
+        <field name="name">Envoyer l'offre + tâche RH</field>
+        <field name="base_automation_id" ref="automation_notify_offre"/>
+        <field name="model_id" ref="hr_recruitment.model_hr_applicant"/>
+        <field name="state">code</field>
+        <field name="code">records.action_villa_nova_schedule_notification()</field>
+    </record>
+
+    <!-- Etape 6 : formalisation / integration (contrat signe) -->
+    <record id="automation_process_hiring" model="base.automation">
+        <field name="name">Villa Nova - Formalisation / intégration</field>
+        <field name="model_id" ref="hr_recruitment.model_hr_applicant"/>
+        <field name="trigger">on_stage_set</field>
+        <field name="trg_field_ref" ref="hr_recruitment.stage_job5"/>
+        <field name="active">True</field>
+    </record>
+    <record id="automation_process_hiring_action" model="ir.actions.server">
+        <field name="name">Bienvenue + fiche employé + tâche contrat</field>
+        <field name="base_automation_id" ref="automation_process_hiring"/>
+        <field name="model_id" ref="hr_recruitment.model_hr_applicant"/>
+        <field name="state">code</field>
+        <field name="code">records.action_villa_nova_schedule_notification()</field>
+    </record>
+
     <!-- Protection anti glisser-depose accidentel : les regles ci-dessus ne font
          que programmer la notification (voir action_villa_nova_schedule_notification).
          Ce cron l'envoie reellement apres le delai de grace, et seulement si le

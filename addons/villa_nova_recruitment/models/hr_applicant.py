@@ -114,6 +114,7 @@ class HrApplicant(models.Model):
                 continue
             applicant.action_villa_nova_send_prequalification_test()
             applicant.action_villa_nova_notify_stage()
+            applicant.action_villa_nova_process_hiring()
 
     def action_villa_nova_send_prequalification_test(self):
         """Envoie le test de prequalification en ligne (Etape 3 de la procedure RH),
@@ -185,6 +186,12 @@ class HrApplicant(models.Model):
                 'activity_type_xmlid': 'mail.mail_activity_data_call',
                 'assignees': lambda applicant: applicant.job_id.user_id,
             },
+            ref('hr_recruitment.stage_job4').id: {
+                'template_xmlid': 'villa_nova_recruitment.mail_template_offre_emploi',
+                'activity_summary': _("Finaliser la négociation et préparer le contrat"),
+                'activity_type_xmlid': 'mail.mail_activity_data_todo',
+                'assignees': lambda applicant: applicant.job_id.user_id,
+            },
         }
 
     def _get_direction_generale_users(self):
@@ -210,4 +217,30 @@ class HrApplicant(models.Model):
                     config.get('activity_type_xmlid', 'mail.mail_activity_data_todo'),
                     summary=config['activity_summary'],
                     user_id=user.id,
+                )
+
+    def action_villa_nova_process_hiring(self):
+        """Etape 6D (Formalisation/Integration) : des que le candidat atteint
+        l'etape "Contrat signe", on envoie l'email de bienvenue, on cree la
+        fiche employe (action native Odoo, sans risque, juste le squelette de
+        la fiche) et on laisse une tache RH pour finaliser le contrat de
+        travail lui-meme (salaire, dates, clauses : ca reste une decision
+        humaine, pas automatisable sans risque)."""
+        stage_signed = self.env.ref('hr_recruitment.stage_job5', raise_if_not_found=False)
+        if not stage_signed:
+            return
+        template = self.env.ref(
+            'villa_nova_recruitment.mail_template_bienvenue_integration', raise_if_not_found=False,
+        )
+        for applicant in self:
+            if applicant.stage_id != stage_signed or applicant.employee_id:
+                continue
+            if applicant.email_from and template:
+                template.send_mail(applicant.id, force_send=True)
+            applicant.create_employee_from_applicant()
+            if applicant.job_id.user_id:
+                applicant.activity_schedule(
+                    'mail.mail_activity_data_todo',
+                    summary=_("Finaliser le contrat de travail (salaire, dates, clauses)"),
+                    user_id=applicant.job_id.user_id.id,
                 )
