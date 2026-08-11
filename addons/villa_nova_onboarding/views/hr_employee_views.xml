@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+
+    <!-- Le champ natif "Coach" est exactement le concept de "parrain/marraine"
+         de la procedure d'onboarding : on ne duplique pas le champ, on le
+         relabellise juste pour que la RH s'y retrouve. -->
+    <record id="hr_employee_view_form_villa_nova" model="ir.ui.view">
+        <field name="name">hr.employee.form.villa.nova.parrain</field>
+        <field name="model">hr.employee</field>
+        <field name="inherit_id" ref="hr.view_employee_form"/>
+        <field name="arch" type="xml">
+            <field name="coach_id" position="attributes">
+                <attribute name="string">Parrain / Marraine</attribute>
+            </field>
+        </field>
+    </record>
+
+    </data>
+</odoo>

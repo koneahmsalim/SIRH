@@ -1,0 +1,231 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1" context="{'lang': 'fr_FR'}">
+
+    <!-- Annexe 2 : Acces au portail d'onboarding -->
+    <record id="mail_template_portail_onboarding" model="mail.template">
+        <field name="name">Onboarding - Accès au portail</field>
+        <field name="model_id" ref="hr.model_hr_employee"/>
+        <field name="subject">Akwaba chez Infinity – Découvre ton portail d'onboarding</field>
+        <field name="email_to">{{ object._get_onboarding_recipient_email() }}</field>
+        <field name="auto_delete" eval="True"/>
+        <field name="body_html" type="html">
+            <div style="margin: 0px; padding: 0px; font-size: 13px;">
+                <p>Hello <t t-out="object.name or ''">Prénom</t>,</p>
+                <p>Nous sommes ravis de t'accueillir prochainement au sein d'Infinity Africa Group !</p>
+                <p>Pour te préparer en douceur à cette nouvelle aventure, nous t'invitons à découvrir ton
+                    <strong>portail d'onboarding</strong> : [Lien vers le portail]</p>
+                <p>Tu y trouveras :</p>
+                <ul>
+                    <li>Une vidéo de bienvenue de notre Directeur Général</li>
+                    <li>Une présentation de notre culture d'entreprise</li>
+                    <li>Des modules e-learning pour mieux comprendre notre écosystème</li>
+                </ul>
+                <p>À très vite,<br/>L'équipe RH</p>
+            </div>
+        </field>
+    </record>
+
+    <!-- Annexe 2 : Mail de bienvenue personnalise (envoye quand le parrain est designe) -->
+    <record id="mail_template_bienvenue_personnalise" model="mail.template">
+        <field name="name">Onboarding - Bienvenue personnalisé</field>
+        <field name="model_id" ref="hr.model_hr_employee"/>
+        <field name="subject">Bienvenue dans l'aventure Infinity !</field>
+        <field name="email_to">{{ object._get_onboarding_recipient_email() }}</field>
+        <field name="auto_delete" eval="True"/>
+        <field name="body_html" type="html">
+            <div style="margin: 0px; padding: 0px; font-size: 13px;">
+                <p>Hello <t t-out="object.name or ''">Prénom</t>,</p>
+                <p>Nous sommes ravis de t'accueillir au sein de <strong>La Villa Nova</strong> et de te
+                    compter parmi les talents qui façonnent l'avenir d'<strong>Infinity Africa Group</strong>.</p>
+                <p>Ton aventure commence officiellement le
+                    <t t-if="object.joining_date"><strong t-out="format_date(object.joining_date)"/></t>
+                    <t t-else="">[date]</t>, à La Villa Nova. Nous t'attendrons avec impatience pour un accueil
+                    personnalisé, une immersion dans notre culture et une première journée riche en découvertes.</p>
+                <p>Tu trouveras ci-joint ton planning de la semaine d'intégration. Ton parrain
+                    <strong><t t-out="object.coach_id.name or ''">Nom du parrain</t></strong> t'accompagnera tout
+                    au long de cette période pour répondre à tes questions et faciliter ton intégration.</p>
+                <p>Encore une fois, bienvenue dans la famille Infinity. Ensemble, nous allons rêver grand et
+                    construire l'Afrique de demain.</p>
+                <p>À très bientôt,<br/>L'équipe RH</p>
+            </div>
+        </field>
+    </record>
+
+    <!-- Annexe 2 : preparation aux services internes - IT -->
+    <record id="mail_template_prep_it" model="mail.template">
+        <field name="name">Onboarding - Préparation IT</field>
+        <field name="model_id" ref="hr.model_hr_employee"/>
+        <field name="subject">Intégration de {{ object.name }} – actions à prévoir (IT)</field>
+        <field name="email_to">{{ object.job_id.user_id.email_formatted or user.email_formatted }}</field>
+        <field name="auto_delete" eval="True"/>
+        <field name="body_html" type="html">
+            <div style="margin: 0px; padding: 0px; font-size: 13px;">
+                <p>Bonjour,</p>
+                <p>Nous avons le plaisir d'accueillir un(e) nouveau/nouvelle collaborateur/collaboratrice au
+                    sein de l'équipe Infinity Africa : <strong><t t-out="object.name or ''">Nom</t></strong>,
+                    <t t-out="object.job_title or object.job_id.name or ''">Fonction</t>, débutera le
+                    <t t-if="object.joining_date"><t t-out="format_date(object.joining_date)"/></t><t t-else="">[date]</t>.</p>
+                <p>Merci de bien vouloir prévoir :</p>
+                <ul>
+                    <li>Un ordinateur</li>
+                    <li>Un badge</li>
+                    <li>Un téléphone + puce de dotation (si applicable)</li>
+                </ul>
+                <p>Ainsi que la création des accès :</p>
+                <ul>
+                    <li>Adresse email</li>
+                    <li>Espace personnel Onboarding</li>
+                    <li>Accès à Asana et SharePoint dédiés</li>
+                </ul>
+                <p>Je reste disponible pour toute information.<br/>L'équipe RH</p>
+            </div>
+        </field>
+    </record>
+
+    <!-- Annexe 2 : preparation aux services internes - Office Manager -->
+    <record id="mail_template_prep_office" model="mail.template">
+        <field name="name">Onboarding - Préparation Office Manager</field>
+        <field name="model_id" ref="hr.model_hr_employee"/>
+        <field name="subject">Intégration de {{ object.name }} – actions à prévoir (poste de travail)</field>
+        <field name="email_to">{{ object.job_id.user_id.email_formatted or user.email_formatted }}</field>
+        <field name="auto_delete" eval="True"/>
+        <field name="body_html" type="html">
+            <div style="margin: 0px; padding: 0px; font-size: 13px;">
+                <p>Bonjour,</p>
+                <p>Nous avons le plaisir d'accueillir <strong><t t-out="object.name or ''">Nom</t></strong>,
+                    <t t-out="object.job_title or object.job_id.name or ''">Fonction</t>, qui débutera le
+                    <t t-if="object.joining_date"><t t-out="format_date(object.joining_date)"/></t><t t-else="">[date]</t>.</p>
+                <p>Merci de bien vouloir préparer l'installation du poste de travail :</p>
+                <ul>
+                    <li>Bureau</li>
+                    <li>Meuble de rangement</li>
+                    <li>Bloc-notes, stylos, etc.</li>
+                </ul>
+                <p>Je reste disponible pour toute information.<br/>L'équipe RH</p>
+            </div>
+        </field>
+    </record>
+
+    <!-- Annexe 2 : preparation aux services internes - Communication -->
+    <record id="mail_template_prep_communication" model="mail.template">
+        <field name="name">Onboarding - Préparation Communication</field>
+        <field name="model_id" ref="hr.model_hr_employee"/>
+        <field name="subject">Intégration de {{ object.name }} – actions à prévoir (communication)</field>
+        <field name="email_to">{{ object.job_id.user_id.email_formatted or user.email_formatted }}</field>
+        <field name="auto_delete" eval="True"/>
+        <field name="body_html" type="html">
+            <div style="margin: 0px; padding: 0px; font-size: 13px;">
+                <p>Bonjour,</p>
+                <p>Nous avons le plaisir d'accueillir <strong><t t-out="object.name or ''">Nom</t></strong>,
+                    <t t-out="object.job_title or object.job_id.name or ''">Fonction</t>, qui débutera le
+                    <t t-if="object.joining_date"><t t-out="format_date(object.joining_date)"/></t><t t-else="">[date]</t>.</p>
+                <p>Merci de bien vouloir prévoir les formalités liées à la communication :</p>
+                <ul>
+                    <li>Photo et signature email</li>
+                    <li>Mise à jour de l'organigramme</li>
+                    <li>Intégration aux groupes WhatsApp de l'équipe</li>
+                </ul>
+                <p>Je reste disponible pour toute information.<br/>L'équipe RH</p>
+            </div>
+        </field>
+    </record>
+
+    <!-- Annexe 2 : email a la comptabilite -->
+    <record id="mail_template_comptabilite" model="mail.template">
+        <field name="name">Onboarding - Comptabilité / Paie</field>
+        <field name="model_id" ref="hr.model_hr_employee"/>
+        <field name="subject">Nouvelle recrue à intégrer en paie – {{ object.name }}</field>
+        <field name="email_to">{{ object.job_id.user_id.email_formatted or user.email_formatted }}</field>
+        <field name="auto_delete" eval="True"/>
+        <field name="body_html" type="html">
+            <div style="margin: 0px; padding: 0px; font-size: 13px;">
+                <p>Bonjour,</p>
+                <p>Nous te confirmons l'arrivée de <strong><t t-out="object.name or ''">Nom</t></strong>, qui
+                    rejoint l'équipe à partir du
+                    <t t-if="object.joining_date"><t t-out="format_date(object.joining_date)"/></t><t t-else="">[date]</t>
+                    en tant que <t t-out="object.job_title or object.job_id.name or ''">Poste</t>.</p>
+                <p>Merci de procéder à :</p>
+                <ul>
+                    <li>L'ouverture de son dossier salarial</li>
+                    <li>Son intégration dans le fichier de paie</li>
+                </ul>
+                <p>Tu trouveras les documents nécessaires dans son dossier RH dans le SharePoint.</p>
+                <p>Merci pour ton suivi,<br/>L'équipe RH</p>
+            </div>
+        </field>
+    </record>
+
+    <!-- Annexe 2 : annonce interne a toute l'equipe -->
+    <record id="mail_template_annonce_interne" model="mail.template">
+        <field name="name">Onboarding - Annonce interne</field>
+        <field name="model_id" ref="hr.model_hr_employee"/>
+        <field name="subject">Nouvelle recrue à La Villa Nova !</field>
+        <field name="auto_delete" eval="True"/>
+        <field name="body_html" type="html">
+            <div style="margin: 0px; padding: 0px; font-size: 13px;">
+                <p>Bonjour à toutes et à tous,</p>
+                <p>Nous avons le plaisir de vous annoncer l'arrivée de
+                    <strong><t t-out="object.name or ''">Nom</t></strong>, qui rejoint notre équipe en tant que
+                    <strong><t t-out="object.job_title or object.job_id.name or ''">Poste</t></strong>
+                    <t t-if="object.department_id"> au sein de <t t-out="object.department_id.name"/></t>.</p>
+                <p><t t-out="object.name or ''"/> débutera le
+                    <t t-if="object.joining_date"><t t-out="format_date(object.joining_date)"/></t><t t-else="">[date]</t>
+                    <t t-if="object.coach_id"> et sera accompagné(e) par <t t-out="object.coach_id.name"/> pour ses
+                    premiers pas chez nous</t>. N'hésitez pas à lui souhaiter la bienvenue et à lui partager vos
+                    conseils pour bien démarrer.</p>
+                <p>Merci à chacun de contribuer à faire de cette intégration une belle réussite !</p>
+                <p>Bien à vous,<br/>L'équipe RH</p>
+            </div>
+        </field>
+    </record>
+
+    <!-- Annexe 2 : designation et briefing du parrain -->
+    <record id="mail_template_briefing_parrain" model="mail.template">
+        <field name="name">Onboarding - Briefing parrain</field>
+        <field name="model_id" ref="hr.model_hr_employee"/>
+        <field name="subject">Tu es désigné(e) parrain/marraine d'intégration</field>
+        <field name="auto_delete" eval="True"/>
+        <field name="body_html" type="html">
+            <div style="margin: 0px; padding: 0px; font-size: 13px;">
+                <p>Bonjour <t t-out="object.coach_id.name or ''">Nom</t>,</p>
+                <p>Tu as été désigné(e) comme <strong>parrain/marraine d'intégration</strong> pour
+                    <strong><t t-out="object.name or ''">Prénom Nom</t></strong>, qui rejoint
+                    <t t-out="object.department_id.name or 'l\'équipe'"/> le
+                    <t t-if="object.joining_date"><t t-out="format_date(object.joining_date)"/></t><t t-else="">[date]</t>.</p>
+                <p>Ton rôle :</p>
+                <ul>
+                    <li>L'accueillir chaleureusement dès son arrivée</li>
+                    <li>L'aider à comprendre notre culture et nos codes</li>
+                    <li>Être disponible pour répondre à ses premières questions</li>
+                </ul>
+                <p>Tu recevras un rappel chaque semaine pendant le premier mois pour t'accompagner dans ce
+                    rôle (Annexe 3 - Fiche rôle Parrain/Marraine).</p>
+                <p>Merci pour ton engagement !<br/>L'équipe RH</p>
+            </div>
+        </field>
+    </record>
+
+    <!-- Annexe 5 : enquete de satisfaction J+30 -->
+    <record id="mail_template_satisfaction_j30" model="mail.template">
+        <field name="name">Onboarding - Enquête de satisfaction J+30</field>
+        <field name="model_id" ref="survey.model_survey_user_input"/>
+        <field name="subject">Ton avis compte : enquête de satisfaction à J+30</field>
+        <field name="auto_delete" eval="True"/>
+        <field name="body_html" type="html">
+            <div style="margin: 0px; padding: 0px; font-size: 13px;">
+                <p>Bonjour,</p>
+                <p>Cela fait maintenant un mois que tu as rejoint La Villa Nova : nous aimerions connaître ton
+                    ressenti sur ton intégration.</p>
+                <div style="margin: 16px 0px 16px 0px;">
+                    <a t-att-href="object.get_start_url()" style="background-color: #875A7B; padding: 8px 16px 8px 16px; text-decoration: none; color: #fff; border-radius: 5px; font-size:13px;">
+                        Répondre à l'enquête
+                    </a>
+                </div>
+                <p>Merci pour ton retour,<br/>L'équipe RH</p>
+            </div>
+        </field>
+    </record>
+
+    </data>
+</odoo>

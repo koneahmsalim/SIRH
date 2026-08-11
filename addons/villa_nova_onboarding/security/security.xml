@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data context="{'lang': 'fr_FR'}">
+
+    <record id="group_support_it" model="res.groups">
+        <field name="name">Onboarding - Support IT</field>
+        <field name="category_id" ref="base.module_category_human_resources_employees"/>
+        <field name="comment">Reçoit les tâches et emails liés aux accès informatiques et au matériel (Annexe Onboarding, Étape "Attribution du matériel").</field>
+    </record>
+
+    <record id="group_office_manager" model="res.groups">
+        <field name="name">Onboarding - Office Manager</field>
+        <field name="category_id" ref="base.module_category_human_resources_employees"/>
+        <field name="comment">Reçoit les tâches et emails liés à la préparation du poste de travail.</field>
+    </record>
+
+    <record id="group_communication" model="res.groups">
+        <field name="name">Onboarding - Communication</field>
+        <field name="category_id" ref="base.module_category_human_resources_employees"/>
+        <field name="comment">Reçoit les tâches et emails liés à la communication interne de bienvenue (annonce équipe, organigramme).</field>
+    </record>
+
+    <record id="group_comptabilite" model="res.groups">
+        <field name="name">Onboarding - Comptabilité / Paie</field>
+        <field name="category_id" ref="base.module_category_human_resources_employees"/>
+        <field name="comment">Reçoit l'email d'intégration en paie de la nouvelle recrue.</field>
+    </record>
+
+    </data>
+</odoo>
