@@ -73,6 +73,17 @@ class HrEmployee(models.Model):
                     "Contrat de travail, accord de confidentialité, règlement intérieur, "
                     "attestation de lecture.",
                 ),
+                (
+                    "Création du dossier administratif",
+                    None,
+                    "Attribution du matricule selon l'ordre d'arrivée, fiche d'identification, "
+                    "RIB, CNI, casier judiciaire, etc.",
+                ),
+                (
+                    "Programmation de la visite médicale d'embauche",
+                    None,
+                    "Organiser le rendez-vous médical d'embauche avant ou peu après le jour J.",
+                ),
             ]
             for summary, group_xmlid, note in checklist:
                 users = self._get_role_group_users(group_xmlid) if group_xmlid else employee.job_id.user_id
@@ -85,6 +96,7 @@ class HrEmployee(models.Model):
                     )
 
             employee._schedule_manager_onboarding_tasks()
+            employee._schedule_integration_timeline()
 
             employee._send_onboarding_template('villa_nova_onboarding.mail_template_portail_onboarding')
             employee._send_onboarding_template(
@@ -110,29 +122,31 @@ class HrEmployee(models.Model):
     def _schedule_manager_onboarding_tasks(self):
         """Role "Manager" (Procedure d'integration, II - Acteurs & roles cles) :
         integration metier, evaluation des resultats, motivation continue.
-        Le bilan de periode d'essai est gere separement (voir hr.contract),
-        des qu'un contrat avec date de fin d'essai existe."""
+        Couvre tous les jalons du parcours J-a-J180 qui reviennent au manager.
+        Declenchee a la fois au demarrage de l'onboarding et, si le manager est
+        designe plus tard, au moment ou le champ "Manager" est renseigne (voir
+        write()) : jamais de jalon manager perdu, quel que soit l'ordre des
+        etapes. Le bilan de periode d'essai est gere separement (voir
+        hr.contract), des qu'un contrat avec date de fin d'essai existe."""
         self.ensure_one()
         if not self.parent_id or not self.parent_id.user_id:
             # Pas de manager assigne pour l'instant : a faire manuellement via la
-            # fiche employe (champ "Manager"), rien a programmer tant que ce n'est pas fait.
+            # fiche employe (champ "Manager"). Les jalons partiront automatiquement
+            # des que ce champ sera renseigne.
             return
         start = self.joining_date or fields.Date.context_today(self)
-        manager_checklist = [
-            (
-                0,
-                "Présenter les missions et objectifs du poste",
-                "Intégration métier : présenter le périmètre du poste, les missions et "
-                "les premiers objectifs au nouveau collaborateur.",
-            ),
-            (
-                30,
-                "Point d'intégration métier (J+30)",
-                "Faire un point sur la prise de poste, évaluer les premiers résultats et "
-                "maintenir la motivation du collaborateur.",
-            ),
+        manager_timeline = [
+            (0, "12h00-14h00 : Déjeuner d'équipe", "Déjeuner convivial avec l'équipe directe et/ou le manager."),
+            (0, "14h00-15h00 : Rencontre avec le manager", "Objectifs à court/moyen terme, clarification des rôles et responsabilités, attentes."),
+            (30, "Point d'intégration métier (J+30)", "Faire un point sur la prise de poste, évaluer les premiers résultats et maintenir la motivation du collaborateur."),
+            (60, "Revue des objectifs avec le manager (J+60)", "Point d'avancement sur les objectifs fixés à l'arrivée."),
+            (75, "Feedback croisé Manager / RH / collaborateur", "Partage croisé des retours à mi-parcours du trimestre 1."),
+            (90, "Évaluation finale d'intégration (J+90)", "Évaluer la montée en compétence et la posture du collaborateur."),
+            (120, "Intégration dans un projet transversal (si applicable)", "À évaluer selon les besoins de l'organisation."),
+            (180, "Entretien de performance anticipé (6 mois)", "Entretien de performance formel à 6 mois."),
+            (180, "Mise en place du Plan de Développement Individuel (PDI)", "Définir le PDI du collaborateur avec son manager."),
         ]
-        for days, summary, note in manager_checklist:
+        for days, summary, note in manager_timeline:
             self.activity_schedule(
                 'mail.mail_activity_data_todo',
                 summary=summary,
@@ -140,6 +154,54 @@ class HrEmployee(models.Model):
                 date_deadline=start + timedelta(days=days),
                 user_id=self.parent_id.user_id.id,
             )
+
+    def _schedule_integration_timeline(self):
+        """Parcours J-7 a J180 (Procedure d'integration Villa Nova, sections
+        3.2 a 3.6) pour les acteurs disponibles des le demarrage de l'onboarding
+        (RH, Direction Generale, IT, Communication). Les jalons Manager et
+        Parrain sont geres a part (voir _schedule_manager_onboarding_tasks et
+        _action_villa_nova_coach_assigned) car leurs destinataires ne sont
+        souvent designes qu'apres coup."""
+        self.ensure_one()
+        start = self.joining_date or fields.Date.context_today(self)
+        rh_users = self.job_id.user_id
+        dg_users = self._get_role_group_users('villa_nova_recruitment.group_direction_generale')
+        it_users = self._get_role_group_users('villa_nova_onboarding.group_support_it')
+        com_users = self._get_role_group_users('villa_nova_onboarding.group_communication')
+
+        # (jours depuis joining_date, resume, note, destinataires)
+        timeline = [
+            # Phase 2 : Jour J - Accueil & Immersion (agenda indicatif ; Odoo ne
+            # gere pas d'horaire sur les taches, l'heure est indiquee dans le titre)
+            (0, "08h00-09h30 : Accueil personnalisé", "Réception, mot de bienvenue, présentation équipe RH, remise du welcome pack.", rh_users),
+            (0, "09h30-10h15 : Présentation de l'entreprise", "Histoire du groupe, mission, valeurs, vision, culture, introduction aux filiales.", dg_users | rh_users),
+            (0, "10h15-10h45 : Visite des locaux", "Tour guidé de La Villa Nova, présentation des espaces et des équipes.", rh_users),
+            (0, "10h45-11h15 : Rencontre avec le Support IT", "Attribution du matériel informatique, badge, présentation des outils numériques.", it_users),
+            (0, "11h15-12h00 : Formalités administratives", "Signature des contrats, règlement intérieur, charte, remise des documents RH.", rh_users),
+            (0, "15h00-15h30 : Présentation des politiques internes", "Horaires, congés, sécurité, communication, accès intranet / livret d'accueil.", rh_users),
+            (0, "16h30-17h00 : Bilan de la journée", "Recueillir les premières impressions du collaborateur, répondre aux questions.", rh_users),
+
+            # Phase 3 : Semaine d'immersion (J1 a J5)
+            (1, "Formation aux outils internes", "Asana, Intranet, messagerie.", it_users),
+            (2, "Modules e-learning à assigner", "Procédures RH, finance, sécurité, organisation interne.", rh_users),
+            (3, "QCM de compréhension (J+3)", "Administrer le QCM d'évaluation de la compréhension (contenu à préparer par la RH).", rh_users),
+            (4, "Atelier « Nos valeurs & notre culture »", "Animation par la commission sociale.", com_users),
+            (5, "Feedback 1 : RH & collaborateur (J+5)", "Premier échange formel sur les impressions à chaud.", rh_users),
+
+            # Phase 4 : Suivi du 1er mois (J6 a J30) - le coaching hebdo est gere
+            # des la designation du parrain, voir _action_villa_nova_coach_assigned
+            (25, "Évaluation intermédiaire des acquis", "QCM et mise en pratique (contenu à préparer par la RH).", rh_users),
+            (30, "Entretien RH (J+30)", "Points forts, points d'attention, suggestions.", rh_users),
+        ]
+        for days, summary, note, users in timeline:
+            for user in users:
+                self.activity_schedule(
+                    'mail.mail_activity_data_todo',
+                    summary=summary,
+                    note=note,
+                    date_deadline=start + timedelta(days=days),
+                    user_id=user.id,
+                )
 
     def _send_onboarding_template(self, template_xmlid, group_xmlid=None, partners=None):
         self.ensure_one()
@@ -163,12 +225,18 @@ class HrEmployee(models.Model):
     # Annexe 2 (bienvenue perso + parrain) / Annexe 3 (suivi hebdomadaire)
     # ------------------------------------------------------------------
     def write(self, vals):
-        newly_assigned = self.env['hr.employee']
+        newly_coached = self.env['hr.employee']
+        newly_managed = self.env['hr.employee']
         if 'coach_id' in vals and vals.get('coach_id'):
-            newly_assigned = self.filtered(lambda e: not e.coach_id)
+            newly_coached = self.filtered(lambda e: not e.coach_id)
+        if 'parent_id' in vals and vals.get('parent_id'):
+            newly_managed = self.filtered(lambda e: not e.parent_id)
         res = super().write(vals)
-        for employee in newly_assigned:
+        for employee in newly_coached:
             employee._action_villa_nova_coach_assigned()
+        for employee in newly_managed:
+            if employee.x_onboarding_started:
+                employee._schedule_manager_onboarding_tasks()
         return res
 
     def _action_villa_nova_coach_assigned(self):
@@ -180,6 +248,13 @@ class HrEmployee(models.Model):
                 partners=self.coach_id.user_id.partner_id,
             )
             start = self.joining_date or fields.Date.context_today(self)
+            self.activity_schedule(
+                'mail.mail_activity_data_todo',
+                summary="15h00-15h30 : Rencontre avec le parrain",
+                note="Présentation du mentor désigné, échange informel pour créer un lien de confiance.",
+                date_deadline=start,
+                user_id=self.coach_id.user_id.id,
+            )
             weekly_checklist = [
                 (7, "Semaine 1 : présentation informelle, tour des équipes, pause-café"),
                 (14, "Semaine 2 : accompagnement lors d'une réunion d'équipe"),
