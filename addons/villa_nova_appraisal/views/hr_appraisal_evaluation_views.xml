@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+
+    <record id="hr_appraisal_evaluation_view_form" model="ir.ui.view">
+        <field name="name">hr.appraisal.evaluation.form</field>
+        <field name="model">hr.appraisal.evaluation</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <button name="action_submit_self_evaluation" type="object" string="Soumettre l'évaluation"
+                            class="oe_highlight" invisible="stage != 'self_eval_pending'"/>
+                    <button name="action_direction_validate" type="object" string="Valider la note (Direction)"
+                            class="oe_highlight" invisible="stage != 'direction_review_pending'"
+                            groups="villa_nova_recruitment.group_direction_generale"/>
+                    <button name="action_close_restitution" type="object" string="Clôturer (entretien réalisé)"
+                            class="oe_highlight" invisible="stage != 'restitution_pending'"/>
+                    <field name="stage" widget="statusbar"
+                           statusbar_visible="self_eval_pending,self_eval_done,direction_review_pending,direction_done,restitution_pending,closed"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="employee_id" placeholder="Collaborateur évalué"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="cycle_id"/>
+                            <field name="track"/>
+                            <field name="manager_id" readonly="1"/>
+                        </group>
+                        <group>
+                            <field name="self_eval_deadline" readonly="1"/>
+                            <field name="direction_deadline" readonly="1"/>
+                            <field name="restitution_deadline" readonly="1"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Auto-évaluation / Évaluation" name="self_eval">
+                            <field name="self_evaluation" placeholder="Objectifs, compétences clés, résultats obtenus..."/>
+                        </page>
+                        <page string="Notation (60% Objectifs / 40% Compétences)" name="scoring">
+                            <group>
+                                <group string="Objectifs (60%)">
+                                    <field name="score_objectifs"/>
+                                </group>
+                                <group string="Compétences (40%)">
+                                    <field name="score_techniques"/>
+                                    <field name="score_comportementales"/>
+                                    <field name="score_relationnelles"/>
+                                    <field name="score_manageriales"/>
+                                    <field name="score_adaptabilite"/>
+                                    <field name="score_competences" readonly="1"/>
+                                </group>
+                            </group>
+                            <group>
+                                <field name="score_total" widget="progressbar" options="{'max_value': 100}"/>
+                            </group>
+                            <field name="direction_comments" placeholder="Commentaires d'évaluation de la Direction..."/>
+                        </page>
+                        <page string="Restitution &amp; PDI" name="restitution">
+                            <field name="restitution_notes" placeholder="Notes de l'entretien de restitution..."/>
+                            <field name="pdi_text" placeholder="Plan de Développement Individuel..."/>
+                        </page>
+                    </notebook>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids"/>
+                    <field name="activity_ids"/>
+                    <field name="message_ids"/>
+                </div>
+            </form>
+        </field>
+    </record>
+
+    <record id="hr_appraisal_evaluation_view_list" model="ir.ui.view">
+        <field name="name">hr.appraisal.evaluation.list</field>
+        <field name="model">hr.appraisal.evaluation</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="employee_id"/>
+                <field name="cycle_id"/>
+                <field name="track"/>
+                <field name="stage"/>
+                <field name="score_total"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="hr_appraisal_evaluation_view_search" model="ir.ui.view">
+        <field name="name">hr.appraisal.evaluation.search</field>
+        <field name="model">hr.appraisal.evaluation</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="employee_id"/>
+                <field name="cycle_id"/>
+                <filter name="filter_manager" string="Auto-évaluation Manager" domain="[('track', '=', 'manager')]"/>
+                <filter name="filter_collaborator" string="Évaluation Collaborateur" domain="[('track', '=', 'collaborator')]"/>
+                <group expand="0" string="Grouper par">
+                    <filter name="group_stage" string="Étape" context="{'group_by': 'stage'}"/>
+                    <filter name="group_cycle" string="Cycle" context="{'group_by': 'cycle_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_hr_appraisal_evaluation" model="ir.actions.act_window">
+        <field name="name">Évaluations</field>
+        <field name="res_model">hr.appraisal.evaluation</field>
+        <field name="view_mode">list,form</field>
+        <field name="search_view_id" ref="hr_appraisal_evaluation_view_search"/>
+    </record>
+
+    </data>
+</odoo>

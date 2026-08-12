@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data context="{'lang': 'fr_FR'}">
+
+    <record id="group_manager_rh" model="res.groups">
+        <field name="name">Évaluation - Manager RH</field>
+        <field name="category_id" ref="base.module_category_human_resources_employees"/>
+        <field name="comment">Acteur "Manager RH" du processus d'évaluation : co-analyse les évaluations des collaborateurs N-1 avec la Direction et communique le feedback final.</field>
+    </record>
+
+    </data>
+</odoo>

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+
+    <menuitem id="menu_appraisal_root" name="Évaluations" parent="hr.menu_hr_root" sequence="25"/>
+    <menuitem id="menu_appraisal_cycles" name="Cycles d'évaluation" parent="menu_appraisal_root"
+              action="action_hr_appraisal_cycle" sequence="10"/>
+    <menuitem id="menu_appraisal_evaluations" name="Évaluations" parent="menu_appraisal_root"
+              action="action_hr_appraisal_evaluation" sequence="20"/>
+
+    </data>
+</odoo>
