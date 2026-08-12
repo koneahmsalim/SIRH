@@ -8,6 +8,11 @@ class HrEmployee(models.Model):
 
     x_onboarding_started = fields.Boolean(string="Onboarding démarré", copy=False)
     x_onboarding_survey_sent = fields.Boolean(string="Enquête J+30 envoyée", copy=False)
+    x_onboarding_survey_j90_sent = fields.Boolean(string="Enquête J+90 envoyée", copy=False)
+    x_trial_validation_status = fields.Selection(
+        related='contract_id.x_trial_validation_status', store=True,
+        string="Validation période d'essai",
+    )
 
     def _get_onboarding_recipient_email(self):
         self.ensure_one()
@@ -79,6 +84,8 @@ class HrEmployee(models.Model):
                         user_id=user.id,
                     )
 
+            employee._schedule_manager_onboarding_tasks()
+
             employee._send_onboarding_template('villa_nova_onboarding.mail_template_portail_onboarding')
             employee._send_onboarding_template(
                 'villa_nova_onboarding.mail_template_prep_it', group_xmlid='villa_nova_onboarding.group_support_it',
@@ -98,6 +105,40 @@ class HrEmployee(models.Model):
             employee._send_onboarding_template(
                 'villa_nova_onboarding.mail_template_annonce_interne',
                 partners=self.env['hr.employee'].search([('active', '=', True)]).mapped('user_id.partner_id'),
+            )
+
+    def _schedule_manager_onboarding_tasks(self):
+        """Role "Manager" (Procedure d'integration, II - Acteurs & roles cles) :
+        integration metier, evaluation des resultats, motivation continue.
+        Le bilan de periode d'essai est gere separement (voir hr.contract),
+        des qu'un contrat avec date de fin d'essai existe."""
+        self.ensure_one()
+        if not self.parent_id or not self.parent_id.user_id:
+            # Pas de manager assigne pour l'instant : a faire manuellement via la
+            # fiche employe (champ "Manager"), rien a programmer tant que ce n'est pas fait.
+            return
+        start = self.joining_date or fields.Date.context_today(self)
+        manager_checklist = [
+            (
+                0,
+                "Présenter les missions et objectifs du poste",
+                "Intégration métier : présenter le périmètre du poste, les missions et "
+                "les premiers objectifs au nouveau collaborateur.",
+            ),
+            (
+                30,
+                "Point d'intégration métier (J+30)",
+                "Faire un point sur la prise de poste, évaluer les premiers résultats et "
+                "maintenir la motivation du collaborateur.",
+            ),
+        ]
+        for days, summary, note in manager_checklist:
+            self.activity_schedule(
+                'mail.mail_activity_data_todo',
+                summary=summary,
+                note=note,
+                date_deadline=start + timedelta(days=days),
+                user_id=self.parent_id.user_id.id,
             )
 
     def _send_onboarding_template(self, template_xmlid, group_xmlid=None, partners=None):
@@ -156,14 +197,19 @@ class HrEmployee(models.Model):
                 )
 
     # ------------------------------------------------------------------
-    # Annexe 5 : Enquete de satisfaction J+30
+    # Annexe 5 / Suivi & Evaluation : enquetes de satisfaction J+30 et J+90
     # ------------------------------------------------------------------
     @api.model
     def _cron_send_onboarding_satisfaction_survey(self):
-        target_date = fields.Date.context_today(self) - timedelta(days=30)
+        self._send_satisfaction_survey_batch(30, 'x_onboarding_survey_sent')
+        self._send_satisfaction_survey_batch(90, 'x_onboarding_survey_j90_sent')
+
+    @api.model
+    def _send_satisfaction_survey_batch(self, days_offset, sent_field):
+        target_date = fields.Date.context_today(self) - timedelta(days=days_offset)
         employees = self.search([
             ('joining_date', '=', target_date),
-            ('x_onboarding_survey_sent', '=', False),
+            (sent_field, '=', False),
             ('active', '=', True),
         ])
         survey = self.env.ref('villa_nova_onboarding.survey_satisfaction_j30', raise_if_not_found=False)
@@ -184,4 +230,4 @@ class HrEmployee(models.Model):
                 'template_id': template.id if template else False,
             })
             invite.action_invite()
-            employee.x_onboarding_survey_sent = True
+            employee[sent_field] = True

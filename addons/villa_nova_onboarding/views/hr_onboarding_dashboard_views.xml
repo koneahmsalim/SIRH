@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+
+    <!-- IV - Suivi & Evaluation : tableau de bord RH avec les indicateurs cles
+         (score satisfaction J+30/J+90, validation des periodes d'essai).
+         Vues neuves (pas d'heritage) pour rester simples et sures. -->
+    <record id="hr_employee_view_list_onboarding_dashboard" model="ir.ui.view">
+        <field name="name">hr.employee.list.onboarding.dashboard</field>
+        <field name="model">hr.employee</field>
+        <field name="arch" type="xml">
+            <list string="Suivi des intégrations" create="false">
+                <field name="name"/>
+                <field name="department_id"/>
+                <field name="job_id"/>
+                <field name="joining_date"/>
+                <field name="coach_id"/>
+                <field name="x_onboarding_survey_sent" widget="boolean_toggle" string="Enquête J+30"/>
+                <field name="x_onboarding_survey_j90_sent" widget="boolean_toggle" string="Enquête J+90"/>
+                <field name="x_trial_validation_status"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="hr_employee_view_pivot_onboarding_dashboard" model="ir.ui.view">
+        <field name="name">hr.employee.pivot.onboarding.dashboard</field>
+        <field name="model">hr.employee</field>
+        <field name="arch" type="xml">
+            <pivot string="Indicateurs d'intégration">
+                <field name="department_id" type="row"/>
+                <field name="x_trial_validation_status" type="col"/>
+            </pivot>
+        </field>
+    </record>
+
+    <record id="hr_employee_action_onboarding_dashboard" model="ir.actions.act_window">
+        <field name="name">Suivi des intégrations</field>
+        <field name="res_model">hr.employee</field>
+        <field name="view_mode">list,pivot,form</field>
+        <field name="domain">[('joining_date', '!=', False)]</field>
+        <field name="context">{}</field>
+    </record>
+    <record id="hr_employee_action_onboarding_dashboard_view_list" model="ir.actions.act_window.view">
+        <field name="sequence">1</field>
+        <field name="view_mode">list</field>
+        <field name="view_id" ref="hr_employee_view_list_onboarding_dashboard"/>
+        <field name="act_window_id" ref="hr_employee_action_onboarding_dashboard"/>
+    </record>
+    <record id="hr_employee_action_onboarding_dashboard_view_pivot" model="ir.actions.act_window.view">
+        <field name="sequence">2</field>
+        <field name="view_mode">pivot</field>
+        <field name="view_id" ref="hr_employee_view_pivot_onboarding_dashboard"/>
+        <field name="act_window_id" ref="hr_employee_action_onboarding_dashboard"/>
+    </record>
+
+    <menuitem id="menu_onboarding_dashboard"
+              name="Suivi des intégrations"
+              parent="hr.menu_hr_root"
+              action="hr_employee_action_onboarding_dashboard"
+              sequence="20"/>
+
+    </data>
+</odoo>

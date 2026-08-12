@@ -9,6 +9,7 @@
     'depends': [
         'villa_nova_recruitment',
         'hr',
+        'hr_contract',
         'survey',
         'calendar',
     ],
@@ -18,6 +19,7 @@
         'data/mail_templates_data.xml',
         'data/cron_data.xml',
         'views/hr_employee_views.xml',
+        'views/hr_onboarding_dashboard_views.xml',
     ],
     'installable': True,
     'application': False,
