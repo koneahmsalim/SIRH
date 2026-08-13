@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+
+    <!-- Nativement, desactiver un utilisateur se fait en le selectionnant dans
+         la liste Reglages > Utilisateurs puis menu "Actions > Archiver" - peu
+         visible. On ajoute ici une case a cocher directe sur la fiche, plus le
+         bandeau "Archive" (present dans la vue de base mais disparait de la
+         vue combinee a cause des nombreuses autres surcharges de ce formulaire
+         par les modules RH installes). Priorite haute pour s'appliquer apres
+         ces surcharges et rester visible dans la vue finale. -->
+    <record id="res_users_view_form_active" model="ir.ui.view">
+        <field name="name">res.users.form.villa.nova.active</field>
+        <field name="model">res.users</field>
+        <field name="inherit_id" ref="base.view_users_form"/>
+        <field name="priority" eval="99"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='image_1920']" position="before">
+                <widget name="web_ribbon" title="Archivé" bg_color="text-bg-danger" invisible="active"/>
+            </xpath>
+            <xpath expr="//div[hasclass('oe_title')]/h2[field[@name='login']]" position="after">
+                <label for="active" string="Compte actif"/>
+                <div class="o_row">
+                    <field name="active"/>
+                    <span class="text-muted" invisible="active">Cet utilisateur ne peut plus se connecter.</span>
+                </div>
+            </xpath>
+        </field>
+    </record>
+
+    </data>
+</odoo>
