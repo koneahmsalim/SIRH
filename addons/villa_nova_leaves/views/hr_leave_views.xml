@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+
+    <record id="hr_leave_view_form_villa_nova" model="ir.ui.view">
+        <field name="name">hr.leave.form.villa.nova</field>
+        <field name="model">hr.leave</field>
+        <field name="inherit_id" ref="hr_holidays.hr_leave_view_form"/>
+        <field name="priority" eval="99"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='holiday_status_id']" position="after">
+                <group string="Permission exceptionnelle" name="villa_nova_permission"
+                       invisible="not holiday_status_id">
+                    <field name="x_motif_permission"/>
+                    <field name="x_evenement_hors_lieu_emploi"/>
+                    <field name="x_distance_evenement" invisible="not x_evenement_hors_lieu_emploi"/>
+                    <field name="x_jours_delai_route" invisible="not x_evenement_hors_lieu_emploi"/>
+                </group>
+                <group string="Congé maladie" name="villa_nova_maladie" invisible="not holiday_status_id">
+                    <field name="x_certificat_recu"/>
+                </group>
+                <group string="Direction Générale" name="villa_nova_dg" invisible="not holiday_status_id">
+                    <field name="x_dg_deadline" readonly="1"/>
+                    <field name="x_dg_attestation_delivree"/>
+                    <field name="x_dg_attestation_date" readonly="1"/>
+                </group>
+            </xpath>
+            <xpath expr="//sheet" position="inside">
+                <button name="action_villa_nova_mark_attestation_delivered" type="object"
+                        string="Marquer l'attestation / validation DG comme délivrée"
+                        class="btn-secondary" invisible="not x_dg_deadline or x_dg_attestation_delivree"
+                        groups="villa_nova_recruitment.group_direction_generale"/>
+            </xpath>
+        </field>
+    </record>
+
+    </data>
+</odoo>

@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="0" context="{'lang': 'fr_FR'}">
+
+    <!-- Types natifs adaptes a la terminologie exacte de la procedure Villa Nova -->
+    <record id="hr_holidays.holiday_status_cl" model="hr.leave.type">
+        <field name="name">Congé payé annuel</field>
+        <field name="requires_allocation">yes</field>
+        <field name="allocation_validation_type">hr</field>
+        <field name="leave_validation_type">both</field>
+    </record>
+
+    <record id="hr_holidays.holiday_status_sl" model="hr.leave.type">
+        <field name="name">Congé maladie</field>
+        <field name="support_document">True</field>
+    </record>
+
+    <record id="hr_holidays.holiday_status_unpaid" model="hr.leave.type">
+        <field name="name">Congé sans solde</field>
+        <field name="leave_validation_type">both</field>
+        <field name="support_document">True</field>
+    </record>
+
+    <!-- Nouveau type : Permission exceptionnelle (Article 25.12 du Code du travail) -->
+    <record id="hr_leave_type_permission_exceptionnelle" model="hr.leave.type">
+        <field name="name">Permission exceptionnelle</field>
+        <field name="requires_allocation">no</field>
+        <field name="leave_validation_type">manager</field>
+        <field name="request_unit">day</field>
+        <field name="color">4</field>
+    </record>
+
+    </data>
+</odoo>

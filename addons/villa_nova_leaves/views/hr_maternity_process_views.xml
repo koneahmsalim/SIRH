@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+
+    <record id="hr_maternity_process_view_form" model="ir.ui.view">
+        <field name="name">hr.maternity.process.form</field>
+        <field name="model">hr.maternity.process</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <button name="action_confirm_annonce" type="object" string="Confirmer l'annonce"
+                            class="oe_highlight" invisible="stage != 'a_annonce'"/>
+                    <button name="action_confirm_consultation" type="object" string="Consultation RH réalisée"
+                            class="oe_highlight" invisible="stage != 'b_consultation'"/>
+                    <button name="action_confirm_documents" type="object" string="Documents reçus"
+                            class="oe_highlight" invisible="stage != 'c_documents'"/>
+                    <button name="action_confirm_demande" type="object" string="Demande officielle soumise"
+                            class="oe_highlight" invisible="stage != 'd_demande'"/>
+                    <button name="action_confirm_validation" type="object" string="Valider la demande"
+                            class="oe_highlight" invisible="stage != 'e_validation'"/>
+                    <button name="action_confirm_retour" type="object" string="Confirmer le retour"
+                            class="oe_highlight" invisible="stage != 'f_retour'"/>
+                    <field name="stage" widget="statusbar"
+                           statusbar_visible="a_annonce,b_consultation,c_documents,d_demande,e_validation,f_retour,g_cloture"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <h1><field name="employee_id" placeholder="Collaboratrice"/></h1>
+                    </div>
+                    <group>
+                        <group string="Annonce &amp; Consultation">
+                            <field name="date_annonce"/>
+                            <field name="date_consultation_rh"/>
+                        </group>
+                        <group string="Congé">
+                            <field name="leave_id"/>
+                            <field name="date_demande_officielle"/>
+                            <field name="date_validation"/>
+                            <field name="confirmation_ecrite_envoyee"/>
+                        </group>
+                    </group>
+                    <group string="Documents">
+                        <field name="cert_grossesse_3_mois"/>
+                        <field name="cert_grossesse_6_mois"/>
+                        <field name="cert_grossesse_7_mois"/>
+                        <field name="cert_medecin_traitant"/>
+                    </group>
+                    <group string="Retour au travail">
+                        <field name="date_retour_prevue"/>
+                        <field name="attestation_reprise_delivree"/>
+                    </group>
+                    <field name="notes_communication_continue" placeholder="Suivi de la communication continue pendant le congé..."/>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids"/>
+                    <field name="activity_ids"/>
+                    <field name="message_ids"/>
+                </div>
+            </form>
+        </field>
+    </record>
+
+    <record id="hr_maternity_process_view_list" model="ir.ui.view">
+        <field name="name">hr.maternity.process.list</field>
+        <field name="model">hr.maternity.process</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="employee_id"/>
+                <field name="stage"/>
+                <field name="date_annonce"/>
+                <field name="date_retour_prevue"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="action_hr_maternity_process" model="ir.actions.act_window">
+        <field name="name">Congés maternité</field>
+        <field name="res_model">hr.maternity.process</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    </data>
+</odoo>

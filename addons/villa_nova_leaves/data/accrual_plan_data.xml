@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1" context="{'lang': 'fr_FR'}">
+
+    <!-- Politique de conge et d'absence, I.2 : 2,5 jours calendaires acquis par
+         mois (30j/an), + paliers d'anciennete en plateau (chaque palier
+         remplace le precedent, ne s'additionne pas) :
+         5 ans -> 31j/an, 10 ans -> 32j/an, 15 ans -> 33j/an,
+         20 ans -> 35j/an, 25 ans -> 37j/an, 30 ans -> 38j/an. -->
+    <record id="hr_leave_accrual_plan_conges_payes" model="hr.leave.accrual.plan">
+        <field name="name">Congés payés Villa Nova (2,5j/mois + ancienneté)</field>
+        <field name="time_off_type_id" ref="hr_holidays.holiday_status_cl"/>
+        <field name="is_based_on_worked_time">False</field>
+    </record>
+
+    <record id="hr_leave_accrual_level_base" model="hr.leave.accrual.level">
+        <field name="accrual_plan_id" ref="hr_leave_accrual_plan_conges_payes"/>
+        <field name="sequence">1</field>
+        <field name="start_type">day</field>
+        <field name="start_count">1</field>
+        <field name="added_value">2.5</field>
+        <field name="added_value_type">day</field>
+        <field name="frequency">monthly</field>
+    </record>
+
+    <record id="hr_leave_accrual_level_5ans" model="hr.leave.accrual.level">
+        <field name="accrual_plan_id" ref="hr_leave_accrual_plan_conges_payes"/>
+        <field name="sequence">2</field>
+        <field name="start_type">year</field>
+        <field name="start_count">5</field>
+        <field name="added_value">2.583333</field>
+        <field name="added_value_type">day</field>
+        <field name="frequency">monthly</field>
+    </record>
+
+    <record id="hr_leave_accrual_level_10ans" model="hr.leave.accrual.level">
+        <field name="accrual_plan_id" ref="hr_leave_accrual_plan_conges_payes"/>
+        <field name="sequence">3</field>
+        <field name="start_type">year</field>
+        <field name="start_count">10</field>
+        <field name="added_value">2.666667</field>
+        <field name="added_value_type">day</field>
+        <field name="frequency">monthly</field>
+    </record>
+
+    <record id="hr_leave_accrual_level_15ans" model="hr.leave.accrual.level">
+        <field name="accrual_plan_id" ref="hr_leave_accrual_plan_conges_payes"/>
+        <field name="sequence">4</field>
+        <field name="start_type">year</field>
+        <field name="start_count">15</field>
+        <field name="added_value">2.75</field>
+        <field name="added_value_type">day</field>
+        <field name="frequency">monthly</field>
+    </record>
+
+    <record id="hr_leave_accrual_level_20ans" model="hr.leave.accrual.level">
+        <field name="accrual_plan_id" ref="hr_leave_accrual_plan_conges_payes"/>
+        <field name="sequence">5</field>
+        <field name="start_type">year</field>
+        <field name="start_count">20</field>
+        <field name="added_value">2.916667</field>
+        <field name="added_value_type">day</field>
+        <field name="frequency">monthly</field>
+    </record>
+
+    <record id="hr_leave_accrual_level_25ans" model="hr.leave.accrual.level">
+        <field name="accrual_plan_id" ref="hr_leave_accrual_plan_conges_payes"/>
+        <field name="sequence">6</field>
+        <field name="start_type">year</field>
+        <field name="start_count">25</field>
+        <field name="added_value">3.083333</field>
+        <field name="added_value_type">day</field>
+        <field name="frequency">monthly</field>
+    </record>
+
+    <record id="hr_leave_accrual_level_30ans" model="hr.leave.accrual.level">
+        <field name="accrual_plan_id" ref="hr_leave_accrual_plan_conges_payes"/>
+        <field name="sequence">7</field>
+        <field name="start_type">year</field>
+        <field name="start_count">30</field>
+        <field name="added_value">3.166667</field>
+        <field name="added_value_type">day</field>
+        <field name="frequency">monthly</field>
+    </record>
+
+    </data>
+</odoo>
