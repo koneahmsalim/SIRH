@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+
+    <!-- Un collaborateur ne doit voir que les cycles auxquels il est rattache,
+         pas ceux de ses collegues (ex. objectifs d'autres departements). -->
+    <record id="hr_appraisal_cycle_rule_own" model="ir.rule">
+        <field name="name">Cycle d'évaluation : uniquement les cycles où je suis inclus</field>
+        <field name="model_id" ref="model_hr_appraisal_cycle"/>
+        <field name="domain_force">[('employee_ids.user_id', '=', user.id)]</field>
+        <field name="groups" eval="[(4, ref('base.group_user'))]"/>
+    </record>
+    <record id="hr_appraisal_cycle_rule_rh" model="ir.rule">
+        <field name="name">Cycle d'évaluation : accès complet RH/DG</field>
+        <field name="model_id" ref="model_hr_appraisal_cycle"/>
+        <field name="domain_force">[(1, '=', 1)]</field>
+        <field name="groups" eval="[(4, ref('villa_nova_recruitment.group_direction_generale')), (4, ref('group_manager_rh'))]"/>
+    </record>
+
+    <!-- Confidentialite des evaluations : chacun ne voit que sa propre
+         evaluation (en tant qu'evalue) ou celle des collaborateurs qu'il
+         encadre directement (en tant qu'evaluateur, piste "collaborateur"). -->
+    <record id="hr_appraisal_evaluation_rule_own" model="ir.rule">
+        <field name="name">Évaluation : uniquement la sienne ou celle de ses N-1</field>
+        <field name="model_id" ref="model_hr_appraisal_evaluation"/>
+        <field name="domain_force">['|', ('employee_id.user_id', '=', user.id), ('employee_id.parent_id.user_id', '=', user.id)]</field>
+        <field name="groups" eval="[(4, ref('base.group_user'))]"/>
+    </record>
+    <record id="hr_appraisal_evaluation_rule_rh" model="ir.rule">
+        <field name="name">Évaluation : accès complet RH/DG</field>
+        <field name="model_id" ref="model_hr_appraisal_evaluation"/>
+        <field name="domain_force">[(1, '=', 1)]</field>
+        <field name="groups" eval="[(4, ref('villa_nova_recruitment.group_direction_generale')), (4, ref('group_manager_rh'))]"/>
+    </record>
+
+    </data>
+</odoo>

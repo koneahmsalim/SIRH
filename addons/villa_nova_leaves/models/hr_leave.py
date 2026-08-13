@@ -1,4 +1,4 @@
-from datetime import timedelta
+from datetime import date, timedelta
 
 from odoo import _, api, fields, models
 from odoo.exceptions import ValidationError
@@ -117,6 +117,30 @@ class HrLeave(models.Model):
                         "Les permissions exceptionnelles nécessitent au moins 6 mois de présence "
                         "dans l'entreprise (Article 25.12 du Code du travail)."
                     ))
+
+    @api.constrains('x_motif_permission', 'employee_id', 'date_from', 'date_to', 'state')
+    def _check_permission_plafond_annuel(self):
+        for leave in self:
+            if not leave.x_motif_permission or not leave._is_permission_exceptionnelle():
+                continue
+            if not leave.date_from or leave.state in ('refuse', 'cancel'):
+                continue
+            year = leave.date_from.year
+            others = self.search([
+                ('id', '!=', leave.id),
+                ('employee_id', '=', leave.employee_id.id),
+                ('holiday_status_id', '=', leave.holiday_status_id.id),
+                ('state', 'not in', ['refuse', 'cancel']),
+                ('date_from', '>=', date(year, 1, 1)),
+                ('date_from', '<=', date(year, 12, 31)),
+            ])
+            total_days = leave.number_of_days + sum(others.mapped('number_of_days'))
+            if total_days > PERMISSION_PLAFOND_JOURS:
+                raise ValidationError(_(
+                    "Plafond annuel de %(max)s jours de permission exceptionnelle dépassé : "
+                    "%(total)s jours cumulés pour %(year)s.",
+                    max=PERMISSION_PLAFOND_JOURS, total=total_days, year=year,
+                ))
 
     def action_validate(self, check_state=True):
         res = super().action_validate(check_state)

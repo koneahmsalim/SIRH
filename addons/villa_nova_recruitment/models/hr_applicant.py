@@ -1,11 +1,21 @@
 from datetime import timedelta
 
 from odoo import _, api, fields, models
+from odoo.exceptions import ValidationError
 
 # Delai de grace avant l'envoi effectif d'un email/test au candidat suite a un
 # changement d'etape : protege contre un glisser-deposer accidentel dans le
 # kanban (la RH a le temps de corriger avant qu'une communication ne parte).
 NOTIFICATION_GRACE_DELAY = timedelta(minutes=15)
+
+# Bornes de la grille de screening ponderee (Etape 3).
+SCORE_MAX = {
+    'x_score_formation': 20,
+    'x_score_experience': 30,
+    'x_score_competences_techniques': 20,
+    'x_score_comportemental': 15,
+    'x_score_lettre_motivation': 15,
+}
 
 
 class HrApplicant(models.Model):
@@ -85,6 +95,17 @@ class HrApplicant(models.Model):
     # ces champs capturent le resultat de cette verification.
     x_references_verifiees = fields.Boolean(string="Références vérifiées")
     x_notes_verification_references = fields.Text(string="Notes de vérification des références")
+
+    @api.constrains(*SCORE_MAX.keys())
+    def _check_score_bounds(self):
+        for applicant in self:
+            for field_name, max_value in SCORE_MAX.items():
+                value = applicant[field_name]
+                if value < 0 or value > max_value:
+                    raise ValidationError(_(
+                        "%(label)s doit être compris entre 0 et %(max)s.",
+                        label=applicant._fields[field_name].string, max=max_value,
+                    ))
 
     x_pending_notification_stage_id = fields.Many2one(
         'hr.recruitment.stage',

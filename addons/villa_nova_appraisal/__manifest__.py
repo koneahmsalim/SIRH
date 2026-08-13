@@ -16,6 +16,7 @@
     'data': [
         'security/security.xml',
         'security/ir.model.access.csv',
+        'security/ir_rule_data.xml',
         'views/hr_appraisal_evaluation_views.xml',
         'views/hr_appraisal_cycle_views.xml',
         'views/menus.xml',

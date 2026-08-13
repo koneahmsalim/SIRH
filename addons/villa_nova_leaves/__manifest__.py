@@ -16,6 +16,7 @@
     ],
     'data': [
         'security/ir.model.access.csv',
+        'security/ir_rule_data.xml',
         'data/leave_type_data.xml',
         'data/accrual_plan_data.xml',
         'data/cron_data.xml',

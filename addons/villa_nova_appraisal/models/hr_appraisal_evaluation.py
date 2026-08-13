@@ -1,6 +1,22 @@
 from datetime import timedelta
 
 from odoo import _, api, fields, models
+from odoo.exceptions import AccessError, ValidationError
+
+SCORE_FIELDS = {
+    'score_objectifs', 'score_techniques', 'score_comportementales',
+    'score_relationnelles', 'score_manageriales', 'score_adaptabilite',
+    'direction_comments',
+}
+
+SCORE_MAX = {
+    'score_objectifs': 60,
+    'score_techniques': 8,
+    'score_comportementales': 8,
+    'score_relationnelles': 8,
+    'score_manageriales': 8,
+    'score_adaptabilite': 8,
+}
 
 
 class HrAppraisalEvaluation(models.Model):
@@ -75,6 +91,28 @@ class HrAppraisalEvaluation(models.Model):
                 + evaluation.score_adaptabilite
             )
             evaluation.score_total = evaluation.score_objectifs + evaluation.score_competences
+
+    @api.constrains(*SCORE_MAX.keys())
+    def _check_score_bounds(self):
+        for evaluation in self:
+            for field_name, max_value in SCORE_MAX.items():
+                value = evaluation[field_name]
+                if value < 0 or value > max_value:
+                    raise ValidationError(_(
+                        "%(label)s doit être compris entre 0 et %(max)s.",
+                        label=evaluation._fields[field_name].string, max=max_value,
+                    ))
+
+    def write(self, vals):
+        if SCORE_FIELDS.intersection(vals) and not (
+            self.env.user.has_group('villa_nova_recruitment.group_direction_generale')
+            or self.env.user.has_group('villa_nova_appraisal.group_manager_rh')
+        ):
+            raise AccessError(_(
+                "Seule la Direction Générale ou un Manager RH peut saisir la notation et les "
+                "commentaires d'évaluation."
+            ))
+        return super().write(vals)
 
     def _expand_stages(self, stages, domain):
         return [key for key, _label in self._fields['stage'].selection]
@@ -187,7 +225,7 @@ class HrAppraisalEvaluation(models.Model):
                     "points forts, axes d'amélioration et perspectives. Élaborer le plan de "
                     "développement individuel (PDI) si nécessaire."
                 ),
-                date_deadline=fields.Date.context_today(self),
+                date_deadline=fields.Datetime.to_datetime(deadline).date(),
                 user_id=user.id,
             )
         self._send_notification(

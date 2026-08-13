@@ -1,3 +1,7 @@
 id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
-access_hr_appraisal_cycle_user,hr.appraisal.cycle.user,model_hr_appraisal_cycle,base.group_user,1,1,1,1
-access_hr_appraisal_evaluation_user,hr.appraisal.evaluation.user,model_hr_appraisal_evaluation,base.group_user,1,1,1,1
+access_hr_appraisal_cycle_user,hr.appraisal.cycle.user,model_hr_appraisal_cycle,base.group_user,1,0,0,0
+access_hr_appraisal_cycle_rh,hr.appraisal.cycle.rh,model_hr_appraisal_cycle,villa_nova_recruitment.group_direction_generale,1,1,1,1
+access_hr_appraisal_cycle_manager_rh,hr.appraisal.cycle.manager.rh,model_hr_appraisal_cycle,villa_nova_appraisal.group_manager_rh,1,1,1,0
+access_hr_appraisal_evaluation_user,hr.appraisal.evaluation.user,model_hr_appraisal_evaluation,base.group_user,1,1,0,0
+access_hr_appraisal_evaluation_rh,hr.appraisal.evaluation.rh,model_hr_appraisal_evaluation,villa_nova_recruitment.group_direction_generale,1,1,1,1
+access_hr_appraisal_evaluation_manager_rh,hr.appraisal.evaluation.manager.rh,model_hr_appraisal_evaluation,villa_nova_appraisal.group_manager_rh,1,1,0,0

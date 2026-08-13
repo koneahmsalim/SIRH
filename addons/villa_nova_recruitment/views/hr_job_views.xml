@@ -40,6 +40,22 @@
         </field>
     </record>
 
+    <!-- Le module website_hr_recruitment ajoute un bouton "Published" directement
+         cliquable sur la carte kanban, qui contournait entierement la validation
+         Direction Generale. On le rend en lecture seule tant que le poste n'est
+         pas valide (le garde-fou reel est cote serveur, voir hr_job.py write()). -->
+    <record id="hr_job_view_kanban_villa_nova_readonly_publish" model="ir.ui.view">
+        <field name="name">hr.job.kanban.villa.nova.readonly.publish</field>
+        <field name="model">hr.job</field>
+        <field name="inherit_id" ref="hr_recruitment.view_hr_job_kanban"/>
+        <field name="priority" eval="99"/>
+        <field name="arch" type="xml">
+            <field name="is_published" position="attributes">
+                <attribute name="readonly">x_validation_state != 'validated'</attribute>
+            </field>
+        </field>
+    </record>
+
     <!-- Le bouton "Nouveau" de l'app Recrutement ouvre une popup simplifiee
          (nom + alias e-mail) avant de rediriger vers le kanban des candidatures
          du poste : le motif doit donc etre visible des cette popup, sinon la RH

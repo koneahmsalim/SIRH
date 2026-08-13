@@ -1,4 +1,5 @@
 from odoo import _, api, fields, models
+from odoo.exceptions import UserError
 
 
 class HrJob(models.Model):
@@ -34,6 +35,19 @@ class HrJob(models.Model):
         tracking=True,
         copy=False,
     )
+
+    def write(self, vals):
+        if vals.get('is_published'):
+            new_state = vals.get('x_validation_state')
+            not_validated = self.filtered(
+                lambda job: (new_state or job.x_validation_state) != 'validated',
+            )
+            if not_validated:
+                raise UserError(_(
+                    "Ce poste ne peut être publié qu'après validation par la Direction "
+                    "Générale (bouton « Soumettre pour validation » puis validation DG)."
+                ))
+        return super().write(vals)
 
     @api.model_create_multi
     def create(self, vals_list):

@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1" context="{'lang': 'fr_FR'}">
+
+    <record id="survey_satisfaction_j90" model="survey.survey">
+        <field name="title">Enquête de satisfaction à J+90</field>
+        <field name="survey_type">custom</field>
+        <field name="access_mode">token</field>
+        <field name="users_login_required">False</field>
+        <field name="scoring_type">no_scoring</field>
+        <field name="questions_layout">page_per_question</field>
+        <field name="description">Cela fait maintenant trois mois que tu as rejoint La Villa Nova ! Ton retour nous aide à évaluer ton intégration sur la durée.</field>
+    </record>
+
+    <record id="survey_satisfaction_j90_q1" model="survey.question">
+        <field name="survey_id" ref="survey_satisfaction_j90"/>
+        <field name="sequence">1</field>
+        <field name="title">Avec le recul de ces trois mois, comment évalues-tu ton intégration globale ?</field>
+        <field name="question_type">simple_choice</field>
+        <field name="suggested_answer_ids" eval="[
+            (0, 0, {'value': 'Excellente', 'sequence': 1}),
+            (0, 0, {'value': 'Bonne', 'sequence': 2}),
+            (0, 0, {'value': 'Moyenne', 'sequence': 3}),
+            (0, 0, {'value': 'Insuffisante', 'sequence': 4}),
+        ]"/>
+    </record>
+
+    <record id="survey_satisfaction_j90_q2" model="survey.question">
+        <field name="survey_id" ref="survey_satisfaction_j90"/>
+        <field name="sequence">2</field>
+        <field name="title">Te sens-tu pleinement intégré(e) à l'équipe et à la culture de La Villa Nova ?</field>
+        <field name="question_type">simple_choice</field>
+        <field name="suggested_answer_ids" eval="[
+            (0, 0, {'value': 'Oui, tout à fait', 'sequence': 1}),
+            (0, 0, {'value': 'Plutôt oui', 'sequence': 2}),
+            (0, 0, {'value': 'Plutôt non', 'sequence': 3}),
+            (0, 0, {'value': 'Pas du tout', 'sequence': 4}),
+        ]"/>
+    </record>
+
+    <record id="survey_satisfaction_j90_q3" model="survey.question">
+        <field name="survey_id" ref="survey_satisfaction_j90"/>
+        <field name="sequence">3</field>
+        <field name="title">Les objectifs fixés à ton arrivée sont-ils clairs et atteignables ?</field>
+        <field name="question_type">simple_choice</field>
+        <field name="suggested_answer_ids" eval="[
+            (0, 0, {'value': 'Oui', 'sequence': 1}),
+            (0, 0, {'value': 'Non', 'sequence': 2}),
+        ]"/>
+    </record>
+
+    <record id="survey_satisfaction_j90_q4" model="survey.question">
+        <field name="survey_id" ref="survey_satisfaction_j90"/>
+        <field name="sequence">4</field>
+        <field name="title">Le suivi de ton manager et/ou de ton parrain/ta marraine sur la durée t'a-t-il été utile ?</field>
+        <field name="question_type">simple_choice</field>
+        <field name="suggested_answer_ids" eval="[
+            (0, 0, {'value': 'Oui, beaucoup', 'sequence': 1}),
+            (0, 0, {'value': 'Un peu', 'sequence': 2}),
+            (0, 0, {'value': 'Pas vraiment', 'sequence': 3}),
+        ]"/>
+    </record>
+
+    <record id="survey_satisfaction_j90_q5" model="survey.question">
+        <field name="survey_id" ref="survey_satisfaction_j90"/>
+        <field name="sequence">5</field>
+        <field name="title">Quels sont, selon toi, tes principaux axes de progression pour la suite ?</field>
+        <field name="question_type">text_box</field>
+    </record>
+
+    <record id="survey_satisfaction_j90_q6" model="survey.question">
+        <field name="survey_id" ref="survey_satisfaction_j90"/>
+        <field name="sequence">6</field>
+        <field name="title">Suggestions pour améliorer le parcours d'intégration sur la durée ?</field>
+        <field name="question_type">text_box</field>
+    </record>
+
+    </data>
+</odoo>

@@ -276,21 +276,31 @@ class HrEmployee(models.Model):
     # ------------------------------------------------------------------
     @api.model
     def _cron_send_onboarding_satisfaction_survey(self):
-        self._send_satisfaction_survey_batch(30, 'x_onboarding_survey_sent')
-        self._send_satisfaction_survey_batch(90, 'x_onboarding_survey_j90_sent')
+        self._send_satisfaction_survey_batch(
+            30, 'x_onboarding_survey_sent',
+            'villa_nova_onboarding.survey_satisfaction_j30',
+            'villa_nova_onboarding.mail_template_satisfaction_j30',
+        )
+        self._send_satisfaction_survey_batch(
+            90, 'x_onboarding_survey_j90_sent',
+            'villa_nova_onboarding.survey_satisfaction_j90',
+            'villa_nova_onboarding.mail_template_satisfaction_j90',
+        )
 
     @api.model
-    def _send_satisfaction_survey_batch(self, days_offset, sent_field):
+    def _send_satisfaction_survey_batch(self, days_offset, sent_field, survey_xmlid, template_xmlid):
+        # '<=' plutot que '=' : si le cron ne tourne pas exactement le jour J
+        # (conteneur arrete, etc.), les collaborateurs concernes sont rattrapes
+        # au prochain passage au lieu d'etre definitivement oublies.
         target_date = fields.Date.context_today(self) - timedelta(days=days_offset)
         employees = self.search([
-            ('joining_date', '=', target_date),
+            ('joining_date', '!=', False),
+            ('joining_date', '<=', target_date),
             (sent_field, '=', False),
             ('active', '=', True),
         ])
-        survey = self.env.ref('villa_nova_onboarding.survey_satisfaction_j30', raise_if_not_found=False)
-        template = self.env.ref(
-            'villa_nova_onboarding.mail_template_satisfaction_j30', raise_if_not_found=False,
-        )
+        survey = self.env.ref(survey_xmlid, raise_if_not_found=False)
+        template = self.env.ref(template_xmlid, raise_if_not_found=False)
         if not survey:
             return
         for employee in employees:

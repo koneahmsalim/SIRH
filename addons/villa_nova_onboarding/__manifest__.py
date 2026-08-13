@@ -16,6 +16,7 @@
     'data': [
         'security/security.xml',
         'data/survey_satisfaction_j30_data.xml',
+        'data/survey_satisfaction_j90_data.xml',
         'data/mail_templates_data.xml',
         'data/cron_data.xml',
         'views/hr_employee_views.xml',

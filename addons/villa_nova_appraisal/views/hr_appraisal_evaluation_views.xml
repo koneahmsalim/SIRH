@@ -40,7 +40,8 @@
                         <page string="Auto-évaluation / Évaluation" name="self_eval">
                             <field name="self_evaluation" placeholder="Objectifs, compétences clés, résultats obtenus..."/>
                         </page>
-                        <page string="Notation (60% Objectifs / 40% Compétences)" name="scoring">
+                        <page string="Notation (60% Objectifs / 40% Compétences)" name="scoring"
+                              groups="villa_nova_recruitment.group_direction_generale,villa_nova_appraisal.group_manager_rh">
                             <group>
                                 <group string="Objectifs (60%)">
                                     <field name="score_objectifs"/>

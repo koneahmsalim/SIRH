@@ -50,7 +50,7 @@ class HrUnplannedAbsence(models.Model):
                 absence.activity_schedule(
                     'mail.mail_activity_data_todo',
                     summary=_("Vérifier le justificatif d'absence de %s (délai 24h)", absence.employee_id.name),
-                    date_deadline=fields.Date.context_today(absence),
+                    date_deadline=absence.justificatif_deadline.date(),
                     user_id=user.id,
                 )
         return absences

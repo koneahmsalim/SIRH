@@ -1,3 +1,5 @@
 id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
-access_hr_maternity_process_user,hr.maternity.process.user,model_hr_maternity_process,base.group_user,1,1,1,1
-access_hr_unplanned_absence_user,hr.unplanned.absence.user,model_hr_unplanned_absence,base.group_user,1,1,1,1
+access_hr_maternity_process_user,hr.maternity.process.user,model_hr_maternity_process,base.group_user,1,0,0,0
+access_hr_maternity_process_rh,hr.maternity.process.rh,model_hr_maternity_process,villa_nova_recruitment.group_direction_generale,1,1,1,1
+access_hr_unplanned_absence_user,hr.unplanned.absence.user,model_hr_unplanned_absence,base.group_user,1,0,0,0
+access_hr_unplanned_absence_rh,hr.unplanned.absence.rh,model_hr_unplanned_absence,villa_nova_recruitment.group_direction_generale,1,1,1,1
