@@ -6,13 +6,13 @@
          review -->
     <template id="thankyou_villa_nova" inherit_id="website_hr_recruitment.thankyou_ir_ui_view">
 
-        <!-- 1) "Your contact information is:" (traduit "Vos coordonnées sont :")
-             affiche en realite les coordonnees du RECRUTEUR (job_sudo.user_id),
-             pas celles du candidat qui vient de postuler : le libelle pretait a
-             confusion, on le rend explicite. -->
-        <xpath expr="//p[@class='text-center mb-0 fs-3 lead']" position="replace">
-            <p class="text-center mb-0 fs-3 lead">Votre contact chez nous pour cette candidature :</p>
-        </xpath>
+        <!-- 1) Le bloc "HR Recruiter" affichait en clair la photo, le telephone
+             personnel et l'email du recruteur (job_sudo.user_id) sur une page
+             publique non authentifiee : n'importe qui postulant pouvait
+             recuperer ces coordonnees, exposant le recruteur au spam/harcelement.
+             On retire entierement ce bloc plutot que de simplement corriger le
+             libelle. -->
+        <xpath expr="//t[@t-if=&quot;job_sudo and job_sudo.user_id&quot;]" position="replace"/>
 
         <!-- 2) Boutons "Take a look around" : "About Us" et "Products" pointaient
              vers "/" (page generique, sans rapport avec l'activite du groupe).
