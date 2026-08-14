@@ -12,9 +12,11 @@
         'base_automation',
         'calendar',
         'hr_recruitment_skills',
+        'portal',
     ],
     'data': [
         'security/security.xml',
+        'security/ir.model.access.csv',
         'data/recruitment_stage_data.xml',
         'data/survey_prequalification_data.xml',
         'data/utm_source_data.xml',

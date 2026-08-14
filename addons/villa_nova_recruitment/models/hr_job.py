@@ -110,6 +110,21 @@ class HrJob(models.Model):
         })
         for job in self:
             job.message_post(body=_("Poste validé par la Direction Générale et publié sur le site carrière."))
+            job._send_job_alert_emails()
+
+    def _send_job_alert_emails(self):
+        self.ensure_one()
+        subscribers = self.env['res.partner'].sudo().search([('x_job_alert_subscribed', '=', True)])
+        if not subscribers:
+            return
+        template = self.env.ref(
+            'villa_nova_recruitment.mail_template_alerte_nouveau_poste', raise_if_not_found=False,
+        )
+        if not template:
+            return
+        template.send_mail(
+            self.id, force_send=True, email_values={'recipient_ids': [(6, 0, subscribers.ids)]},
+        )
 
     def action_reset_to_draft(self):
         self.write({'x_validation_state': 'draft', 'is_published': False})

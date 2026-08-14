@@ -24,15 +24,14 @@
         </xpath>
         <xpath expr="(//div[@id='o_recruitment_thank_cta']//a)[3]" position="replace"/>
 
-        <!-- 3) Lien de suivi de candidature (feature demandee en review) : le
-             candidat peut suivre l'avancement de SA candidature sans creer de
-             compte, via un jeton non devinable, en plus des emails deja
-             envoyes a chaque etape. -->
+        <!-- 3) Lien de suivi de candidature : desormais que la candidature
+             necessite un compte, le candidat est deja connecte a ce stade,
+             on le renvoie directement vers l'espace portail (/my/applications). -->
         <xpath expr="//t[@t-set='job_sudo']" position="after">
             <t t-set="applicant_sudo" t-value="request.website._website_form_last_record().sudo()"/>
         </xpath>
         <xpath expr="(//div[@id='o_recruitment_thank_cta']//a)[1]" position="before">
-            <a t-if="applicant_sudo" role="button" t-att-href="applicant_sudo._get_tracking_url()"
+            <a t-if="applicant_sudo" role="button" t-attf-href="/my/applications/#{applicant_sudo.id}"
                class="btn btn-outline-primary btn-lg">Suivre ma candidature</a>
         </xpath>
 

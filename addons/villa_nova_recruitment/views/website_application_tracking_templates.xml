@@ -2,61 +2,102 @@
 <odoo>
     <data>
 
-    <template id="application_tracking" name="Suivi de candidature">
-        <t t-call="website.layout">
-            <div id="wrap">
-                <div class="container py-5">
-                    <div class="row justify-content-center">
-                        <div class="col-lg-8">
-                            <h1 class="mb-1">Suivi de votre candidature</h1>
-                            <p class="text-muted mb-4">
-                                <t t-out="applicant.partner_name or applicant.email_from"/> —
-                                poste : <strong t-out="applicant.job_id.name"/>
-                            </p>
+    <!-- Carte "Mes candidatures" sur la page d'accueil du portail (/my). -->
+    <template id="portal_my_home_applications" inherit_id="portal.portal_my_home">
+        <xpath expr="//div[@id='portal_common_category']" position="inside">
+            <t t-call="portal.portal_docs_entry">
+                <t t-set="title">Mes candidatures</t>
+                <t t-set="text">Suivez l'avancement de vos candidatures chez Villa Nova.</t>
+                <t t-set="url" t-value="'/my/applications'"/>
+                <t t-set="count" t-value="applications_count"/>
+            </t>
+        </xpath>
+    </template>
 
-                            <t t-if="not applicant.active">
-                                <div class="alert alert-secondary" role="alert">
-                                    Cette candidature n'est plus active. Si vous pensez qu'il s'agit d'une erreur,
-                                    n'hésitez pas à contacter notre équipe Recrutement.
-                                </div>
-                            </t>
-                            <t t-else="">
-                                <ol class="list-group list-group-numbered mb-4">
-                                    <t t-foreach="stages" t-as="stage">
-                                        <t t-set="is_current" t-value="stage.id == applicant.stage_id.id"/>
-                                        <t t-set="is_past" t-value="stage.sequence &lt; applicant.stage_id.sequence"/>
-                                        <li t-attf-class="list-group-item d-flex justify-content-between align-items-center #{'active fw-bold' if is_current else ('text-muted' if not is_past else '')}">
-                                            <span t-out="stage.name"/>
-                                            <span t-if="is_current" class="badge bg-primary rounded-pill">Étape actuelle</span>
-                                            <i t-elif="is_past" class="fa fa-check text-success" role="img" aria-label="Étape franchie" title="Étape franchie"/>
-                                        </li>
-                                    </t>
-                                </ol>
-                                <p class="text-muted">
-                                    Cette page se met à jour automatiquement au fil de votre candidature.
-                                    Vous recevrez également un email à chaque étape importante.
-                                </p>
-                            </t>
+    <!-- Liste des candidatures du candidat connecte -->
+    <template id="portal_my_applications" name="Mes candidatures">
+        <t t-call="portal.portal_layout">
+            <t t-set="breadcrumbs_searchbar" t-value="False"/>
+            <div class="container py-4">
+                <h1>Mes candidatures</h1>
 
-                            <a role="button" href="/jobs" class="btn btn-outline-primary mt-3">Voir nos autres offres</a>
+                <div class="card mb-4">
+                    <div class="card-body d-flex justify-content-between align-items-center">
+                        <div>
+                            <strong>Alertes nouveaux postes</strong>
+                            <p class="text-muted mb-0">Reçois un email lorsqu'un nouveau poste est publié chez Villa Nova.</p>
                         </div>
+                        <form action="/my/job-alerts/toggle" method="post">
+                            <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                            <button type="submit" t-attf-class="btn #{'btn-success' if x_job_alert_subscribed else 'btn-outline-secondary'}">
+                                <t t-if="x_job_alert_subscribed">Activées</t>
+                                <t t-else="">Activer</t>
+                            </button>
+                        </form>
                     </div>
                 </div>
+
+                <t t-if="not applicants">
+                    <p class="text-muted">Vous n'avez pas encore de candidature en cours.</p>
+                </t>
+                <table t-else="" class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Poste</th>
+                            <th>Étape actuelle</th>
+                            <th>Date de candidature</th>
+                            <th/>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr t-foreach="applicants" t-as="applicant">
+                            <td t-out="applicant.job_id.name"/>
+                            <td t-out="applicant.stage_id.name"/>
+                            <td t-out="applicant.create_date.date()"/>
+                            <td>
+                                <a t-attf-href="/my/applications/#{applicant.id}" class="btn btn-sm btn-outline-primary">Voir le détail</a>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <a role="button" href="/jobs" class="btn btn-outline-primary mt-3">Voir nos autres offres</a>
             </div>
         </t>
     </template>
 
-    <template id="application_tracking_not_found" name="Candidature introuvable">
-        <t t-call="website.layout">
-            <div id="wrap">
-                <div class="container py-5 text-center">
-                    <h1>Candidature introuvable</h1>
+    <!-- Detail d'une candidature (pipeline visuel) -->
+    <template id="portal_application_detail" name="Détail de candidature">
+        <t t-call="portal.portal_layout">
+            <t t-set="breadcrumbs_searchbar" t-value="False"/>
+            <div class="container py-4">
+                <a href="/my/applications" class="btn btn-link ps-0">&#8592; Retour à mes candidatures</a>
+                <h1 class="mb-1">Suivi de votre candidature</h1>
+                <p class="text-muted mb-4">Poste : <strong t-out="applicant.job_id.name"/></p>
+
+                <t t-if="not applicant.active">
+                    <div class="alert alert-secondary" role="alert">
+                        Cette candidature n'est plus active. Si vous pensez qu'il s'agit d'une erreur,
+                        n'hésitez pas à contacter notre équipe Recrutement.
+                    </div>
+                </t>
+                <t t-else="">
+                    <ol class="list-group list-group-numbered mb-4">
+                        <t t-foreach="stages" t-as="stage">
+                            <t t-set="is_current" t-value="stage.id == applicant.stage_id.id"/>
+                            <t t-set="is_past" t-value="stage.sequence &lt; applicant.stage_id.sequence"/>
+                            <li t-attf-class="list-group-item d-flex justify-content-between align-items-center #{'active fw-bold' if is_current else ('text-muted' if not is_past else '')}">
+                                <span t-out="stage.name"/>
+                                <span t-if="is_current" class="badge bg-primary rounded-pill">Étape actuelle</span>
+                                <i t-elif="is_past" class="fa fa-check text-success" role="img" aria-label="Étape franchie" title="Étape franchie"/>
+                            </li>
+                        </t>
+                    </ol>
                     <p class="text-muted">
-                        Ce lien de suivi n'est plus valide. Si vous pensez qu'il s'agit d'une erreur,
-                        contactez notre équipe Recrutement.
+                        Cette page se met à jour automatiquement au fil de votre candidature.
+                        Vous recevrez également un email à chaque étape importante.
                     </p>
-                    <a role="button" href="/jobs" class="btn btn-primary mt-3">Voir nos offres</a>
-                </div>
+                </t>
             </div>
         </t>
     </template>
