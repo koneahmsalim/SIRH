@@ -16,6 +16,8 @@
                     <strong><t t-out="object.job_id.name or ''">Poste</t></strong> a été présélectionnée.</p>
                 <p>Un membre de notre équipe RH va prochainement vous contacter pour un court entretien téléphonique
                     (10 à 15 minutes). N'hésitez pas à répondre à cet email pour nous indiquer vos disponibilités.</p>
+                <p>Vous pouvez suivre l'avancement de votre candidature à tout moment :
+                    <a t-att-href="object._get_tracking_url()">voir le statut de ma candidature</a>.</p>
                 <p>Cordialement,<br/>L'équipe Ressources Humaines - Villa Nova</p>
             </div>
         </field>
@@ -36,6 +38,8 @@
                 <p>Nous allons vous inviter à un entretien structuré comportant un volet RH, un volet technique et un
                     volet pratique. Notre équipe reviendra vers vous très prochainement pour convenir d'une date, d'une
                     heure et du format (présentiel ou visioconférence).</p>
+                <p>Vous pouvez suivre l'avancement de votre candidature à tout moment :
+                    <a t-att-href="object._get_tracking_url()">voir le statut de ma candidature</a>.</p>
                 <p>Cordialement,<br/>L'équipe Ressources Humaines - Villa Nova</p>
             </div>
         </field>
@@ -55,6 +59,8 @@
                     <strong><t t-out="object.job_id.name or ''">Poste</t></strong>, vous serez invité(e) à réaliser des
                     tests pratiques (étude de cas et/ou exercices techniques en lien avec le poste).</p>
                 <p>Notre équipe vous communiquera prochainement les modalités précises.</p>
+                <p>Vous pouvez suivre l'avancement de votre candidature à tout moment :
+                    <a t-att-href="object._get_tracking_url()">voir le statut de ma candidature</a>.</p>
                 <p>Cordialement,<br/>L'équipe Ressources Humaines - Villa Nova</p>
             </div>
         </field>
@@ -74,6 +80,8 @@
                     franchi une nouvelle étape importante : vous êtes à présent convié(e) à un entretien avec notre
                     Président.</p>
                 <p>Notre équipe RH reviendra vers vous pour organiser cet échange.</p>
+                <p>Vous pouvez suivre l'avancement de votre candidature à tout moment :
+                    <a t-att-href="object._get_tracking_url()">voir le statut de ma candidature</a>.</p>
                 <p>Cordialement,<br/>L'équipe Ressources Humaines - Villa Nova</p>
             </div>
         </field>
@@ -94,6 +102,8 @@
                     références professionnelles.</p>
                 <p>Merci de répondre à cet email en nous communiquant leurs coordonnées ainsi que votre autorisation
                     pour les contacter.</p>
+                <p>Vous pouvez suivre l'avancement de votre candidature à tout moment :
+                    <a t-att-href="object._get_tracking_url()">voir le statut de ma candidature</a>.</p>
                 <p>Cordialement,<br/>L'équipe Ressources Humaines - Villa Nova</p>
             </div>
         </field>
@@ -127,6 +137,8 @@
                 </t>
                 <p>N'hésitez pas à revenir vers nous si vous souhaitez échanger sur ces conditions : nous restons
                     ouverts à la discussion avant la formalisation du contrat.</p>
+                <p>Vous pouvez suivre l'avancement de votre candidature à tout moment :
+                    <a t-att-href="object._get_tracking_url()">voir le statut de ma candidature</a>.</p>
                 <p>Cordialement,<br/>L'équipe Ressources Humaines - Villa Nova</p>
             </div>
         </field>

@@ -1,3 +1,4 @@
+import uuid
 from datetime import timedelta
 
 from odoo import _, api, fields, models
@@ -20,6 +21,18 @@ SCORE_MAX = {
 
 class HrApplicant(models.Model):
     _inherit = 'hr.applicant'
+
+    # Page de suivi de candidature (lien magique, sans compte utilisateur ni
+    # login) : le candidat garde uniquement une lecture seule de l'avancement
+    # de SA candidature, sans jamais avoir acces au backend Odoo.
+    access_token = fields.Char(
+        string="Jeton de suivi", copy=False, readonly=True,
+        default=lambda self: str(uuid.uuid4()),
+    )
+
+    def _get_tracking_url(self):
+        self.ensure_one()
+        return f"{self.get_base_url()}/jobs/my/application/{self.access_token}"
 
     # Etape 3 : grille de screening ponderee (Formation 20%, Experience 30%,
     # Competences techniques 20%, Comportemental 15%, Lettre de motivation 15%).

@@ -22,6 +22,8 @@
         'data/automation_data.xml',
         'views/hr_job_views.xml',
         'views/hr_applicant_views.xml',
+        'views/website_templates.xml',
+        'views/website_application_tracking_templates.xml',
     ],
     'post_init_hook': 'post_init_hook',
     'installable': True,

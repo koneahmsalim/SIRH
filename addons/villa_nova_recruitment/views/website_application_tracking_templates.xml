@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+
+    <template id="application_tracking" name="Suivi de candidature">
+        <t t-call="website.layout">
+            <div id="wrap">
+                <div class="container py-5">
+                    <div class="row justify-content-center">
+                        <div class="col-lg-8">
+                            <h1 class="mb-1">Suivi de votre candidature</h1>
+                            <p class="text-muted mb-4">
+                                <t t-out="applicant.partner_name or applicant.email_from"/> —
+                                poste : <strong t-out="applicant.job_id.name"/>
+                            </p>
+
+                            <t t-if="not applicant.active">
+                                <div class="alert alert-secondary" role="alert">
+                                    Cette candidature n'est plus active. Si vous pensez qu'il s'agit d'une erreur,
+                                    n'hésitez pas à contacter notre équipe Recrutement.
+                                </div>
+                            </t>
+                            <t t-else="">
+                                <ol class="list-group list-group-numbered mb-4">
+                                    <t t-foreach="stages" t-as="stage">
+                                        <t t-set="is_current" t-value="stage.id == applicant.stage_id.id"/>
+                                        <t t-set="is_past" t-value="stage.sequence &lt; applicant.stage_id.sequence"/>
+                                        <li t-attf-class="list-group-item d-flex justify-content-between align-items-center #{'active fw-bold' if is_current else ('text-muted' if not is_past else '')}">
+                                            <span t-out="stage.name"/>
+                                            <span t-if="is_current" class="badge bg-primary rounded-pill">Étape actuelle</span>
+                                            <i t-elif="is_past" class="fa fa-check text-success" role="img" aria-label="Étape franchie" title="Étape franchie"/>
+                                        </li>
+                                    </t>
+                                </ol>
+                                <p class="text-muted">
+                                    Cette page se met à jour automatiquement au fil de votre candidature.
+                                    Vous recevrez également un email à chaque étape importante.
+                                </p>
+                            </t>
+
+                            <a role="button" href="/jobs" class="btn btn-outline-primary mt-3">Voir nos autres offres</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </t>
+    </template>
+
+    <template id="application_tracking_not_found" name="Candidature introuvable">
+        <t t-call="website.layout">
+            <div id="wrap">
+                <div class="container py-5 text-center">
+                    <h1>Candidature introuvable</h1>
+                    <p class="text-muted">
+                        Ce lien de suivi n'est plus valide. Si vous pensez qu'il s'agit d'une erreur,
+                        contactez notre équipe Recrutement.
+                    </p>
+                    <a role="button" href="/jobs" class="btn btn-primary mt-3">Voir nos offres</a>
+                </div>
+            </div>
+        </t>
+    </template>
+
+    </data>
+</odoo>

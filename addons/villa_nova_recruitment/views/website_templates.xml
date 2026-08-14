@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+
+    <!-- Page de remerciement apres candidature : deux corrections remontees en
+         review -->
+    <template id="thankyou_villa_nova" inherit_id="website_hr_recruitment.thankyou_ir_ui_view">
+
+        <!-- 1) "Your contact information is:" (traduit "Vos coordonnées sont :")
+             affiche en realite les coordonnees du RECRUTEUR (job_sudo.user_id),
+             pas celles du candidat qui vient de postuler : le libelle pretait a
+             confusion, on le rend explicite. -->
+        <xpath expr="//p[@class='text-center mb-0 fs-3 lead']" position="replace">
+            <p class="text-center mb-0 fs-3 lead">Votre contact chez nous pour cette candidature :</p>
+        </xpath>
+
+        <!-- 2) Boutons "Take a look around" : "About Us" et "Products" pointaient
+             vers "/" (page generique, sans rapport avec l'activite du groupe).
+             On pointe "A propos" vers le vrai site d'Infinity Africa Group et on
+             retire "Products", sans objet pour ce groupe. -->
+        <xpath expr="(//div[@id='o_recruitment_thank_cta']//a)[2]" position="replace">
+            <a role="button" href="https://infinity-africa.com/" target="_blank"
+               class="btn btn-primary btn-lg ms-3">À propos d'Infinity Africa Group</a>
+        </xpath>
+        <xpath expr="(//div[@id='o_recruitment_thank_cta']//a)[3]" position="replace"/>
+
+        <!-- 3) Lien de suivi de candidature (feature demandee en review) : le
+             candidat peut suivre l'avancement de SA candidature sans creer de
+             compte, via un jeton non devinable, en plus des emails deja
+             envoyes a chaque etape. -->
+        <xpath expr="//t[@t-set='job_sudo']" position="after">
+            <t t-set="applicant_sudo" t-value="request.website._website_form_last_record().sudo()"/>
+        </xpath>
+        <xpath expr="(//div[@id='o_recruitment_thank_cta']//a)[1]" position="before">
+            <a t-if="applicant_sudo" role="button" t-att-href="applicant_sudo._get_tracking_url()"
+               class="btn btn-outline-primary btn-lg">Suivre ma candidature</a>
+        </xpath>
+
+    </template>
+
+    </data>
+</odoo>

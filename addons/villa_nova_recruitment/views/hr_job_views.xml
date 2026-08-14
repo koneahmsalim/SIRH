@@ -23,7 +23,7 @@
                 <page string="Planification du recrutement" name="villa_nova_planification">
                     <group>
                         <group name="villa_nova_motif" string="Identification du besoin">
-                            <field name="x_motif_recrutement"/>
+                            <field name="x_motif_recrutement" required="1"/>
                             <field name="x_delai_souhaite"/>
                             <field name="x_date_cloture"/>
                             <field name="x_budget_recrutement"/>
@@ -35,9 +35,40 @@
                         </group>
                     </group>
                 </page>
+                <page string="Fiche de poste" name="villa_nova_fiche_poste">
+                    <group string="Description du poste">
+                        <field name="description" position="move"/>
+                    </group>
+                    <group string="Profil recherché">
+                        <field name="requirements" nolabel="1"
+                               placeholder="Diplômes, expérience, qualités requises..."/>
+                    </group>
+                    <group string="Compétences attendues">
+                        <field name="skill_ids" position="move"/>
+                    </group>
+                </page>
             </xpath>
 
+            <!-- Le contenu de "Job Summary" (description) est deplace dans notre
+                 onglet "Fiche de poste" ci-dessus au lieu d'etre duplique : on
+                 masque l'onglet devenu vide. -->
+            <page name="job_description_page" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </page>
+
         </field>
+    </record>
+
+    <!-- Le bouton "Nouveau" ouvrait jusque-la une popup minimaliste (nom + alias)
+         qui redirigeait ensuite vers le kanban des candidatures, obligeant la RH
+         a rouvrir le poste via Configuration pour renseigner motif/budget/objectifs :
+         un seul flux desormais, la fiche complete directement, sans redirection
+         forcee vers un autre ecran a la sauvegarde. -->
+    <record id="hr_recruitment.create_job_simple" model="ir.actions.act_window">
+        <field name="view_id" ref="hr.view_hr_job_form"/>
+        <field name="view_mode">form</field>
+        <field name="target">current</field>
+        <field name="context">{}</field>
     </record>
 
     <!-- Le module website_hr_recruitment ajoute un bouton "Published" directement
@@ -53,21 +84,6 @@
             <field name="is_published" position="attributes">
                 <attribute name="readonly">x_validation_state != 'validated'</attribute>
             </field>
-        </field>
-    </record>
-
-    <!-- Le bouton "Nouveau" de l'app Recrutement ouvre une popup simplifiee
-         (nom + alias e-mail) avant de rediriger vers le kanban des candidatures
-         du poste : le motif doit donc etre visible des cette popup, sinon la RH
-         ne le voit jamais au moment de la creation. -->
-    <record id="hr_job_simple_form_villa_nova" model="ir.ui.view">
-        <field name="name">hr.job.simple.form.villa.nova.motif</field>
-        <field name="model">hr.job</field>
-        <field name="inherit_id" ref="hr_recruitment.hr_job_simple_form"/>
-        <field name="arch" type="xml">
-            <xpath expr="//field[@name='name']" position="after">
-                <field name="x_motif_recrutement" required="1"/>
-            </xpath>
         </field>
     </record>
 
