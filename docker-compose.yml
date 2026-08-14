@@ -10,7 +10,7 @@ services:
       - postgres_data:/var/lib/postgresql/data
 
   odoo:
-    image: odoo:18
+    build: .
     depends_on:
       - postgres
     ports:
