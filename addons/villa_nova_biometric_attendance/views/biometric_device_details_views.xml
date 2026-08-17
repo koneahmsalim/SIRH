@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="biometric_device_details_view_form_villa_nova" model="ir.ui.view">
+        <field name="name">biometric.device.details.view.form.villa.nova</field>
+        <field name="model">biometric.device.details</field>
+        <field name="inherit_id" ref="hr_biometric_attendance.biometric_device_details_view_form"/>
+        <field name="arch" type="xml">
+            <button name="action_download_attendance" position="before">
+                <button name="action_villa_nova_sync_recent_attendance"
+                        string="Synchroniser les pointages recents"
+                        type="object" class="oe_highlight"
+                        help="Importe uniquement les pointages survenus depuis la derniere synchronisation (rapide). Se declenche aussi automatiquement toutes les 15 minutes."/>
+            </button>
+        </field>
+    </record>
+</odoo>
