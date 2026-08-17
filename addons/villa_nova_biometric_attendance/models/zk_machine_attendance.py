@@ -15,6 +15,9 @@ class ZkMachineAttendance(models.Model):
         employees = records.filtered(
             lambda r: r.employee_id and r.punch_type not in NATIVE_PUNCH_CODES
         ).employee_id
-        for employee in employees:
+        # Une importation groupee (plusieurs pointages du meme jour pour un
+        # meme employe) peut repeter le meme employe plusieurs fois dans le
+        # recordset : on ne reconstruit qu'une fois chacun.
+        for employee in employees.browse(set(employees.ids)):
             employee._villa_nova_rebuild_attendance_from_punches()
         return records
