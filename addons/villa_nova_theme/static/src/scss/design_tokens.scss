@@ -342,3 +342,91 @@
         animation: none;
     }
 }
+
+// ==========================================================================
+// Phase 4 — listes & kanban generiques : ces regles s'appliquent a TOUTES
+// les vues liste/kanban du projet sans toucher a un seul fichier de vue
+// (recherche, groupement, pagination, selection multiple, statuts). Les
+// ecrans metier specifiques (Conges, Presences...) restent en phase 6 pour
+// leur structure propre ; ici on ne touche qu'au langage visuel partage.
+// ==========================================================================
+
+// Facettes de recherche (filtres actifs) : pastilles de marque plutot que
+// le gris Bootstrap par defaut, pour rester coherent avec les badges vn-*.
+.o_searchview_facet {
+    background-color: rgba($vn-crimson, 0.08) !important;
+    border: 1px solid rgba($vn-crimson, 0.18);
+    border-radius: var(--vn-radius-full);
+}
+
+.o_searchview_facet_label {
+    background-color: rgba($vn-crimson, 0.14) !important;
+    color: $vn-crimson-dark;
+    border-radius: var(--vn-radius-full) 0 0 var(--vn-radius-full);
+}
+
+.o_facet_values {
+    color: $vn-graphite;
+}
+
+// Pagination : chiffres tabulaires, valeur cliquable plus lisible.
+.o_pager_counter, .o_pager_value {
+    font-variant-numeric: tabular-nums;
+    font-weight: $o-font-weight-medium;
+}
+
+// Barre d'action apparaissant lors d'une selection multiple en liste.
+.o_list_selection_box {
+    border-radius: var(--vn-radius-sm);
+    border-color: rgba($vn-crimson, 0.3);
+    background-color: rgba($vn-crimson, 0.06);
+    color: $vn-crimson-dark;
+    font-weight: $o-font-weight-medium;
+}
+
+// En-tete de colonne kanban (groupement) : typographie de titre coherente
+// avec le reste du design system plutot que le gras brut par defaut.
+.o_kanban_header {
+    .o_column_title {
+        font-family: $o-headings-font-family;
+        font-size: 0.95rem;
+        color: $vn-graphite;
+    }
+}
+
+.o_kanban_group {
+    background-color: $o-gray-100;
+    border-radius: var(--vn-radius-md);
+    padding: var(--vn-space-2);
+}
+
+// Statusbar (widget "etat" des formulaires - fleches de progression) : la
+// forme en chevrons est geree par le coeur via clip-path + custom
+// properties (--o-statusbar-background-active/--o-statusbar-border-active) -
+// on redefinit ces variables plutot que de refaire le decoupage, l'etape
+// courante passe ainsi au cramoisi de marque plutot qu'au bleu Bootstrap.
+.o_statusbar_status {
+    --o-statusbar-background-active: #{$vn-crimson};
+    --o-statusbar-border-active: #{$vn-crimson-dark};
+
+    .o_arrow_button {
+        font-size: 0.78rem;
+        font-weight: $o-font-weight-medium;
+
+        &.o_arrow_button_current {
+            color: #fff;
+        }
+    }
+}
+
+// Cases a cocher (selection de lignes, to-do...) teintees a la marque
+// plutot que le bleu Bootstrap par defaut.
+.form-check-input:checked {
+    background-color: $vn-crimson;
+    border-color: $vn-crimson;
+}
+
+.form-check-input:focus {
+    border-color: $vn-crimson;
+    box-shadow: 0 0 0 3px rgba($vn-crimson, 0.15);
+}
