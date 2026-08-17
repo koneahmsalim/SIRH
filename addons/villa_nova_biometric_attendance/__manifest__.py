@@ -15,6 +15,7 @@
     'depends': ['hr_biometric_attendance'],
     'data': [
         'views/biometric_device_details_views.xml',
+        'views/hr_attendance_views.xml',
         'data/ir_cron_data.xml',
     ],
     'installable': True,

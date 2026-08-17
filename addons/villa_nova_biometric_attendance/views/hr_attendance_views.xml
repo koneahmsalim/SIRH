@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Kanban RH : plus informatif que le kanban mobile natif (employe,
+         entree/sortie, heures travaillees, heures sup., statut "en cours"). -->
+    <record id="villa_nova_hr_attendance_kanban" model="ir.ui.view">
+        <field name="name">hr.attendance.kanban.villa.nova</field>
+        <field name="model">hr.attendance</field>
+        <field name="arch" type="xml">
+            <kanban default_group_by="employee_id" sample="1">
+                <field name="employee_id"/>
+                <field name="check_in"/>
+                <field name="check_out"/>
+                <field name="worked_hours"/>
+                <field name="overtime_hours"/>
+                <templates>
+                    <t t-name="card">
+                        <div class="oe_kanban_global_click">
+                            <field name="employee_id" widget="many2one_avatar_user"
+                                   options="{'display_avatar_name': True}" class="fs-6 fw-bold mb-1"/>
+                            <div>
+                                <i class="fa fa-sign-in me-1 text-success" title="Entree"/>
+                                <field name="check_in"/>
+                            </div>
+                            <div t-if="record.check_out.raw_value">
+                                <i class="fa fa-sign-out me-1 text-danger" title="Sortie"/>
+                                <field name="check_out"/>
+                            </div>
+                            <div t-else="">
+                                <span class="badge text-bg-warning">En cours</span>
+                            </div>
+                            <div class="mt-1">
+                                <field name="worked_hours" widget="float_time"/>h travaillees
+                                <span t-if="record.overtime_hours.raw_value > 0" class="badge text-bg-info ms-1">
+                                    +<field name="overtime_hours" widget="float_time"/>h sup.
+                                </span>
+                            </div>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <!-- Vue calendrier : aucune n'existe nativement pour hr.attendance. -->
+    <record id="villa_nova_hr_attendance_calendar" model="ir.ui.view">
+        <field name="name">hr.attendance.calendar.villa.nova</field>
+        <field name="model">hr.attendance</field>
+        <field name="arch" type="xml">
+            <calendar string="Présences" date_start="check_in" date_stop="check_out"
+                      mode="month" color="employee_id">
+                <field name="employee_id"/>
+                <field name="worked_hours"/>
+            </calendar>
+        </field>
+    </record>
+
+    <!-- Filtres rapides supplementaires sur la vue "Aperçu". -->
+    <record id="hr_attendance_view_filter_villa_nova" model="ir.ui.view">
+        <field name="name">hr.attendance.view.filter.villa.nova</field>
+        <field name="model">hr.attendance</field>
+        <field name="inherit_id" ref="hr_attendance.hr_attendance_view_filter"/>
+        <field name="arch" type="xml">
+            <filter name="myattendances" position="before">
+                <filter string="Aujourd'hui" name="villa_nova_today"
+                        domain="[('check_in', '&gt;=', context_today().strftime('%Y-%m-%d')),
+                                 ('check_in', '&lt;', (context_today() + datetime.timedelta(days=1)).strftime('%Y-%m-%d'))]"/>
+                <filter string="Cette semaine" name="villa_nova_this_week"
+                        domain="[('check_in', '&gt;=', (context_today() - datetime.timedelta(days=context_today().weekday())).strftime('%Y-%m-%d')),
+                                 ('check_in', '&lt;', (context_today() + datetime.timedelta(days=7 - context_today().weekday())).strftime('%Y-%m-%d'))]"/>
+                <filter string="Ce mois" name="villa_nova_this_month"
+                        domain="[('check_in', '&gt;=', context_today().strftime('%Y-%m-01')),
+                                 ('check_in', '&lt;', (context_today() + relativedelta(months=1)).strftime('%Y-%m-01'))]"/>
+                <separator/>
+            </filter>
+            <filter name="auto_check" position="after">
+                <filter string="Heures supplémentaires" name="villa_nova_overtime" domain="[('overtime_hours', '&gt;', 0)]"/>
+            </filter>
+        </field>
+    </record>
+
+    <!-- Memes filtres rapides sur la vue "Gestion". -->
+    <record id="hr_attendance_management_view_filter_villa_nova" model="ir.ui.view">
+        <field name="name">hr.attendance.management.view.filter.villa.nova</field>
+        <field name="model">hr.attendance</field>
+        <field name="inherit_id" ref="hr_attendance.hr_attendance_management_view_filter"/>
+        <field name="arch" type="xml">
+            <filter name="myattendances" position="before">
+                <filter string="Aujourd'hui" name="villa_nova_today"
+                        domain="[('check_in', '&gt;=', context_today().strftime('%Y-%m-%d')),
+                                 ('check_in', '&lt;', (context_today() + datetime.timedelta(days=1)).strftime('%Y-%m-%d'))]"/>
+                <filter string="Cette semaine" name="villa_nova_this_week"
+                        domain="[('check_in', '&gt;=', (context_today() - datetime.timedelta(days=context_today().weekday())).strftime('%Y-%m-%d')),
+                                 ('check_in', '&lt;', (context_today() + datetime.timedelta(days=7 - context_today().weekday())).strftime('%Y-%m-%d'))]"/>
+                <filter string="Ce mois" name="villa_nova_this_month"
+                        domain="[('check_in', '&gt;=', context_today().strftime('%Y-%m-01')),
+                                 ('check_in', '&lt;', (context_today() + relativedelta(months=1)).strftime('%Y-%m-01'))]"/>
+                <separator/>
+            </filter>
+        </field>
+    </record>
+
+    <!-- Ajoute kanban/calendrier/pivot a l'action "Apercu" (jusqu'ici
+         limitee a list,form alors que le kanban natif et le pivot de
+         "Analyse" existaient deja sans etre relies a cette action).
+         view_ids explicite pour eviter toute ambiguite : le modele a
+         plusieurs vues list et deux vues kanban une fois la notre ajoutee. -->
+    <record id="hr_attendance.hr_attendance_action" model="ir.actions.act_window">
+        <field name="view_mode">list,kanban,calendar,pivot,form</field>
+        <field name="view_ids" eval="[
+            (5, 0, 0),
+            (0, 0, {'sequence': 1, 'view_mode': 'list', 'view_id': ref('hr_attendance.view_attendance_tree')}),
+            (0, 0, {'sequence': 2, 'view_mode': 'kanban', 'view_id': ref('villa_nova_hr_attendance_kanban')}),
+            (0, 0, {'sequence': 3, 'view_mode': 'calendar', 'view_id': ref('villa_nova_hr_attendance_calendar')}),
+            (0, 0, {'sequence': 4, 'view_mode': 'pivot', 'view_id': ref('hr_attendance.hr_attendance_view_pivot')}),
+            (0, 0, {'sequence': 5, 'view_mode': 'form', 'view_id': ref('hr_attendance.hr_attendance_view_form')}),
+        ]"/>
+    </record>
+</odoo>
