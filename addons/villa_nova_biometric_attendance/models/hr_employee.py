@@ -1,8 +1,14 @@
-import pytz
+from datetime import timedelta
 
-from odoo import models
+from odoo import fields, models
 
-from .zk_machine_attendance import NATIVE_PUNCH_CODES
+from .zk_machine_attendance import DEVICE_TZ, NATIVE_PUNCH_CODES
+
+# Ne retraite que les derniers jours a chaque nouveau pointage. Sans cette
+# limite, le cout de la reconstruction (recherche + suppression + recreation)
+# grandirait indefiniment avec l'anciennete de l'employe, pour des jours qui
+# ne bougent plus de toute facon.
+REBUILD_WINDOW_DAYS = 5
 
 
 class HrEmployee(models.Model):
@@ -16,21 +22,25 @@ class HrEmployee(models.Model):
         self.ensure_one()
         Attendance = self.env['hr.attendance']
         MachineAttendance = self.env['zk.machine.attendance']
-        tz = pytz.timezone(self.env.user.partner_id.tz or 'GMT')
 
+        window_start = fields.Datetime.now() - timedelta(days=REBUILD_WINDOW_DAYS)
         punches = MachineAttendance.search([
             ('employee_id', '=', self.id),
             ('punch_type', 'not in', list(NATIVE_PUNCH_CODES)),
+            ('punching_time', '>=', window_start),
         ])
         by_day = {}
         for p in punches:
-            day = tz.localize(p.punching_time).date()
+            day = DEVICE_TZ.localize(p.punching_time).date()
             by_day.setdefault(day, []).append(p.punching_time)
 
         # Ne recalcule que les presences deja issues d'un pointage biometrique
         # (memes horodatages), pour ne jamais toucher une saisie manuelle.
         known_times = {t for times in by_day.values() for t in times}
-        Attendance.search([('employee_id', '=', self.id)]).filtered(
+        Attendance.search([
+            ('employee_id', '=', self.id),
+            ('check_in', '>=', window_start),
+        ]).filtered(
             lambda a: a.check_in in known_times or (a.check_out and a.check_out in known_times)
         ).unlink()
         # Le solde d'heures sup. journalier (unique par employe+jour) n'est pas

@@ -9,7 +9,7 @@
                 <button name="action_villa_nova_sync_recent_attendance"
                         string="Synchroniser les pointages recents"
                         type="object" class="oe_highlight"
-                        help="Importe uniquement les pointages survenus depuis la derniere synchronisation (rapide). Se declenche aussi automatiquement toutes les 2 minutes."/>
+                        help="Importe uniquement les pointages survenus depuis la derniere synchronisation. Se declenche aussi automatiquement toutes les 15 minutes (le boitier renvoie tout son historique a chaque pull, ~22s de transfert : un intervalle trop court risque de geler le lecteur d'empreinte au moment d'un badgeage)."/>
             </button>
         </field>
     </record>

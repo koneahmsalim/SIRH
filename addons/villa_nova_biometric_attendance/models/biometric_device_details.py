@@ -5,16 +5,9 @@ import pytz
 
 from odoo import models
 
-_logger = logging.getLogger(__name__)
+from .zk_machine_attendance import DEVICE_TZ
 
-# Le boitier est physiquement a Abidjan (UTC+0, jamais d'heure d'ete) : on
-# fixe ce fuseau plutot que de dependre du fuseau de l'utilisateur/de la
-# tache qui declenche la synchronisation. Le cron et les executions
-# manuelles via `odoo shell` tournent sous le compte systeme __system__, qui
-# n'a pas vocation a etre corrige a chaque fois qu'un compte reel change de
-# fuseau (incident du 17/08 : ce compte etait reste sur Europe/Brussels,
-# decalant tous les pointages importes ce jour-la de 2h).
-DEVICE_TZ = pytz.timezone('Africa/Abidjan')
+_logger = logging.getLogger(__name__)
 
 
 class BiometricDeviceDetails(models.Model):
