@@ -1,9 +1,11 @@
 {
     'name': "Villa Nova - Theme Infinity Africa Group",
     'summary': (
-        "Identite visuelle de marque (graphite + cramoisi, extraite du site "
-        "officiel infinity-africa.com) appliquee a tout le backend Odoo : "
-        "barre superieure, boutons, liens, page de connexion, favicon."
+        "Design system Infinity Africa Group : palette de marque (graphite + "
+        "cramoisi, extraite du site officiel infinity-africa.com), paire "
+        "typographique auto-hebergee (Manrope/Inter/JetBrains Mono), tokens "
+        "d'espacement/rayon/ombre et composants de base (cartes, badges, "
+        "etats vides, skeletons) appliques a tout le backend Odoo."
     ),
     'version': '18.0.1.0.0',
     'category': 'Theme',
@@ -16,6 +18,11 @@
     'assets': {
         'web._assets_primary_variables': [
             ('before', 'web/static/src/scss/primary_variables.scss', 'villa_nova_theme/static/src/scss/primary_variables.scss'),
+            ('before', 'web/static/src/scss/primary_variables.scss', 'villa_nova_theme/static/src/scss/typography_variables.scss'),
+        ],
+        'web.assets_backend': [
+            'villa_nova_theme/static/src/scss/fonts.scss',
+            'villa_nova_theme/static/src/scss/design_tokens.scss',
         ],
     },
     'installable': True,

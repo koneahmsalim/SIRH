@@ -1,0 +1,35 @@
+// ==========================================================================
+// Paire typographique de marque, auto-hebergee (static/src/fonts/*.woff2,
+// voir fonts.scss) : plus de depedance a une police systeme generique ni a
+// un CDN. Insere, comme primary_variables.scss, AVANT
+// web/static/src/scss/primary_variables.scss dans le bundle
+// 'web._assets_primary_variables' : les fonctions utilitaires Odoo
+// (o-add-unicode-support-font, definie dans utils.scss) sont deja
+// disponibles a ce stade car ce fichier est charge dans le contexte plus
+// large de 'web._assets_helpers', qui charge utils.scss avant d'inclure
+// 'web._assets_primary_variables'.
+//
+// - Manrope (600/700/800) : titres, en-tetes de section, valeurs de KPI.
+//   Trait geometrique plus affirme que la police systeme par defaut,
+//   distinctif sans nuire a la lisibilite en gros corps.
+// - Inter (400/500/600/700) : corps de texte et donnees (tableaux,
+//   formulaires, badges). Chasse tres lisible en petite taille, chiffres
+//   tabulaires disponibles (voir design_tokens.scss), couverture complete
+//   des caracteres accentues francais.
+// - JetBrains Mono (400/500) : codes/identifiants (ex. codes d'activite
+//   des feuilles de temps), horodatages.
+// ==========================================================================
+
+$vn-font-fallback-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+$vn-font-fallback-mono: SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+
+$o-font-family-sans-serif: o-add-unicode-support-font(join(('Inter',), $vn-font-fallback-sans, $separator: comma));
+$o-headings-font-family: o-add-unicode-support-font(join(('Manrope',), $vn-font-fallback-sans, $separator: comma));
+$o-font-family-monospace: o-add-unicode-support-font(join(('JetBrains Mono',), $vn-font-fallback-mono, $separator: comma));
+
+// Manrope est nettement plus dense que la police systeme a poids egal :
+// on remonte le plancher "bold" utilise par les titres pour conserver un
+// contraste de hierarchie net entre normal/medium/bold.
+$o-font-weight-normal: 400 !default;
+$o-font-weight-medium: 600 !default;
+$o-font-weight-bold: 700 !default;

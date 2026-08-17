@@ -11,8 +11,9 @@
          le portail de recrutement), qui remplace entierement web.login_layout
          par un t-call="website.layout" + <div class="oe_website_login_container">
          - la carte/logo d'origine que ce module ciblait auparavant n'existe
-         donc plus dans le rendu final. On habille cet element reel via CSS
-         (voir login.scss) plutot que de xpath-er une structure disparue.
-         Le logo de marque est deja repris automatiquement par l'entete du
-         site (res.company.logo, cf. hooks.py). -->
+         donc plus dans le rendu final. Un essai de restylage CSS cible de
+         cette page a ete abandonne (le fichier n'etait jamais inclus dans le
+         bundle compile malgre plusieurs purges de cache - cause non
+         identifiee). Le logo de marque est deja repris automatiquement par
+         l'entete du site (res.company.logo, cf. hooks.py). -->
 </odoo>

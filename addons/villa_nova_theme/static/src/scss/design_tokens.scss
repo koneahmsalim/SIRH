@@ -1,0 +1,344 @@
+// ==========================================================================
+// Design system Villa Nova / Infinity Africa Group — fondations (Phase 1).
+//
+// Deux couches dans ce fichier :
+//   1. Tokens en custom properties CSS (:root) — espacement, rayons,
+//      ombres, couleurs de marque exposees pour la JS (graphes du
+//      dashboard, phase 3) sans dupliquer les valeurs SCSS.
+//   2. Habillage des elements natifs Odoo (boutons, inputs, cartes kanban,
+//      tableaux, badges, panneau de controle, etats vides) + primitives
+//      reutilisables prefixees "vn-" pour les ecrans construits de zero
+//      (dashboard, futurs composants shell).
+//
+// Charge dans le bundle 'web.assets_backend' (CSS normale, contrairement a
+// primary_variables.scss qui vit dans le bundle "variables SCSS" et ne doit
+// jamais emettre de CSS visible).
+// ==========================================================================
+
+:root {
+    // Espacement (echelle 4px)
+    --vn-space-1: 0.25rem;
+    --vn-space-2: 0.5rem;
+    --vn-space-3: 0.75rem;
+    --vn-space-4: 1rem;
+    --vn-space-5: 1.25rem;
+    --vn-space-6: 1.5rem;
+    --vn-space-8: 2rem;
+    --vn-space-10: 2.5rem;
+    --vn-space-12: 3rem;
+    --vn-space-16: 4rem;
+
+    // Rayons
+    --vn-radius-sm: 6px;
+    --vn-radius-md: 10px;
+    --vn-radius-lg: 14px;
+    --vn-radius-xl: 20px;
+    --vn-radius-full: 999px;
+
+    // Elevation — ombres tres douces (pas les ombres lourdes Bootstrap par
+    // defaut), coherentes avec un rendu "SaaS premium" plutot que Material.
+    --vn-shadow-1: 0 1px 2px rgba(20, 22, 23, 0.05);
+    --vn-shadow-2: 0 2px 8px rgba(20, 22, 23, 0.06), 0 1px 2px rgba(20, 22, 23, 0.04);
+    --vn-shadow-3: 0 8px 24px rgba(20, 22, 23, 0.10), 0 2px 6px rgba(20, 22, 23, 0.05);
+    --vn-shadow-4: 0 16px 40px rgba(20, 22, 23, 0.14), 0 4px 10px rgba(20, 22, 23, 0.06);
+
+    // Couleurs de marque, dupliquees ici en custom properties pour etre
+    // lisibles depuis la JS (ex. getComputedStyle) sans recompiler du SCSS —
+    // utile pour les graphiques du futur dashboard (phase 3).
+    --vn-graphite: #{$vn-graphite};
+    --vn-graphite-darker: #{$vn-graphite-darker};
+    --vn-crimson: #{$vn-crimson};
+    --vn-crimson-dark: #{$vn-crimson-dark};
+    --vn-mist: #{$vn-mist};
+    --vn-slate: #{$vn-slate};
+    --vn-slate-light: #{$vn-slate-light};
+    --vn-success: #{$o-success};
+    --vn-warning: #{$o-warning};
+    --vn-danger: #{$o-danger};
+    --vn-info: #{$o-info};
+
+    // Transitions courtes et coherentes (micro-interactions discretes).
+    --vn-ease: cubic-bezier(0.2, 0, 0, 1);
+    --vn-transition-fast: 120ms var(--vn-ease);
+    --vn-transition-base: 180ms var(--vn-ease);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    :root {
+        --vn-transition-fast: 0ms;
+        --vn-transition-base: 0ms;
+    }
+}
+
+// --------------------------------------------------------------------------
+// Elements natifs Odoo — habillage global
+// --------------------------------------------------------------------------
+
+// Chiffres tabulaires partout ou des nombres s'alignent en colonne.
+.o_list_table td.o_list_number,
+.o_kanban_record .vn-metric,
+.vn-kpi-value {
+    font-variant-numeric: tabular-nums;
+}
+
+// Boutons : rayon coherent + transition douce + focus visible net (accessibilite).
+.btn {
+    border-radius: var(--vn-radius-sm);
+    transition: background-color var(--vn-transition-fast), border-color var(--vn-transition-fast),
+        box-shadow var(--vn-transition-fast), transform var(--vn-transition-fast);
+
+    &:active {
+        transform: translateY(0.5px);
+    }
+
+    &:focus-visible {
+        outline: 2px solid var(--vn-crimson);
+        outline-offset: 2px;
+    }
+}
+
+.btn-primary {
+    box-shadow: var(--vn-shadow-1);
+
+    &:hover {
+        box-shadow: var(--vn-shadow-2);
+    }
+}
+
+// Champs et selects : rayon coherent, etat focus plus doux que le bleu Bootstrap brut.
+.o_input,
+.o_field_widget input.o_input,
+.o_field_widget textarea.o_input,
+.form-control,
+.form-select {
+    border-radius: var(--vn-radius-sm);
+    transition: border-color var(--vn-transition-fast), box-shadow var(--vn-transition-fast);
+
+    &:focus {
+        border-color: var(--vn-crimson);
+        box-shadow: 0 0 0 3px rgba($vn-crimson, 0.12);
+    }
+}
+
+// Dropdowns / menus contextuels.
+.dropdown-menu {
+    border-radius: var(--vn-radius-md);
+    box-shadow: var(--vn-shadow-3);
+    border-color: $o-gray-200;
+    padding: var(--vn-space-2);
+
+    .dropdown-item {
+        border-radius: var(--vn-radius-sm);
+        padding: var(--vn-space-2) var(--vn-space-3);
+
+        &:hover,
+        &:focus {
+            background-color: $o-gray-100;
+        }
+
+        &.active,
+        &:active {
+            background-color: rgba($vn-crimson, 0.1);
+            color: $vn-crimson-dark;
+        }
+    }
+}
+
+// Cartes kanban : surface plus "carte SaaS" que le kanban Odoo par defaut
+// (bordure fine, ombre au survol, transition).
+.o_kanban_record {
+    border-radius: var(--vn-radius-md);
+    transition: box-shadow var(--vn-transition-base), border-color var(--vn-transition-base);
+
+    &:hover {
+        box-shadow: var(--vn-shadow-2);
+        border-color: $o-gray-300;
+    }
+}
+
+.o_kanban_view.o_kanban_ungrouped .o_kanban_record,
+.o_kanban_view .o_kanban_group {
+    background-color: $o-view-background-color;
+}
+
+// Tableaux liste : lignes plus respirantes, en-tete plus lisible, survol net.
+.o_list_renderer {
+    .o_list_table > thead {
+        th {
+            font-weight: $o-font-weight-medium;
+            color: $vn-slate;
+            text-transform: uppercase;
+            font-size: 0.7rem;
+            letter-spacing: 0.04em;
+        }
+    }
+
+    .o_data_row {
+        transition: background-color var(--vn-transition-fast);
+
+        &:hover {
+            background-color: $o-gray-100;
+        }
+    }
+}
+
+// Panneau de controle / fil d'ariane : un peu plus d'air, separation nette
+// du contenu sans les bordures lourdes par defaut.
+.o_control_panel {
+    background-color: $o-view-background-color;
+}
+
+.o_breadcrumb {
+    font-weight: $o-font-weight-medium;
+}
+
+// Etats vides natifs (o_view_nocontent) : composition plus "produit",
+// texte secondaire attenue, action mise en avant si presente.
+.o_view_nocontent {
+    .o_nocontent_help {
+        max-width: 420px;
+        margin: var(--vn-space-8) auto;
+        padding: var(--vn-space-6);
+        text-align: center;
+        color: $vn-slate;
+
+        p.o_view_nocontent_empty_folder {
+            font-family: $o-headings-font-family;
+            font-size: 1.1rem;
+            font-weight: $o-font-weight-bold;
+            color: $vn-graphite;
+            margin-bottom: var(--vn-space-2);
+        }
+    }
+}
+
+// Badges de statut natifs : un peu plus de rondeur, poids de police coherent.
+.badge {
+    border-radius: var(--vn-radius-sm);
+    font-weight: $o-font-weight-medium;
+    padding: 0.3em 0.6em;
+}
+
+// --------------------------------------------------------------------------
+// Primitives reutilisables (prefixe vn-) — vocabulaire du design system pour
+// les ecrans construits de zero (dashboard en phase 3, futurs composants).
+// --------------------------------------------------------------------------
+
+.vn-card {
+    background-color: $o-view-background-color;
+    border: 1px solid $o-gray-200;
+    border-radius: var(--vn-radius-lg);
+    box-shadow: var(--vn-shadow-1);
+    padding: var(--vn-space-5);
+    transition: box-shadow var(--vn-transition-base);
+
+    &.vn-card-interactive:hover {
+        box-shadow: var(--vn-shadow-3);
+    }
+}
+
+.vn-kpi-card {
+    @extend .vn-card;
+    display: flex;
+    flex-direction: column;
+    gap: var(--vn-space-2);
+
+    .vn-kpi-label {
+        font-size: 0.75rem;
+        font-weight: $o-font-weight-medium;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        color: $vn-slate;
+    }
+
+    .vn-kpi-value {
+        font-family: $o-headings-font-family;
+        font-size: 1.85rem;
+        font-weight: $o-font-weight-bold;
+        color: $vn-graphite;
+        line-height: 1.1;
+    }
+
+    .vn-kpi-trend {
+        display: inline-flex;
+        align-items: center;
+        gap: var(--vn-space-1);
+        font-size: 0.8rem;
+        font-weight: $o-font-weight-medium;
+        width: fit-content;
+
+        &.vn-trend-up { color: $o-success; }
+        &.vn-trend-down { color: $o-danger; }
+        &.vn-trend-flat { color: $vn-slate; }
+    }
+}
+
+// Badges "pilule" semantiques, pour les etats metier (contrat actif, conge
+// en attente, candidature en cours...) — plus expressifs que .badge natif.
+.vn-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--vn-space-1);
+    padding: 0.25em 0.65em;
+    border-radius: var(--vn-radius-full);
+    font-size: 0.75rem;
+    font-weight: $o-font-weight-medium;
+    line-height: 1.4;
+
+    &::before {
+        content: "";
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background-color: currentColor;
+    }
+
+    &.vn-badge-success { background-color: rgba($o-success, 0.12); color: darken($o-success, 5%); }
+    &.vn-badge-warning { background-color: rgba($o-warning, 0.14); color: darken($o-warning, 8%); }
+    &.vn-badge-danger { background-color: rgba($o-danger, 0.12); color: darken($o-danger, 5%); }
+    &.vn-badge-info { background-color: rgba($o-info, 0.12); color: darken($o-info, 5%); }
+    &.vn-badge-neutral { background-color: $o-gray-200; color: $vn-slate; }
+    &.vn-badge-brand { background-color: rgba($vn-crimson, 0.1); color: $vn-crimson-dark; }
+}
+
+// Etat vide "produit" pour les composants custom (dashboard, sidebar...).
+.vn-empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: var(--vn-space-3);
+    padding: var(--vn-space-10) var(--vn-space-6);
+    color: $vn-slate;
+
+    .vn-empty-icon {
+        font-size: 2rem;
+        color: $o-gray-400;
+    }
+
+    .vn-empty-title {
+        font-family: $o-headings-font-family;
+        font-weight: $o-font-weight-bold;
+        color: $vn-graphite;
+        font-size: 1rem;
+    }
+}
+
+// Skeleton loader — shimmer discret pour les composants charges de facon
+// asynchrone (dashboard, phase 3).
+@keyframes vn-skeleton-shimmer {
+    0% { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
+}
+
+.vn-skeleton {
+    display: block;
+    border-radius: var(--vn-radius-sm);
+    background: linear-gradient(90deg, $o-gray-200 25%, $o-gray-100 37%, $o-gray-200 63%);
+    background-size: 200% 100%;
+    animation: vn-skeleton-shimmer 1.4s ease-in-out infinite;
+
+    @media (prefers-reduced-motion: reduce) {
+        animation: none;
+    }
+}
