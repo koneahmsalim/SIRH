@@ -1,0 +1,49 @@
+// ==========================================================================
+// Identite visuelle Infinity Africa Group, extraite du site officiel
+// (infinity-africa.com) : graphite sombre dominant + accent cramoisi.
+// Ce fichier est insere AVANT web/static/src/scss/primary_variables.scss
+// dans le bundle 'web._assets_primary_variables' (directive 'before' dans
+// le manifest) : les valeurs ci-dessous sont donc deja fixees quand le
+// coeur d'Odoo applique ses "!default", qui n'ecrasent jamais une valeur
+// deja definie.
+// ==========================================================================
+
+$vn-graphite: #2A2D2F;
+$vn-graphite-darker: #1C1E1F;
+$vn-crimson: #DC143C;
+$vn-crimson-dark: #A80F2E;
+$vn-mist: #F5F9FA;
+$vn-slate: #758696;
+$vn-slate-light: #AEBDC1;
+
+// Neutres : on retient la structure Bootstrap/Odoo mais on la teinte vers
+// les gris froids du site plutot que les gris neutres par defaut.
+$o-gray-100: #F7F9FA !default;
+$o-gray-200: #EEF1F2 !default;
+$o-gray-300: #E1E5E7 !default;
+$o-gray-400: $vn-slate-light !default;
+$o-gray-500: #93A3AC !default;
+$o-gray-600: $vn-slate !default;
+$o-gray-700: #4B565F !default;
+$o-gray-800: #33383B !default;
+$o-gray-900: $vn-graphite !default;
+
+// Couleur de marque : pilote la barre superieure, les boutons d'action,
+// les liens et les etats actifs dans tout le backend.
+$o-brand-odoo: $vn-graphite;
+$o-brand-primary: $vn-crimson;
+$o-brand-secondary: $vn-graphite;
+$o-brand-lightsecondary: $vn-mist;
+
+$o-action: $o-brand-primary;
+$o-main-link-color: $vn-crimson-dark;
+$o-main-headings-color: $vn-graphite;
+
+// Danger reste distinct du cramoisi de marque (nuance plus orangee) pour
+// qu'un bouton d'action et une alerte de suppression ne se confondent pas.
+$o-danger: #E4572E !default;
+$o-success: #1F8A57 !default;
+$o-warning: #C98A0A !default;
+$o-info: #2C7A9E !default;
+
+$o-view-background-color: #FFFFFF;
