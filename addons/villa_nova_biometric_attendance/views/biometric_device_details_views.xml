@@ -9,7 +9,7 @@
                 <button name="action_villa_nova_sync_recent_attendance"
                         string="Synchroniser les pointages recents"
                         type="object" class="oe_highlight"
-                        help="Importe uniquement les pointages survenus depuis la derniere synchronisation (rapide). Se declenche aussi automatiquement toutes les 15 minutes."/>
+                        help="Importe uniquement les pointages survenus depuis la derniere synchronisation (rapide). Se declenche aussi automatiquement toutes les 2 minutes."/>
             </button>
         </field>
     </record>
