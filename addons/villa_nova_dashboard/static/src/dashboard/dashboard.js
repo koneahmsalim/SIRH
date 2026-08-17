@@ -5,6 +5,7 @@ import { imageUrl } from "@web/core/utils/urls";
 import { _t } from "@web/core/l10n/translation";
 import { user } from "@web/core/user";
 import { VnBarChart } from "../bar_chart/bar_chart";
+import { VnGroupedBarChart } from "../bar_chart/grouped_bar_chart";
 
 // Les methodes RPC ci-dessous appartiennent au module hrms_dashboard
 // (models/hr_employee.py) : ce dashboard reutilise entierement la logique
@@ -12,7 +13,7 @@ import { VnBarChart } from "../bar_chart/bar_chart";
 // voir le plan de refonte (aucun changement de modele/champ/droit).
 export class VillaNovaDashboard extends Component {
     static template = "villa_nova_dashboard.Dashboard";
-    static components = { VnBarChart };
+    static components = { VnBarChart, VnGroupedBarChart };
     static props = ["*"];
 
     setup() {
@@ -27,6 +28,11 @@ export class VillaNovaDashboard extends Component {
             upcoming: { birthday: [], event: [], announcement: [] },
             deptChart: [],
             leaveTrend: [],
+            joinResignMonths: [],
+            joinResignSeries: [],
+            attritionTrend: [],
+            skills: [],
+            tasks: [],
             checkingInOut: false,
         });
 
@@ -35,18 +41,45 @@ export class VillaNovaDashboard extends Component {
 
     async loadAll() {
         this.state.loading = true;
-        const [isManager, employeeRows, upcoming, deptChart, leaveTrend] = await Promise.all([
+        const [isManager, employeeRows, upcoming, deptChart, leaveTrend, skills, tasks] = await Promise.all([
             this.orm.call("hr.employee", "check_user_group", []),
             this.orm.call("hr.employee", "get_user_employee_details", []),
             this.orm.call("hr.employee", "get_upcoming", []),
             this.orm.call("hr.employee", "get_dept_employee", []),
             this.orm.call("hr.employee", "employee_leave_trend", []),
+            this.orm.call("hr.employee", "get_employee_skill", []),
+            this.orm.call("hr.employee", "get_employee_project_tasks", []),
         ]);
         this.state.isManager = isManager;
         this.state.employee = employeeRows ? employeeRows[0] : null;
         this.state.upcoming = upcoming;
         this.state.deptChart = deptChart;
         this.state.leaveTrend = leaveTrend.map((row) => ({ label: row.l_month, value: row.leave }));
+        this.state.skills = skills.map((row) => ({ label: row.skills, value: row.progress }));
+        this.state.tasks = tasks;
+
+        if (isManager) {
+            const [joinResign, attrition] = await Promise.all([
+                this.orm.call("hr.employee", "join_resign_trends", []),
+                this.orm.call("hr.employee", "get_attrition_rate", []),
+            ]);
+            const joinSeries = joinResign.find((s) => s.name === "Join");
+            const resignSeries = joinResign.find((s) => s.name === "Resign");
+            this.state.joinResignMonths = (joinSeries?.values || []).map((v) => v.l_month);
+            this.state.joinResignSeries = [
+                {
+                    name: "Embauches",
+                    color: "var(--vn-crimson)",
+                    values: (joinSeries?.values || []).map((v) => v.count),
+                },
+                {
+                    name: "Départs",
+                    color: "var(--vn-slate)",
+                    values: (resignSeries?.values || []).map((v) => v.count),
+                },
+            ];
+            this.state.attritionTrend = attrition.map((row) => ({ label: row.month, value: row.attrition_rate }));
+        }
         this.state.loading = false;
     }
 
@@ -161,6 +194,54 @@ export class VillaNovaDashboard extends Component {
         this.openWindowAction("account.analytic.line", {
             name: _t("Mes feuilles de temps"),
             domain: [["project_id", "!=", false], ["user_id", "=", user.userId]],
+        });
+    }
+
+    openNewRecord(resModel, name) {
+        this.actionService.doAction({
+            type: "ir.actions.act_window",
+            name,
+            res_model: resModel,
+            view_mode: "form",
+            views: [[false, "form"]],
+            target: "new",
+        });
+    }
+
+    openNewAttendance() {
+        this.openNewRecord("hr.attendance", _t("Présence"));
+    }
+
+    openNewLeave() {
+        this.openNewRecord("hr.leave", _t("Demande de congé"));
+    }
+
+    openNewExpense() {
+        this.openNewRecord("hr.expense", _t("Note de frais"));
+    }
+
+    openMyPayslips() {
+        this.openWindowAction("hr.payslip", {
+            name: _t("Mes fiches de paie"),
+            domain: [["employee_id", "=", this.state.employee?.id]],
+        });
+    }
+
+    openContracts() {
+        this.openWindowAction("hr.contract", {
+            name: _t("Contrats"),
+            context: { search_default_employee_id: this.state.employee?.id },
+        });
+    }
+
+    openTask(taskId) {
+        this.actionService.doAction({
+            type: "ir.actions.act_window",
+            res_model: "project.task",
+            res_id: taskId,
+            view_mode: "form",
+            views: [[false, "form"]],
+            target: "current",
         });
     }
 

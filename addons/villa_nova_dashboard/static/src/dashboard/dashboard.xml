@@ -36,6 +36,24 @@
                     </button>
                 </div>
 
+                <div class="vn-dashboard-quick-actions">
+                    <button class="vn-quick-action" t-on-click="openNewAttendance">
+                        <i class="fa fa-clock-o"/> Présence
+                    </button>
+                    <button class="vn-quick-action" t-on-click="openNewLeave">
+                        <i class="fa fa-calendar-plus-o"/> Demande de congé
+                    </button>
+                    <button class="vn-quick-action" t-on-click="openNewExpense">
+                        <i class="fa fa-receipt"/> Note de frais
+                    </button>
+                    <button class="vn-quick-action" t-on-click="openMyPayslips">
+                        <i class="fa fa-money"/> Mes fiches de paie
+                    </button>
+                    <button class="vn-quick-action" t-if="state.isManager" t-on-click="openContracts">
+                        <i class="fa fa-file-text-o"/> Contrats
+                    </button>
+                </div>
+
                 <div class="vn-dashboard-kpis">
                     <div class="vn-kpi-card vn-card-interactive" t-on-click="openLeavesToApprove" role="button">
                         <span class="vn-kpi-label">Congés à approuver</span>
@@ -107,6 +125,19 @@
                                 </t>
                             </ul>
                         </div>
+
+                        <div class="vn-card" t-if="state.tasks.length">
+                            <h2 class="vn-card-title">Mes tâches</h2>
+                            <ul class="vn-record-list">
+                                <t t-foreach="state.tasks" t-as="task" t-key="task.id">
+                                    <li class="vn-record-item vn-record-item-clickable" t-on-click="() => this.openTask(task.id)">
+                                        <span class="vn-record-title" t-esc="task.task_name"/>
+                                        <span class="vn-record-sub" t-esc="task.project_name"/>
+                                        <span class="vn-badge vn-badge-neutral" t-esc="task.stage_name"/>
+                                    </li>
+                                </t>
+                            </ul>
+                        </div>
                     </div>
 
                     <div class="vn-dashboard-col">
@@ -118,6 +149,11 @@
                         <div class="vn-card">
                             <h2 class="vn-card-title">Mes congés — 6 derniers mois</h2>
                             <VnBarChart data="state.leaveTrend" orientation="'vertical'" emptyLabel="'Aucun congé sur la période'"/>
+                        </div>
+
+                        <div class="vn-card" t-if="state.skills.length">
+                            <h2 class="vn-card-title">Mes compétences</h2>
+                            <VnBarChart data="state.skills" orientation="'horizontal'" color="'var(--vn-graphite)'" emptyLabel="'Aucune compétence renseignée'"/>
                         </div>
 
                         <div class="vn-card" t-if="state.employee and state.employee.expense_lines and state.employee.expense_lines.length">
@@ -132,6 +168,17 @@
                                 </t>
                             </ul>
                         </div>
+                    </div>
+                </div>
+
+                <div class="vn-dashboard-grid" t-if="state.isManager">
+                    <div class="vn-card">
+                        <h2 class="vn-card-title">Embauches / départs — 12 derniers mois</h2>
+                        <VnGroupedBarChart labels="state.joinResignMonths" series="state.joinResignSeries"/>
+                    </div>
+                    <div class="vn-card">
+                        <h2 class="vn-card-title">Taux d'attrition mensuel</h2>
+                        <VnBarChart data="state.attritionTrend" orientation="'vertical'" color="'var(--vn-warning)'" emptyLabel="'Pas assez de données'"/>
                     </div>
                 </div>
             </t>

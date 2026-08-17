@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="villa_nova_dashboard.GroupedBarChart">
+        <div class="vn-grouped-chart">
+            <div class="vn-grouped-chart-legend">
+                <t t-foreach="props.series" t-as="s" t-key="s.name">
+                    <span class="vn-grouped-chart-legend-item">
+                        <span class="vn-grouped-chart-dot" t-attf-style="background-color: {{s.color}};"/>
+                        <t t-esc="s.name"/>
+                    </span>
+                </t>
+            </div>
+            <div class="vn-grouped-chart-body">
+                <t t-foreach="props.labels" t-as="label" t-key="label_index">
+                    <div class="vn-grouped-chart-col">
+                        <div class="vn-grouped-chart-bars">
+                            <t t-foreach="props.series" t-as="s" t-key="s.name">
+                                <div class="vn-grouped-chart-bar-track">
+                                    <div class="vn-grouped-chart-bar-fill"
+                                         t-attf-style="height: {{heightPercent(s.values[label_index])}}%; background-color: {{s.color}};"/>
+                                </div>
+                            </t>
+                        </div>
+                        <span class="vn-grouped-chart-label" t-esc="label"/>
+                    </div>
+                </t>
+            </div>
+        </div>
+    </t>
+
+</templates>

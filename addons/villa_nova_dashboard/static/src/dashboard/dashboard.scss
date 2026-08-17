@@ -48,6 +48,35 @@
     white-space: nowrap;
 }
 
+.vn-dashboard-quick-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--vn-space-2);
+}
+
+.vn-quick-action {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--vn-space-2);
+    padding: var(--vn-space-2) var(--vn-space-4);
+    background: $o-view-background-color;
+    border: 1px solid $o-gray-200;
+    border-radius: var(--vn-radius-full);
+    font-size: 0.82rem;
+    font-weight: $o-font-weight-medium;
+    color: $vn-graphite;
+    transition: border-color var(--vn-transition-fast), color var(--vn-transition-fast), background-color var(--vn-transition-fast);
+
+    i {
+        color: $vn-crimson;
+    }
+
+    &:hover {
+        border-color: $vn-crimson;
+        background-color: rgba($vn-crimson, 0.05);
+    }
+}
+
 .vn-dashboard-kpis {
     display: grid;
     grid-template-columns: repeat(5, 1fr);
@@ -154,6 +183,91 @@
     color: $vn-slate;
     font-variant-numeric: tabular-nums;
     flex-shrink: 0;
+}
+
+.vn-record-item-clickable {
+    cursor: pointer;
+    border-radius: var(--vn-radius-sm);
+    margin: 0 calc(-1 * var(--vn-space-2));
+    padding-left: var(--vn-space-2);
+    padding-right: var(--vn-space-2);
+    transition: background-color var(--vn-transition-fast);
+
+    &:hover {
+        background-color: $o-gray-100;
+    }
+}
+
+// --------------------------------------------------------------------------
+// Graphique groupe (villa_nova_dashboard.GroupedBarChart) - embauches/departs
+// --------------------------------------------------------------------------
+.vn-grouped-chart-legend {
+    display: flex;
+    gap: var(--vn-space-4);
+    margin-bottom: var(--vn-space-3);
+}
+
+.vn-grouped-chart-legend-item {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--vn-space-1);
+    font-size: 0.78rem;
+    color: $vn-slate;
+}
+
+.vn-grouped-chart-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    display: inline-block;
+}
+
+.vn-grouped-chart-body {
+    display: flex;
+    align-items: flex-end;
+    gap: var(--vn-space-2);
+    height: 140px;
+    overflow-x: auto;
+}
+
+.vn-grouped-chart-col {
+    flex: 1 1 0;
+    min-width: 28px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    height: 100%;
+}
+
+.vn-grouped-chart-bars {
+    flex: 1 1 auto;
+    display: flex;
+    align-items: flex-end;
+    gap: 2px;
+    width: 100%;
+}
+
+.vn-grouped-chart-bar-track {
+    flex: 1 1 0;
+    height: 100%;
+    display: flex;
+    align-items: flex-end;
+    background: $o-gray-100;
+    border-radius: 2px;
+    overflow: hidden;
+}
+
+.vn-grouped-chart-bar-fill {
+    width: 100%;
+    min-height: 2px;
+    border-radius: 2px 2px 0 0;
+    transition: height var(--vn-transition-base);
+}
+
+.vn-grouped-chart-label {
+    margin-top: var(--vn-space-1);
+    font-size: 0.65rem;
+    color: $vn-slate;
 }
 
 // --------------------------------------------------------------------------

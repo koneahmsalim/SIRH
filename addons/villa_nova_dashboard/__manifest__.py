@@ -20,6 +20,8 @@
         'web.assets_backend': [
             'villa_nova_dashboard/static/src/bar_chart/bar_chart.js',
             'villa_nova_dashboard/static/src/bar_chart/bar_chart.xml',
+            'villa_nova_dashboard/static/src/bar_chart/grouped_bar_chart.js',
+            'villa_nova_dashboard/static/src/bar_chart/grouped_bar_chart.xml',
             'villa_nova_dashboard/static/src/dashboard/dashboard.scss',
             'villa_nova_dashboard/static/src/dashboard/dashboard.xml',
             'villa_nova_dashboard/static/src/dashboard/dashboard.js',
