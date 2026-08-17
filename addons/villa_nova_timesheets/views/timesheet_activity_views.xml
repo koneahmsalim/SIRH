@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="villa_nova_timesheet_activity_view_list" model="ir.ui.view">
+        <field name="name">villa.nova.timesheet.activity.list</field>
+        <field name="model">villa.nova.timesheet.activity</field>
+        <field name="arch" type="xml">
+            <list decoration-muted="not active">
+                <field name="code"/>
+                <field name="name"/>
+                <field name="category_lvl1" optional="show"/>
+                <field name="category_lvl2" optional="show"/>
+                <field name="entity" optional="show"/>
+                <field name="nature_analytique" optional="hide"/>
+                <field name="billability_default"/>
+                <field name="project_required"/>
+                <field name="visibility_scope"/>
+                <field name="active" widget="boolean_toggle"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="villa_nova_timesheet_activity_view_form" model="ir.ui.view">
+        <field name="name">villa.nova.timesheet.activity.form</field>
+        <field name="model">villa.nova.timesheet.activity</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <widget name="web_ribbon" title="Archivé" bg_color="text-bg-danger" invisible="active"/>
+                    <div class="oe_title">
+                        <label for="code"/>
+                        <h1><field name="code" placeholder="ex. HR-TIM-01"/></h1>
+                        <field name="name" placeholder="Libellé de l'activité"/>
+                    </div>
+                    <group>
+                        <group string="Classement">
+                            <field name="category_lvl1"/>
+                            <field name="category_lvl2"/>
+                            <field name="entity"/>
+                            <field name="nature_analytique"/>
+                        </group>
+                        <group string="Règles de saisie">
+                            <field name="billability_default"/>
+                            <field name="project_required"/>
+                            <field name="expected_deliverable"/>
+                        </group>
+                    </group>
+                    <group string="Visibilité">
+                        <field name="visibility_scope"/>
+                        <field name="department_ids" widget="many2many_tags"
+                               invisible="visibility_scope != 'department'"/>
+                        <field name="profile_description"/>
+                    </group>
+                    <field name="active" invisible="1"/>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="villa_nova_timesheet_activity_view_search" model="ir.ui.view">
+        <field name="name">villa.nova.timesheet.activity.search</field>
+        <field name="model">villa.nova.timesheet.activity</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="code"/>
+                <field name="name"/>
+                <field name="category_lvl1"/>
+                <field name="entity"/>
+                <filter string="Archivés" name="inactive" domain="[('active', '=', False)]"/>
+                <group expand="0" string="Regrouper par">
+                    <filter string="Entité" name="groupby_entity" context="{'group_by': 'entity'}"/>
+                    <filter string="Catégorie" name="groupby_cat1" context="{'group_by': 'category_lvl1'}"/>
+                    <filter string="Visibilité" name="groupby_visibility" context="{'group_by': 'visibility_scope'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="villa_nova_timesheet_activity_action" model="ir.actions.act_window">
+        <field name="name">Codes activité (nomenclature IAG)</field>
+        <field name="res_model">villa.nova.timesheet.activity</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <menuitem id="villa_nova_timesheet_activity_menu"
+              name="Codes activité"
+              parent="hr_timesheet.hr_timesheet_menu_configuration"
+              action="villa_nova_timesheet_activity_action"
+              sequence="5"/>
+</odoo>
