@@ -1,332 +1,375 @@
 // ==========================================================================
-// Sidebar persistante — remplace la barre horizontale d'apps/sections.
-// Chrome sombre (graphite de marque) en continuite avec le bandeau
-// superieur allege plus bas dans ce fichier.
+// Navigation a deux niveaux : rail d'icones permanent (switcher d'app,
+// toujours identique) + panneau de sections contextuel (accordeon,
+// n'apparait que pour l'app active et seulement si elle a des sections).
 //
-// Montee via registry "main_components" (voir sidebar.js) plutot que par
-// imbrication reelle dans le template web.WebClient : on ne touche donc a
-// aucun composant du coeur Odoo (NavBar/WebClient), ce qui rend cette
-// fonctionnalite entierement additive et sans risque de regression sur le
-// reste du backend. En contrepartie, la sidebar est position:fixed et sa
-// place est reservee via une classe sur <body> (vn-has-sidebar /
-// vn-sidebar-collapsed, cf. useEffect dans sidebar.js) qui decale
-// .o_web_client d'autant - voir tout en bas de ce fichier.
+// Pourquoi cette architecture plutot qu'une sidebar classique qui deplie
+// tout : l'analyse de la navigation reelle du projet montre qu'Employes a
+// a lui seul 13 categories de premier niveau (51 elements au total) -
+// les afficher toutes simultanement dans une sidebar produit exactement
+// le "mur d'elements" a eviter. Le rail reste donc minimal et STABLE
+// (memes icones, quelle que soit l'app active) ; le panneau ne montre que
+// les categories de l'app courante, repliees par defaut, un seul groupe
+// ouvert a la fois (accordeon).
+//
+// Comme le reste du shell (voir Phase 2), rail et panneau sont montes de
+// facon additive (registry main_components, position:fixed) sans toucher
+// aux composants du coeur Odoo - voir sidebar.js / section_panel.js pour
+// le detail du decalage de .o_web_client (variable CSS --vn-shell-offset,
+// car sa valeur depend de donnees - l'app courante a-t-elle des sections -
+// pas seulement d'un etat manuel comme un simple replier/deplier).
 // ==========================================================================
 
-$vn-sidebar-width: 248px;
-$vn-sidebar-width-collapsed: 68px;
+$vn-rail-width: 72px;
+$vn-panel-width: 260px;
+$vn-panel-width-collapsed: 20px;
 
-.vn-sidebar {
+// --------------------------------------------------------------------------
+// Rail (switcher d'applications)
+// --------------------------------------------------------------------------
+.vn-rail {
     position: fixed;
     top: 0;
     left: 0;
     bottom: 0;
-    width: $vn-sidebar-width;
+    width: $vn-rail-width;
     display: flex;
     flex-direction: column;
+    align-items: center;
     background-color: $vn-graphite;
-    color: rgba(255, 255, 255, 0.82);
-    overflow: hidden;
-    transition: width var(--vn-transition-base);
     z-index: 1010;
-
-    &.vn-sidebar-collapsed {
-        width: $vn-sidebar-width-collapsed;
-    }
-
-    a {
-        text-decoration: none;
-        color: inherit;
-    }
-}
-
-.vn-sidebar-header {
-    display: flex;
-    align-items: center;
+    padding: var(--vn-space-3) 0;
     gap: var(--vn-space-2);
-    padding: var(--vn-space-4) var(--vn-space-3);
-    flex-shrink: 0;
+
+    a { text-decoration: none; }
 }
 
-.vn-sidebar-brand {
+.vn-rail-brand {
     display: flex;
-    align-items: center;
-    gap: var(--vn-space-2);
-    min-width: 0;
-    flex: 1 1 auto;
+    margin-bottom: var(--vn-space-2);
 }
 
-.vn-sidebar-brand-mark {
-    width: 28px;
-    height: 28px;
+.vn-rail-brand-mark {
+    width: 32px;
+    height: 32px;
     border-radius: var(--vn-radius-sm);
-    flex-shrink: 0;
     object-fit: contain;
 }
 
-.vn-sidebar-brand-name {
-    font-family: $o-headings-font-family;
-    font-weight: $o-font-weight-bold;
-    color: #fff;
-    font-size: 0.95rem;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-.vn-sidebar-collapse-btn {
-    background: transparent;
-    border: none;
-    color: rgba(255, 255, 255, 0.55);
-    width: 24px;
-    height: 24px;
-    border-radius: var(--vn-radius-sm);
+.vn-rail-search {
+    width: 40px;
+    height: 40px;
     display: flex;
     align-items: center;
     justify-content: center;
-    flex-shrink: 0;
-    transition: background-color var(--vn-transition-fast), color var(--vn-transition-fast);
-
-    &:hover {
-        background-color: rgba(255, 255, 255, 0.08);
-        color: #fff;
-    }
-}
-
-.vn-sidebar-search {
-    display: flex;
-    align-items: center;
-    gap: var(--vn-space-2);
-    margin: 0 var(--vn-space-3) var(--vn-space-3);
-    padding: var(--vn-space-2) var(--vn-space-3);
-    background-color: rgba(255, 255, 255, 0.06);
+    background: rgba(255, 255, 255, 0.06);
     border: 1px solid rgba(255, 255, 255, 0.08);
     border-radius: var(--vn-radius-sm);
     color: rgba(255, 255, 255, 0.55);
-    font-size: 0.85rem;
-    flex-shrink: 0;
-    transition: background-color var(--vn-transition-fast), border-color var(--vn-transition-fast);
+    margin-bottom: var(--vn-space-2);
+    transition: background-color var(--vn-transition-fast), color var(--vn-transition-fast);
 
     &:hover {
         background-color: rgba(255, 255, 255, 0.1);
-        border-color: rgba(255, 255, 255, 0.16);
-    }
-
-    .fa-search {
-        font-size: 0.8rem;
-    }
-
-    .vn-sidebar-search-label {
-        flex: 1 1 auto;
-        text-align: left;
-    }
-
-    .vn-sidebar-search-kbd {
-        background-color: rgba(255, 255, 255, 0.1);
-        border: 1px solid rgba(255, 255, 255, 0.12);
-        border-radius: 4px;
-        padding: 0.05em 0.4em;
-        font-size: 0.7rem;
-        color: rgba(255, 255, 255, 0.6);
+        color: #fff;
     }
 }
 
-.vn-sidebar-nav {
+.vn-rail-apps {
     flex: 1 1 auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
     overflow-y: auto;
-    padding: 0 var(--vn-space-2) var(--vn-space-3);
+    width: 100%;
 
-    &::-webkit-scrollbar { width: 6px; }
-    &::-webkit-scrollbar-thumb { background-color: rgba(255, 255, 255, 0.15); border-radius: 3px; }
+    &::-webkit-scrollbar { width: 0; }
 }
 
-.vn-sidebar-app-item {
+.vn-rail-app-item {
+    position: relative;
+    width: 44px;
+    height: 44px;
+    flex-shrink: 0;
     display: flex;
     align-items: center;
-    gap: var(--vn-space-3);
-    padding: var(--vn-space-2) var(--vn-space-3);
-    border-radius: var(--vn-radius-sm);
-    font-size: 0.85rem;
-    font-weight: $o-font-weight-medium;
-    color: rgba(255, 255, 255, 0.75);
-    transition: background-color var(--vn-transition-fast), color var(--vn-transition-fast);
-    white-space: nowrap;
+    justify-content: center;
+    border-radius: var(--vn-radius-md);
+    transition: background-color var(--vn-transition-fast);
 
     &:hover {
         background-color: rgba(255, 255, 255, 0.08);
-        color: #fff;
+    }
+
+    .vn-rail-active-indicator {
+        position: absolute;
+        left: -12px;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 3px;
+        height: 0;
+        border-radius: var(--vn-radius-full);
+        background-color: $vn-crimson;
+        transition: height var(--vn-transition-fast);
     }
 
     &.vn-active {
-        background-color: rgba($vn-crimson, 0.18);
-        color: #fff;
+        background-color: rgba($vn-crimson, 0.16);
+
+        .vn-rail-active-indicator {
+            height: 22px;
+        }
     }
 }
 
-.vn-sidebar-app-icon {
-    width: 20px;
-    height: 20px;
-    flex-shrink: 0;
-    border-radius: 5px;
+.vn-rail-app-icon {
+    width: 24px;
+    height: 24px;
+    border-radius: 6px;
     object-fit: cover;
 }
 
-.vn-sidebar-app-label {
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-.vn-sidebar-sections {
-    padding: var(--vn-space-1) 0 var(--vn-space-2) calc(20px + var(--vn-space-3) + var(--vn-space-1));
+.vn-rail-footer {
+    flex-shrink: 0;
+    padding-top: var(--vn-space-2);
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    width: 100%;
     display: flex;
-    flex-direction: column;
-    gap: 1px;
-}
+    justify-content: center;
 
-.vn-sidebar-section-group {
-    margin-top: var(--vn-space-2);
+    .o_user_menu {
+        display: block !important;
 
-    &:first-child {
-        margin-top: 0;
+        button {
+            display: flex;
+            background: transparent;
+            border: none;
+            padding: 2px;
+            border-radius: 50%;
+
+            &:hover {
+                background-color: rgba(255, 255, 255, 0.1);
+            }
+        }
+
+        img.o_avatar {
+            width: 32px !important;
+            height: 32px !important;
+            aspect-ratio: 1;
+            object-fit: cover;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+        // Rail en icones pures : le nom/base de donnees ne s'affiche
+        // jamais ici (contrairement au pied de sidebar precedent).
+        .oe_topbar_name {
+            display: none !important;
+        }
     }
 }
 
-.vn-sidebar-section-label {
+// --------------------------------------------------------------------------
+// Panneau de sections (accordeon, contextuel a l'app active)
+// --------------------------------------------------------------------------
+.vn-panel {
+    position: fixed;
+    top: 0;
+    left: $vn-rail-width;
+    bottom: 0;
+    width: $vn-panel-width;
+    background-color: $o-view-background-color;
+    border-right: 1px solid $o-gray-200;
+    z-index: 1005;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    transition: width var(--vn-transition-base);
+
+    &.vn-panel-collapsed {
+        width: $vn-panel-width-collapsed;
+        align-items: center;
+    }
+
+    a { text-decoration: none; }
+}
+
+.vn-panel-expand-btn {
+    margin-top: var(--vn-space-3);
+    width: 20px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: $o-gray-100;
+    border: none;
+    border-radius: 0 var(--vn-radius-sm) var(--vn-radius-sm) 0;
+    color: $vn-slate;
+
+    &:hover {
+        background: $o-gray-200;
+        color: $vn-graphite;
+    }
+}
+
+.vn-panel-header {
+    display: flex;
+    align-items: center;
+    gap: var(--vn-space-2);
+    padding: var(--vn-space-4) var(--vn-space-3) var(--vn-space-3);
+    flex-shrink: 0;
+    border-bottom: 1px solid $o-gray-100;
+}
+
+.vn-panel-app-icon {
+    width: 22px;
+    height: 22px;
+    border-radius: 5px;
+    object-fit: cover;
+    flex-shrink: 0;
+}
+
+.vn-panel-app-name {
+    font-family: $o-headings-font-family;
+    font-weight: $o-font-weight-bold;
+    color: $vn-graphite;
+    font-size: 0.92rem;
+    flex: 1 1 auto;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.vn-panel-collapse-btn {
+    background: transparent;
+    border: none;
+    color: $vn-slate;
+    width: 22px;
+    height: 22px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--vn-radius-sm);
+    flex-shrink: 0;
+
+    &:hover {
+        background-color: $o-gray-100;
+        color: $vn-graphite;
+    }
+}
+
+.vn-panel-nav {
+    flex: 1 1 auto;
+    overflow-y: auto;
+    padding: var(--vn-space-2);
+
+    &::-webkit-scrollbar { width: 6px; }
+    &::-webkit-scrollbar-thumb { background-color: $o-gray-200; border-radius: 3px; }
+}
+
+.vn-panel-group-header {
+    display: flex;
+    align-items: center;
+    gap: var(--vn-space-2);
+    width: 100%;
+    padding: var(--vn-space-2) var(--vn-space-2);
+    background: transparent;
+    border: none;
+    border-radius: var(--vn-radius-sm);
+    font-size: 0.85rem;
+    font-weight: $o-font-weight-medium;
+    color: $vn-graphite;
+    text-align: left;
+    transition: background-color var(--vn-transition-fast);
+
+    &:hover {
+        background-color: $o-gray-100;
+    }
+
+    &.vn-expanded {
+        color: $vn-crimson-dark;
+    }
+}
+
+.vn-panel-group-chevron {
+    font-size: 0.7rem;
+    color: $vn-slate;
+    flex-shrink: 0;
+    transition: transform var(--vn-transition-fast);
+}
+
+.vn-panel-group-body {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    padding: var(--vn-space-1) 0 var(--vn-space-2);
+}
+
+.vn-panel-subgroup-label {
     font-size: 0.68rem;
     font-weight: $o-font-weight-medium;
     text-transform: uppercase;
     letter-spacing: 0.04em;
-    color: rgba(255, 255, 255, 0.35);
-    padding: var(--vn-space-1) var(--vn-space-2);
+    color: $vn-slate;
+    padding: var(--vn-space-2) var(--vn-space-2) var(--vn-space-1);
 }
 
-.vn-sidebar-section-item {
+.vn-panel-leaf-item {
     display: block;
-    padding: 0.35rem var(--vn-space-2);
+    padding: 0.4rem var(--vn-space-2);
     border-radius: var(--vn-radius-sm);
-    font-size: 0.82rem;
-    color: rgba(255, 255, 255, 0.6);
-    transition: background-color var(--vn-transition-fast), color var(--vn-transition-fast);
+    font-size: 0.83rem;
+    color: $vn-slate;
     overflow: hidden;
     text-overflow: ellipsis;
+    white-space: nowrap;
+    transition: background-color var(--vn-transition-fast), color var(--vn-transition-fast);
 
     &:hover {
-        background-color: rgba(255, 255, 255, 0.08);
-        color: #fff;
+        background-color: $o-gray-100;
+        color: $vn-graphite;
     }
 
     &.vn-active {
-        color: $vn-crimson;
+        color: $vn-crimson-dark;
         font-weight: $o-font-weight-medium;
-        background-color: rgba($vn-crimson, 0.12);
+        background-color: rgba($vn-crimson, 0.08);
     }
 }
 
-.vn-sidebar-footer {
-    flex-shrink: 0;
-    border-top: 1px solid rgba(255, 255, 255, 0.08);
-    padding: var(--vn-space-2);
-
-    // Le UserMenu natif est concu pour une barre horizontale claire : on le
-    // reajuste pour le pied de la sidebar sombre plutot que de le reecrire.
-    .o_user_menu {
-        display: block !important;
-        width: 100%;
-
-        > .dropdown, .o-dropdown {
-            width: 100%;
-        }
-
-        button {
-            display: flex;
-            align-items: center;
-            width: 100%;
-            background: transparent;
-            border: none;
-            border-radius: var(--vn-radius-sm);
-            padding: var(--vn-space-1);
-
-            &:hover {
-                background-color: rgba(255, 255, 255, 0.08);
-            }
-        }
-
-        // Le dimensionnement natif de l'avatar (.o_user_avatar) suppose un
-        // contexte de barre horizontale (hauteur de navbar) ; on le fige
-        // explicitement ici pour eviter qu'il ne s'etire dans ce nouveau
-        // contexte vertical.
-        img.o_avatar {
-            width: 28px !important;
-            height: 28px !important;
-            aspect-ratio: 1;
-            object-fit: cover;
-            flex-shrink: 0;
-        }
-
-        .oe_topbar_name {
-            display: block !important;
-            min-width: 0;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            color: rgba(255, 255, 255, 0.85);
-        }
-
-        .oe_topbar_name mark {
-            background: transparent;
-            color: rgba(255, 255, 255, 0.4);
-        }
-    }
-}
-
-.vn-sidebar-collapsed {
-    .vn-sidebar-search {
-        justify-content: center;
-        padding: var(--vn-space-2);
-    }
-
-    .vn-sidebar-app-item {
-        justify-content: center;
-        padding: var(--vn-space-2);
-    }
-
-    .vn-sidebar-footer .oe_topbar_name {
-        display: none !important;
-    }
+.vn-panel-top-leaf {
+    font-weight: $o-font-weight-medium;
+    color: $vn-graphite;
 }
 
 // --------------------------------------------------------------------------
-// Decalage du contenu : la sidebar est position:fixed (montee hors du
-// flux via main_components, cf. sidebar.js), donc .o_web_client est
-// pousse par une marge equivalente a sa largeur plutot que par une
-// imbrication flex reelle. body.vn-has-sidebar est pose par l'effet
-// reactif du composant ; absent tant que la sidebar n'a pas fini de
-// monter (evite un decalage fantome) et sur petit ecran (mobile inchange).
+// Decalage du contenu : rail + panneau sont position:fixed (montes hors du
+// flux via main_components), donc .o_web_client est pousse par une marge
+// dont la valeur (variable CSS --vn-shell-offset) est calculee en JS
+// (sidebar.js) selon que l'app active a des sections et que le panneau
+// est replie ou non. body.vn-has-sidebar est absent sur petit ecran
+// (mobile inchange, cf. sidebar.js).
 //
 // IMPORTANT : Odoo pose la classe "o_web_client" directement sur <body>
-// (ce n'est pas un div separe) - le selecteur doit donc etre un selecteur
-// compose sur le meme element (pas de descendant), sinon il ne matche
-// jamais rien (piege rencontre : marge jamais appliquee malgre une regle
-// bien compilee, diagnostique via getComputedStyle + querySelector).
+// (ce n'est pas un div separe) - le selecteur doit donc etre compose sur
+// le meme element (pas de combinateur descendant).
 // --------------------------------------------------------------------------
 @media (min-width: 768px) {
     body.vn-has-sidebar.o_web_client {
-        margin-left: $vn-sidebar-width;
-        width: calc(100% - #{$vn-sidebar-width});
+        margin-left: var(--vn-shell-offset, #{$vn-rail-width});
+        width: calc(100% - var(--vn-shell-offset, #{$vn-rail-width}));
         transition: margin-left var(--vn-transition-base), width var(--vn-transition-base);
-    }
-
-    body.vn-has-sidebar.vn-sidebar-collapsed.o_web_client {
-        margin-left: $vn-sidebar-width-collapsed;
-        width: calc(100% - #{$vn-sidebar-width-collapsed});
     }
 }
 
 // --------------------------------------------------------------------------
-// Barre superieure allegee : la sidebar prend en charge le changement
-// d'application (grille) et les sections (menu horizontal) — on les
-// masque ici plutot que de reecrire le NavBar natif. Ceci neutralise au
-// passage le mega-menu app-switcher fourni par ohrms_core (side_bar.xml),
-// qui vit dans le meme conteneur .o_navbar_apps_menu.
+// Barre superieure allegee : le rail/panneau prennent en charge le
+// changement d'application et les sections - on masque la grille d'apps et
+// le menu de sections horizontal natifs plutot que de reecrire le NavBar.
+// Neutralise au passage le mega-menu app-switcher fourni par ohrms_core
+// (side_bar.xml), qui vit dans le meme conteneur .o_navbar_apps_menu.
 // --------------------------------------------------------------------------
 body.vn-has-sidebar {
     .o_navbar_apps_menu,

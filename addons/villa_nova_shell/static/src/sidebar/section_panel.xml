@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="villa_nova_shell.SectionPanel">
+        <aside class="vn-panel d-print-none"
+               t-if="!this.ui.isSmall and sections.length"
+               t-att-class="{'vn-panel-collapsed': shellState.panelCollapsed}">
+            <t t-if="!shellState.panelCollapsed">
+                <div class="vn-panel-header">
+                    <img t-if="currentApp and currentApp.webIconData" t-att-src="currentApp.webIconData" class="vn-panel-app-icon" alt=""/>
+                    <span class="vn-panel-app-name" t-esc="currentApp and currentApp.name"/>
+                    <button class="vn-panel-collapse-btn" t-on-click="togglePanelCollapsed" title="Réduire le panneau">
+                        <i class="oi oi-chevron-left"/>
+                    </button>
+                </div>
+                <nav class="vn-panel-nav" role="navigation">
+                    <t t-foreach="sections" t-as="section" t-key="section.id">
+                        <t t-if="section.childrenTree.length">
+                            <button class="vn-panel-group-header"
+                                    t-att-class="{'vn-expanded': isGroupExpanded(section)}"
+                                    t-on-click="() => this.toggleGroup(section)">
+                                <i class="oi vn-panel-group-chevron" t-att-class="isGroupExpanded(section) ? 'oi-chevron-down' : 'oi-chevron-right'"/>
+                                <span t-esc="section.name"/>
+                            </button>
+                            <div class="vn-panel-group-body" t-if="isGroupExpanded(section)">
+                                <t t-foreach="section.childrenTree" t-as="child" t-key="child.id">
+                                    <t t-call="villa_nova_shell.PanelItem">
+                                        <t t-set="section" t-value="child"/>
+                                        <t t-set="depth" t-value="1"/>
+                                    </t>
+                                </t>
+                            </div>
+                        </t>
+                        <a t-else="" class="vn-panel-leaf-item vn-panel-top-leaf"
+                           t-att-class="{'vn-active': isActiveLeaf(section)}"
+                           t-att-href="getMenuItemHref(section)"
+                           t-on-click.prevent="() => this.onLeafClick(section)"
+                           t-esc="section.name"/>
+                    </t>
+                </nav>
+            </t>
+            <t t-else="">
+                <button class="vn-panel-expand-btn" t-on-click="togglePanelCollapsed" title="Développer le panneau">
+                    <i class="oi oi-chevron-right"/>
+                </button>
+            </t>
+        </aside>
+    </t>
+
+    <t t-name="villa_nova_shell.PanelItem">
+        <t t-if="section.childrenTree.length">
+            <div class="vn-panel-subgroup-label" t-attf-style="padding-left: {{depth * 12}}px" t-esc="section.name"/>
+            <t t-foreach="section.childrenTree" t-as="child" t-key="child.id">
+                <t t-call="villa_nova_shell.PanelItem">
+                    <t t-set="section" t-value="child"/>
+                    <t t-set="depth" t-value="depth + 1"/>
+                </t>
+            </t>
+        </t>
+        <a t-else="" class="vn-panel-leaf-item"
+           t-attf-style="padding-left: {{12 + depth * 12}}px"
+           t-att-class="{'vn-active': isActiveLeaf(section)}"
+           t-att-href="getMenuItemHref(section)"
+           t-on-click.prevent="() => this.onLeafClick(section)"
+           t-esc="section.name"/>
+    </t>
+
+</templates>
