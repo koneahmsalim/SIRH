@@ -1,0 +1,249 @@
+.vn-dashboard {
+    padding: var(--vn-space-6);
+    max-width: 1400px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: var(--vn-space-5);
+}
+
+.vn-dashboard-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: var(--vn-space-4);
+}
+
+.vn-dashboard-header-identity {
+    display: flex;
+    align-items: center;
+    gap: var(--vn-space-4);
+}
+
+.vn-dashboard-avatar {
+    width: 56px;
+    height: 56px;
+    border-radius: var(--vn-radius-md);
+    object-fit: cover;
+    flex-shrink: 0;
+}
+
+.vn-dashboard-greeting {
+    font-family: $o-headings-font-family;
+    font-size: 1.4rem;
+    font-weight: $o-font-weight-bold;
+    color: $vn-graphite;
+    margin: 0;
+}
+
+.vn-dashboard-date {
+    margin: 0.15rem 0 0;
+    color: $vn-slate;
+    font-size: 0.9rem;
+    text-transform: capitalize;
+}
+
+.vn-dashboard-attendance-btn {
+    white-space: nowrap;
+}
+
+.vn-dashboard-kpis {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: var(--vn-space-4);
+
+    @media (max-width: 1200px) {
+        grid-template-columns: repeat(3, 1fr);
+    }
+
+    @media (max-width: 768px) {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .vn-kpi-card {
+        cursor: pointer;
+    }
+}
+
+.vn-dashboard-grid {
+    display: grid;
+    grid-template-columns: 1.1fr 1fr;
+    gap: var(--vn-space-5);
+    align-items: start;
+
+    @media (max-width: 992px) {
+        grid-template-columns: 1fr;
+    }
+}
+
+.vn-dashboard-col {
+    display: flex;
+    flex-direction: column;
+    gap: var(--vn-space-5);
+}
+
+.vn-card-title {
+    font-family: $o-headings-font-family;
+    font-size: 0.95rem;
+    font-weight: $o-font-weight-bold;
+    color: $vn-graphite;
+    margin: 0 0 var(--vn-space-4);
+}
+
+// --------------------------------------------------------------------------
+// Listes (a venir / demandes / notes de frais)
+// --------------------------------------------------------------------------
+.vn-upcoming-list, .vn-record-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+.vn-upcoming-item {
+    display: flex;
+    align-items: center;
+    gap: var(--vn-space-3);
+    padding: var(--vn-space-2) 0;
+    border-bottom: 1px solid $o-gray-100;
+    font-size: 0.85rem;
+    color: $vn-graphite;
+
+    &:last-child { border-bottom: none; }
+}
+
+.vn-upcoming-icon {
+    width: 28px;
+    height: 28px;
+    flex-shrink: 0;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8rem;
+
+    &.vn-upcoming-icon-birthday { background: rgba($o-warning, 0.15); color: darken($o-warning, 10%); }
+    &.vn-upcoming-icon-announcement { background: rgba($vn-crimson, 0.12); color: $vn-crimson-dark; }
+    &.vn-upcoming-icon-event { background: rgba($o-info, 0.12); color: darken($o-info, 5%); }
+}
+
+.vn-record-item {
+    display: flex;
+    align-items: center;
+    gap: var(--vn-space-3);
+    padding: var(--vn-space-2) 0;
+    border-bottom: 1px solid $o-gray-100;
+    font-size: 0.85rem;
+
+    &:last-child { border-bottom: none; }
+}
+
+.vn-record-title {
+    font-weight: $o-font-weight-medium;
+    color: $vn-graphite;
+    flex: 1 1 auto;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.vn-record-sub {
+    color: $vn-slate;
+    font-variant-numeric: tabular-nums;
+    flex-shrink: 0;
+}
+
+// --------------------------------------------------------------------------
+// Graphique en barres (villa_nova_dashboard.BarChart)
+// --------------------------------------------------------------------------
+.vn-bar-chart-h-row {
+    display: flex;
+    align-items: center;
+    gap: var(--vn-space-3);
+    padding: var(--vn-space-1) 0;
+    font-size: 0.8rem;
+}
+
+.vn-bar-chart-h-label {
+    width: 40%;
+    flex-shrink: 0;
+    color: $vn-graphite;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.vn-bar-chart-h-track {
+    flex: 1 1 auto;
+    height: 8px;
+    background: $o-gray-100;
+    border-radius: var(--vn-radius-full);
+    overflow: hidden;
+}
+
+.vn-bar-chart-h-fill {
+    height: 100%;
+    border-radius: var(--vn-radius-full);
+    transition: width var(--vn-transition-base);
+}
+
+.vn-bar-chart-h-value {
+    width: 2em;
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+    color: $vn-slate;
+    flex-shrink: 0;
+}
+
+.vn-bar-chart-v {
+    display: flex;
+    align-items: flex-end;
+    gap: var(--vn-space-3);
+    height: 140px;
+}
+
+.vn-bar-chart-v-col {
+    flex: 1 1 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    height: 100%;
+}
+
+.vn-bar-chart-v-value {
+    font-size: 0.7rem;
+    color: $vn-slate;
+    font-variant-numeric: tabular-nums;
+    margin-bottom: var(--vn-space-1);
+}
+
+.vn-bar-chart-v-track {
+    flex: 1 1 auto;
+    width: 60%;
+    display: flex;
+    align-items: flex-end;
+    background: $o-gray-100;
+    border-radius: var(--vn-radius-sm);
+    overflow: hidden;
+}
+
+.vn-bar-chart-v-fill {
+    width: 100%;
+    border-radius: var(--vn-radius-sm) var(--vn-radius-sm) 0 0;
+    transition: height var(--vn-transition-base);
+    min-height: 2px;
+}
+
+.vn-bar-chart-v-label {
+    margin-top: var(--vn-space-1);
+    font-size: 0.7rem;
+    color: $vn-slate;
+    text-transform: capitalize;
+}
+
+.vn-bar-chart-empty {
+    padding: var(--vn-space-6) 0;
+}

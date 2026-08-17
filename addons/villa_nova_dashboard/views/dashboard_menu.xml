@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Nouvelle action client OWL, en remplacement de hrms_dashboard.hr_action_dashboard -->
+    <record id="action_dashboard" model="ir.actions.client">
+        <field name="name">Dashboard</field>
+        <field name="tag">villa_nova_dashboard</field>
+    </record>
+
+    <!-- Le menu racine "Dashboard" (hrms_dashboard) pointe desormais vers
+         notre action : on ne touche pas au module tiers, on repointe juste
+         son menu, comme on repointerait un lien. -->
+    <record id="hrms_dashboard.hrms_dashboard_menu_root" model="ir.ui.menu">
+        <field name="action" ref="action_dashboard"/>
+        <field name="web_icon">villa_nova_theme,static/src/img/icon_mark.png</field>
+    </record>
+</odoo>

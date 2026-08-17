@@ -301,15 +301,21 @@ $vn-sidebar-width-collapsed: 68px;
 // imbrication flex reelle. body.vn-has-sidebar est pose par l'effet
 // reactif du composant ; absent tant que la sidebar n'a pas fini de
 // monter (evite un decalage fantome) et sur petit ecran (mobile inchange).
+//
+// IMPORTANT : Odoo pose la classe "o_web_client" directement sur <body>
+// (ce n'est pas un div separe) - le selecteur doit donc etre un selecteur
+// compose sur le meme element (pas de descendant), sinon il ne matche
+// jamais rien (piege rencontre : marge jamais appliquee malgre une regle
+// bien compilee, diagnostique via getComputedStyle + querySelector).
 // --------------------------------------------------------------------------
 @media (min-width: 768px) {
-    body.vn-has-sidebar .o_web_client {
+    body.vn-has-sidebar.o_web_client {
         margin-left: $vn-sidebar-width;
         width: calc(100% - #{$vn-sidebar-width});
         transition: margin-left var(--vn-transition-base), width var(--vn-transition-base);
     }
 
-    body.vn-has-sidebar.vn-sidebar-collapsed .o_web_client {
+    body.vn-has-sidebar.vn-sidebar-collapsed.o_web_client {
         margin-left: $vn-sidebar-width-collapsed;
         width: calc(100% - #{$vn-sidebar-width-collapsed});
     }

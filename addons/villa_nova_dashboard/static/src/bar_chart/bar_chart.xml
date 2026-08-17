@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="villa_nova_dashboard.BarChart">
+        <div t-if="!props.data.length" class="vn-empty-state vn-bar-chart-empty">
+            <i class="fa fa-bar-chart vn-empty-icon"/>
+            <div class="vn-empty-title" t-esc="props.emptyLabel or 'Aucune donnée'"/>
+        </div>
+        <div t-elif="props.orientation === 'horizontal'" class="vn-bar-chart vn-bar-chart-h">
+            <t t-foreach="props.data" t-as="row" t-key="row_index">
+                <div class="vn-bar-chart-h-row">
+                    <span class="vn-bar-chart-h-label" t-esc="row.label"/>
+                    <div class="vn-bar-chart-h-track">
+                        <div class="vn-bar-chart-h-fill"
+                             t-attf-style="width: {{widthPercent(row.value)}}%; background-color: {{props.color}};"/>
+                    </div>
+                    <span class="vn-bar-chart-h-value" t-esc="row.value"/>
+                </div>
+            </t>
+        </div>
+        <div t-else="" class="vn-bar-chart vn-bar-chart-v">
+            <t t-foreach="props.data" t-as="col" t-key="col_index">
+                <div class="vn-bar-chart-v-col">
+                    <span class="vn-bar-chart-v-value" t-esc="col.value"/>
+                    <div class="vn-bar-chart-v-track">
+                        <div class="vn-bar-chart-v-fill"
+                             t-attf-style="height: {{widthPercent(col.value)}}%; background-color: {{props.color}};"/>
+                    </div>
+                    <span class="vn-bar-chart-v-label" t-esc="col.label"/>
+                </div>
+            </t>
+        </div>
+    </t>
+
+</templates>

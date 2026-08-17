@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="villa_nova_dashboard.Dashboard">
+        <div class="vn-dashboard">
+            <t t-if="state.loading">
+                <div class="vn-dashboard-header vn-card">
+                    <span class="vn-skeleton" style="width: 240px; height: 28px;"/>
+                    <span class="vn-skeleton" style="width: 140px; height: 38px; margin-top: 12px;"/>
+                </div>
+                <div class="vn-dashboard-kpis">
+                    <t t-foreach="[1,2,3,4,5]" t-as="i" t-key="i">
+                        <span class="vn-skeleton" style="height: 96px;"/>
+                    </t>
+                </div>
+            </t>
+
+            <t t-else="">
+                <div class="vn-dashboard-header vn-card">
+                    <div class="vn-dashboard-header-identity">
+                        <img t-if="state.employee" t-att-src="avatarUrl" class="vn-dashboard-avatar" alt=""/>
+                        <div>
+                            <h1 class="vn-dashboard-greeting">
+                                <t t-esc="greeting"/><t t-if="firstName">, <t t-esc="firstName"/></t>
+                            </h1>
+                            <p class="vn-dashboard-date" t-esc="todayLabel"/>
+                        </div>
+                    </div>
+                    <button class="btn vn-dashboard-attendance-btn"
+                            t-att-class="isCheckedIn ? 'btn-outline-danger' : 'btn-primary'"
+                            t-att-disabled="state.checkingInOut"
+                            t-on-click="toggleAttendance">
+                        <i class="fa" t-att-class="isCheckedIn ? 'fa-sign-out' : 'fa-sign-in'"/>
+                        <t t-if="isCheckedIn"> Pointer la sortie</t>
+                        <t t-else=""> Pointer l'arrivée</t>
+                    </button>
+                </div>
+
+                <div class="vn-dashboard-kpis">
+                    <div class="vn-kpi-card vn-card-interactive" t-on-click="openLeavesToApprove" role="button">
+                        <span class="vn-kpi-label">Congés à approuver</span>
+                        <span class="vn-kpi-value" t-esc="leavesToApproveCount"/>
+                    </div>
+                    <div class="vn-kpi-card vn-card-interactive" t-on-click="openAllocationsToApprove" role="button">
+                        <span class="vn-kpi-label">Allocations à approuver</span>
+                        <span class="vn-kpi-value" t-esc="allocationsToApproveCount"/>
+                    </div>
+                    <div class="vn-kpi-card vn-card-interactive" t-on-click="openLeavesToday" role="button">
+                        <span class="vn-kpi-label">En congé aujourd'hui</span>
+                        <span class="vn-kpi-value" t-esc="todayLeaveCount"/>
+                    </div>
+                    <div class="vn-kpi-card vn-card-interactive" t-on-click="openMyTimesheets" role="button">
+                        <span class="vn-kpi-label">Mes feuilles de temps</span>
+                        <span class="vn-kpi-value" t-esc="myTimesheetsCount"/>
+                    </div>
+                    <div class="vn-kpi-card vn-card-interactive" t-on-click="openApplications" role="button">
+                        <span class="vn-kpi-label">Candidatures ouvertes</span>
+                        <span class="vn-kpi-value" t-esc="openApplicationsCount"/>
+                    </div>
+                </div>
+
+                <div class="vn-dashboard-grid">
+                    <div class="vn-dashboard-col">
+                        <div class="vn-card">
+                            <h2 class="vn-card-title">À venir</h2>
+                            <t t-if="!state.upcoming.birthday.length and !state.upcoming.event.length and !state.upcoming.announcement.length">
+                                <div class="vn-empty-state">
+                                    <i class="fa fa-calendar-check-o vn-empty-icon"/>
+                                    <div class="vn-empty-title">Rien de prévu pour le moment</div>
+                                </div>
+                            </t>
+                            <ul t-else="" class="vn-upcoming-list">
+                                <t t-foreach="state.upcoming.birthday" t-as="b" t-key="'b'+b.id">
+                                    <li class="vn-upcoming-item">
+                                        <i class="fa fa-birthday-cake vn-upcoming-icon vn-upcoming-icon-birthday"/>
+                                        <span class="vn-upcoming-text">
+                                            <strong t-esc="b.name"/>
+                                            <t t-if="b.is_birthday"> — anniversaire aujourd'hui 🎉</t>
+                                            <t t-else=""> — anniversaire dans <t t-esc="b.days"/> j.</t>
+                                        </span>
+                                    </li>
+                                </t>
+                                <t t-foreach="state.upcoming.announcement" t-as="a" t-key="'a'+a_index">
+                                    <li class="vn-upcoming-item">
+                                        <i class="fa fa-bullhorn vn-upcoming-icon vn-upcoming-icon-announcement"/>
+                                        <span class="vn-upcoming-text" t-esc="a.announcement_reason"/>
+                                    </li>
+                                </t>
+                                <t t-foreach="state.upcoming.event" t-as="e" t-key="'e'+e_index">
+                                    <li class="vn-upcoming-item">
+                                        <i class="fa fa-calendar vn-upcoming-icon vn-upcoming-icon-event"/>
+                                        <span class="vn-upcoming-text" t-esc="e[1]"/>
+                                    </li>
+                                </t>
+                            </ul>
+                        </div>
+
+                        <div class="vn-card" t-if="state.employee and state.employee.leave_lines and state.employee.leave_lines.length">
+                            <h2 class="vn-card-title">Mes dernières demandes de congé</h2>
+                            <ul class="vn-record-list">
+                                <t t-foreach="state.employee.leave_lines.slice(0, 5)" t-as="l" t-key="l.id">
+                                    <li class="vn-record-item">
+                                        <span class="vn-record-title" t-esc="l.type"/>
+                                        <span class="vn-record-sub" t-esc="l.request_date_from + ' → ' + l.request_date_to"/>
+                                        <span t-attf-class="vn-badge {{statusBadgeClass(l.state)}}" t-esc="l.state"/>
+                                    </li>
+                                </t>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="vn-dashboard-col">
+                        <div class="vn-card" t-if="state.isManager">
+                            <h2 class="vn-card-title">Répartition par département</h2>
+                            <VnBarChart data="deptChartData" orientation="'horizontal'" emptyLabel="'Aucun département'"/>
+                        </div>
+
+                        <div class="vn-card">
+                            <h2 class="vn-card-title">Mes congés — 6 derniers mois</h2>
+                            <VnBarChart data="state.leaveTrend" orientation="'vertical'" emptyLabel="'Aucun congé sur la période'"/>
+                        </div>
+
+                        <div class="vn-card" t-if="state.employee and state.employee.expense_lines and state.employee.expense_lines.length">
+                            <h2 class="vn-card-title">Mes dernières notes de frais</h2>
+                            <ul class="vn-record-list">
+                                <t t-foreach="state.employee.expense_lines.slice(0, 5)" t-as="x" t-key="x_index">
+                                    <li class="vn-record-item">
+                                        <span class="vn-record-title" t-esc="x.name"/>
+                                        <span class="vn-record-sub" t-esc="x.total_amount"/>
+                                        <span t-attf-class="vn-badge {{statusBadgeClass(x.state)}}" t-esc="x.state"/>
+                                    </li>
+                                </t>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </t>
+        </div>
+    </t>
+
+</templates>
