@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="villa_nova_shell.Sidebar">
+        <aside class="vn-sidebar d-print-none" t-if="!this.ui.isSmall" t-att-class="{'vn-sidebar-collapsed': state.collapsed}">
+            <div class="vn-sidebar-header">
+                <a class="vn-sidebar-brand" href="/odoo" title="Accueil">
+                    <img class="vn-sidebar-brand-mark" src="/villa_nova_theme/static/src/img/icon_mark.png" alt=""/>
+                    <span class="vn-sidebar-brand-name" t-if="!state.collapsed">Villa Nova</span>
+                </a>
+                <button class="vn-sidebar-collapse-btn" t-on-click="toggleCollapsed"
+                        t-att-title="state.collapsed ? 'Développer le menu' : 'Réduire le menu'">
+                    <i class="oi" t-att-class="state.collapsed ? 'oi-chevron-right' : 'oi-chevron-left'"/>
+                </button>
+            </div>
+
+            <button class="vn-sidebar-search" t-on-click="openSearch" title="Rechercher (Ctrl+K)">
+                <i class="fa fa-search"/>
+                <span class="vn-sidebar-search-label" t-if="!state.collapsed">Rechercher…</span>
+                <kbd class="vn-sidebar-search-kbd" t-if="!state.collapsed">Ctrl K</kbd>
+            </button>
+
+            <nav class="vn-sidebar-nav" role="navigation" aria-label="Applications">
+                <t t-foreach="apps" t-as="app" t-key="app.id">
+                    <a class="vn-sidebar-app-item"
+                       t-att-class="{'vn-active': isCurrentApp(app)}"
+                       t-att-href="getMenuItemHref(app)"
+                       t-att-data-menu-xmlid="app.xmlid"
+                       t-on-click.prevent="() => this.onAppClick(app)"
+                       t-att-title="app.name">
+                        <img t-if="app.webIconData" t-att-src="app.webIconData" class="vn-sidebar-app-icon" alt=""/>
+                        <span class="vn-sidebar-app-label" t-if="!state.collapsed" t-esc="app.name"/>
+                    </a>
+                    <div class="vn-sidebar-sections"
+                         t-if="isCurrentApp(app) and !state.collapsed and currentAppSections.length">
+                        <t t-foreach="currentAppSections" t-as="section" t-key="section.id">
+                            <t t-call="villa_nova_shell.SidebarSection">
+                                <t t-set="section" t-value="section"/>
+                            </t>
+                        </t>
+                    </div>
+                </t>
+            </nav>
+
+            <div class="vn-sidebar-footer">
+                <UserMenu/>
+            </div>
+        </aside>
+    </t>
+
+    <t t-name="villa_nova_shell.SidebarSection">
+        <div t-if="section.childrenTree.length" class="vn-sidebar-section-group">
+            <div class="vn-sidebar-section-label" t-esc="section.name"/>
+            <t t-foreach="section.childrenTree" t-as="child" t-key="child.id">
+                <t t-call="villa_nova_shell.SidebarSection">
+                    <t t-set="section" t-value="child"/>
+                </t>
+            </t>
+        </div>
+        <a t-else="" class="vn-sidebar-section-item"
+           t-att-class="{'vn-active': isCurrentSection(section)}"
+           t-att-href="getMenuItemHref(section)"
+           t-att-data-menu-xmlid="section.xmlid"
+           t-on-click.prevent="() => this.onSectionClick(section)"
+           t-esc="section.name"/>
+    </t>
+
+</templates>
