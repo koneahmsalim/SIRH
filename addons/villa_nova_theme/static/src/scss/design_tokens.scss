@@ -430,3 +430,66 @@
     border-color: $vn-crimson;
     box-shadow: 0 0 0 3px rgba($vn-crimson, 0.15);
 }
+
+// ==========================================================================
+// Phase 5 — formulaires : traitement generique (sheet, smart buttons,
+// onglets, chatter) valide sur l'ecran Employes puis propage partout,
+// meme logique que la phase 4 (regles globales, pas de vue par ecran).
+// ==========================================================================
+
+// La feuille blanche du formulaire : legere elevation plutot que la
+// bordure plate par defaut, pour la detacher du fond gris de la page.
+.o_form_sheet {
+    border-radius: var(--vn-radius-lg);
+    box-shadow: var(--vn-shadow-1);
+}
+
+.o_form_label {
+    font-weight: $o-font-weight-medium;
+    color: $vn-graphite;
+}
+
+// Smart buttons (coin superieur droit des formulaires) : la couleur de
+// marque est deja reprise automatiquement (le coeur lit $o-brand-primary
+// pour la valeur chiffree) - on affine juste le rayon et le survol.
+.o-form-buttonbox {
+    .oe_stat_button {
+        border-radius: var(--vn-radius-sm);
+        transition: background-color var(--vn-transition-fast);
+    }
+}
+
+// Onglets (notebook) : accent de marque sur l'onglet actif plutot que le
+// gris Bootstrap - le coeur expose ces variables pour ca (voir
+// notebook.scss), pas besoin de refaire le decoupage des bordures.
+.o_notebook {
+    --notebook-link-border-color-active-accent: #{$vn-crimson};
+
+    // Le lien generique herite de $o-main-link-color (cramoisi) - on
+    // neutralise les onglets inactifs pour que seul l'onglet actif porte
+    // la couleur de marque (sinon tous les onglets paraissent "actifs").
+    .nav-link {
+        color: $vn-slate;
+
+        &.active {
+            color: $vn-crimson-dark;
+            font-weight: $o-font-weight-medium;
+        }
+
+        &:hover:not(.active) {
+            color: $vn-graphite;
+        }
+    }
+}
+
+// Chatter (messages/notes/pieces jointes/historique) : separation nette
+// de la barre d'actions, boutons "Log note"/"Envoyer" coherents avec le
+// reste (deja habilles via .btn en phase 1, on ajuste juste l'espacement).
+.o-mail-Chatter-topbar {
+    padding-bottom: var(--vn-space-2);
+    border-bottom: 1px solid $o-gray-100;
+}
+
+.o-mail-Chatter-sendMessage.active, .o-mail-Chatter-logNote.active {
+    box-shadow: inset 0 -2px 0 $vn-crimson;
+}
