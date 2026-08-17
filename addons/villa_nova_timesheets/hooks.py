@@ -7,17 +7,17 @@ CATEGORY_TO_DEPARTMENTS = {
     "Administration": ["Administration"],
     "IAT Solutions": ["Technologie", "Recherche & Développement", "R&D USA", "Projets à long terme"],
     "IAT Consulting": ["Services professionnels"],
+    "Banque d'affaires": ["Infinity Africa Capital"],
+    "Financement PME": ["Infinity Africa Finance"],
+    "Venture Capital": ["Infinity Africa Ventures"],
+    "Immobilier": ["Infinity Africa Properties"],
+    "Marchés financiers": ["Infinity Africa Securities"],
     # Pas de departement Villa Nova correspondant actuellement : ces codes
     # restent importes (reference complete du groupe) mais invisibles tant
     # qu'aucun employe n'est rattache a un departement pour ces entites.
     "Contrôle, audit et conformité": [],
     "Support IT": [],
     "Juridique et conformité": [],
-    "Banque d'affaires": [],
-    "Financement PME": [],
-    "Venture Capital": [],
-    "Immobilier": [],
-    "Marchés financiers": [],
 }
 
 
