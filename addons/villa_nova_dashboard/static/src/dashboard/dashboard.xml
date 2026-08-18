@@ -54,29 +54,82 @@
                     </button>
                 </div>
 
+                <!-- KPI du haut : personnelles pour un employe (ce qui me
+                     concerne, moi), orientees approbation/pilotage RH pour
+                     un manager (ce que je dois traiter pour les autres).
+                     Avant cette refonte, les 5 cartes etaient identiques
+                     pour tout le monde alors que 4 sur 5 ne concernent que
+                     quelqu'un qui approuve/recrute - un simple employe les
+                     voyait sans jamais pouvoir agir dessus. -->
                 <div class="vn-dashboard-kpis">
-                    <div class="vn-kpi-card vn-card-interactive" t-on-click="openLeavesToApprove" role="button">
-                        <span class="vn-kpi-label">Congés à approuver</span>
-                        <span class="vn-kpi-value" t-esc="leavesToApproveCount"/>
-                    </div>
-                    <div class="vn-kpi-card vn-card-interactive" t-on-click="openAllocationsToApprove" role="button">
-                        <span class="vn-kpi-label">Allocations à approuver</span>
-                        <span class="vn-kpi-value" t-esc="allocationsToApproveCount"/>
-                    </div>
-                    <div class="vn-kpi-card vn-card-interactive" t-on-click="openLeavesToday" role="button">
-                        <span class="vn-kpi-label">En congé aujourd'hui</span>
-                        <span class="vn-kpi-value" t-esc="todayLeaveCount"/>
-                    </div>
-                    <div class="vn-kpi-card vn-card-interactive" t-on-click="openMyTimesheets" role="button">
-                        <span class="vn-kpi-label">Mes feuilles de temps</span>
-                        <span class="vn-kpi-value" t-esc="myTimesheetsCount"/>
-                    </div>
-                    <div class="vn-kpi-card vn-card-interactive" t-on-click="openApplications" role="button">
-                        <span class="vn-kpi-label">Candidatures ouvertes</span>
-                        <span class="vn-kpi-value" t-esc="openApplicationsCount"/>
-                    </div>
+                    <t t-if="state.isManager">
+                        <div class="vn-kpi-card vn-card-interactive" t-on-click="openLeavesToApprove" role="button">
+                            <span class="vn-kpi-label">Congés à approuver</span>
+                            <span class="vn-kpi-value" t-esc="leavesToApproveCount"/>
+                        </div>
+                        <div class="vn-kpi-card vn-card-interactive" t-on-click="openAllocationsToApprove" role="button">
+                            <span class="vn-kpi-label">Allocations à approuver</span>
+                            <span class="vn-kpi-value" t-esc="allocationsToApproveCount"/>
+                        </div>
+                        <div class="vn-kpi-card vn-card-interactive" t-on-click="openLeavesToday" role="button">
+                            <span class="vn-kpi-label">En congé aujourd'hui</span>
+                            <span class="vn-kpi-value" t-esc="todayLeaveCount"/>
+                        </div>
+                        <div class="vn-kpi-card vn-card-interactive" t-on-click="openApplications" role="button">
+                            <span class="vn-kpi-label">Candidatures ouvertes</span>
+                            <span class="vn-kpi-value" t-esc="openApplicationsCount"/>
+                        </div>
+                        <div class="vn-kpi-card vn-card-interactive" t-on-click="openMyTimesheets" role="button">
+                            <span class="vn-kpi-label">Mes feuilles de temps</span>
+                            <span class="vn-kpi-value" t-esc="myTimesheetsCount"/>
+                        </div>
+                    </t>
+                    <t t-else="">
+                        <div class="vn-kpi-card vn-card-interactive" t-on-click="openMyLeaves" role="button">
+                            <span class="vn-kpi-label">Solde de congés</span>
+                            <span class="vn-kpi-value" t-esc="leaveBalance"/>
+                        </div>
+                        <div class="vn-kpi-card vn-card-interactive" t-on-click="openMyTimesheets" role="button">
+                            <span class="vn-kpi-label">Mes feuilles de temps</span>
+                            <span class="vn-kpi-value" t-esc="myTimesheetsCount"/>
+                        </div>
+                        <div class="vn-kpi-card vn-card-interactive" t-on-click="openMyExpenses" role="button">
+                            <span class="vn-kpi-label">Mes notes de frais</span>
+                            <span class="vn-kpi-value" t-esc="myExpenseCount"/>
+                        </div>
+                        <div class="vn-kpi-card vn-card-interactive" t-on-click="openMyTasks" role="button">
+                            <span class="vn-kpi-label">Mes tâches</span>
+                            <span class="vn-kpi-value" t-esc="state.tasks.length"/>
+                        </div>
+                    </t>
                 </div>
 
+                <!-- Vue d'equipe : uniquement pour un manager/RH, juste
+                     apres les KPI (avant, elle etait tout en bas de page,
+                     apres tout le contenu personnel - donc quasi invisible
+                     pour le profil qui en a le plus besoin). -->
+                <t t-if="state.isManager">
+                    <div class="vn-dashboard-grid">
+                        <div class="vn-card">
+                            <h2 class="vn-card-title">Répartition par département</h2>
+                            <VnBarChart data="deptChartData" orientation="'horizontal'" emptyLabel="'Aucun département'"/>
+                        </div>
+                        <div class="vn-card">
+                            <h2 class="vn-card-title">Taux d'attrition mensuel</h2>
+                            <VnBarChart data="state.attritionTrend" orientation="'vertical'" color="'var(--vn-warning)'" emptyLabel="'Pas assez de données'"/>
+                        </div>
+                    </div>
+                    <div class="vn-card">
+                        <h2 class="vn-card-title">Embauches / départs — 12 derniers mois</h2>
+                        <VnGroupedBarChart labels="state.joinResignMonths" series="state.joinResignSeries"/>
+                    </div>
+                </t>
+
+                <!-- Contenu personnel : commun a tout le monde (un manager
+                     reste aussi un employe), mais relegue en second plan
+                     pour un manager puisque la vue d'equipe ci-dessus
+                     repond a son besoin principal en arrivant sur le
+                     dashboard. -->
                 <div class="vn-dashboard-grid">
                     <div class="vn-dashboard-col">
                         <div class="vn-card">
@@ -141,11 +194,6 @@
                     </div>
 
                     <div class="vn-dashboard-col">
-                        <div class="vn-card" t-if="state.isManager">
-                            <h2 class="vn-card-title">Répartition par département</h2>
-                            <VnBarChart data="deptChartData" orientation="'horizontal'" emptyLabel="'Aucun département'"/>
-                        </div>
-
                         <div class="vn-card">
                             <h2 class="vn-card-title">Mes congés — 6 derniers mois</h2>
                             <VnBarChart data="state.leaveTrend" orientation="'vertical'" emptyLabel="'Aucun congé sur la période'"/>
@@ -168,17 +216,6 @@
                                 </t>
                             </ul>
                         </div>
-                    </div>
-                </div>
-
-                <div class="vn-dashboard-grid" t-if="state.isManager">
-                    <div class="vn-card">
-                        <h2 class="vn-card-title">Embauches / départs — 12 derniers mois</h2>
-                        <VnGroupedBarChart labels="state.joinResignMonths" series="state.joinResignSeries"/>
-                    </div>
-                    <div class="vn-card">
-                        <h2 class="vn-card-title">Taux d'attrition mensuel</h2>
-                        <VnBarChart data="state.attritionTrend" orientation="'vertical'" color="'var(--vn-warning)'" emptyLabel="'Pas assez de données'"/>
                     </div>
                 </div>
             </t>

@@ -78,17 +78,11 @@
 }
 
 .vn-dashboard-kpis {
+    // auto-fit plutot que des breakpoints fixes : le nombre de cartes varie
+    // desormais selon le role (4 pour un employe, 5 pour un manager/RH).
     display: grid;
-    grid-template-columns: repeat(5, 1fr);
+    grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
     gap: var(--vn-space-4);
-
-    @media (max-width: 1200px) {
-        grid-template-columns: repeat(3, 1fr);
-    }
-
-    @media (max-width: 768px) {
-        grid-template-columns: repeat(2, 1fr);
-    }
 
     .vn-kpi-card {
         cursor: pointer;

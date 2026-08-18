@@ -137,6 +137,15 @@ export class VillaNovaDashboard extends Component {
         return this.state.employee?.job_applications || 0;
     }
 
+    get leaveBalance() {
+        const value = this.state.employee?.remaining_leaves;
+        return value !== undefined && value !== null ? Math.round(value) : 0;
+    }
+
+    get myExpenseCount() {
+        return this.state.employee?.expense_lines?.length || 0;
+    }
+
     get deptChartData() {
         return this.state.deptChart.map((row) => ({ label: row.label, value: row.value }));
     }
@@ -194,6 +203,28 @@ export class VillaNovaDashboard extends Component {
         this.openWindowAction("account.analytic.line", {
             name: _t("Mes feuilles de temps"),
             domain: [["project_id", "!=", false], ["user_id", "=", user.userId]],
+        });
+    }
+
+    openMyLeaves() {
+        this.openWindowAction("hr.leave", {
+            name: _t("Mes congés"),
+            domain: [["employee_id", "=", this.state.employee?.id]],
+        });
+    }
+
+    openMyExpenses() {
+        this.openWindowAction("hr.expense", {
+            name: _t("Mes notes de frais"),
+            domain: [["employee_id", "=", this.state.employee?.id]],
+        });
+    }
+
+    openMyTasks() {
+        this.openWindowAction("project.task", {
+            name: _t("Mes tâches"),
+            domain: [["user_ids", "in", [user.userId]]],
+            viewMode: "kanban,list,form",
         });
     }
 

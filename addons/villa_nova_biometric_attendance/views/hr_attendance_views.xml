@@ -99,6 +99,15 @@
         </field>
     </record>
 
+    <!-- Le "Mode kiosque" natif (ecran web ou l'on badge sur une tablette
+         partagee) n'a pas d'usage chez Infinity Africa : toute la presence
+         passe par le boitier biometrique physique (empreinte/visage), pas
+         par une page web. Menu masque plutot que supprime, au cas ou
+         l'usage change (ex. site sans boitier). -->
+    <record id="hr_attendance.menu_action_open_form" model="ir.ui.menu">
+        <field name="active">False</field>
+    </record>
+
     <!-- Ajoute kanban/calendrier/pivot a l'action "Apercu" (jusqu'ici
          limitee a list,form alors que le kanban natif et le pivot de
          "Analyse" existaient deja sans etre relies a cette action).
