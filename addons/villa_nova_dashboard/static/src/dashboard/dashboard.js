@@ -265,14 +265,58 @@ export class VillaNovaDashboard extends Component {
         });
     }
 
-    openTask(taskId) {
+    openRecordForm(resModel, resId) {
         this.actionService.doAction({
             type: "ir.actions.act_window",
-            res_model: "project.task",
-            res_id: taskId,
+            res_model: resModel,
+            res_id: resId,
             view_mode: "form",
             views: [[false, "form"]],
             target: "current",
+        });
+    }
+
+    openTask(taskId) {
+        this.openRecordForm("project.task", taskId);
+    }
+
+    openMyProfile() {
+        if (!this.state.employee) {
+            return;
+        }
+        this.openRecordForm("hr.employee", this.state.employee.id);
+    }
+
+    openDepartmentEmployees(row) {
+        this.openWindowAction("hr.employee", {
+            name: row.label,
+            domain: [["department_id.name", "=", row.label]],
+        });
+    }
+
+    // Les libelles du graphique "Mes conges" incluent l'annee (ex. "Mar
+    // 2026" - voir employee_leave_trend dans hrms_dashboard), contrairement
+    // aux graphiques attrition/embauches-departs qui ne gardent que les 3
+    // lettres du mois sans annee : ceux-la ne peuvent donc pas etre rendus
+    // cliquables sans ambiguite sur la periode exacte visee.
+    openLeaveMonth(col) {
+        const MONTHS = { Jan: 1, Feb: 2, Mar: 3, Apr: 4, May: 5, Jun: 6, Jul: 7, Aug: 8, Sep: 9, Oct: 10, Nov: 11, Dec: 12 };
+        const [abbr, year] = (col.label || "").split(" ");
+        const month = MONTHS[abbr];
+        if (!month || !year || !this.state.employee) {
+            return;
+        }
+        const pad = (n) => String(n).padStart(2, "0");
+        const from = `${year}-${pad(month)}-01`;
+        const lastDay = new Date(Number(year), month, 0).getDate();
+        const to = `${year}-${pad(month)}-${pad(lastDay)}`;
+        this.openWindowAction("hr.leave", {
+            name: col.label,
+            domain: [
+                ["employee_id", "=", this.state.employee.id],
+                ["date_from", "<=", to],
+                ["date_to", ">=", from],
+            ],
         });
     }
 

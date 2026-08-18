@@ -112,7 +112,7 @@
                     <div class="vn-dashboard-grid">
                         <div class="vn-card">
                             <h2 class="vn-card-title">Répartition par département</h2>
-                            <VnBarChart data="deptChartData" orientation="'horizontal'" emptyLabel="'Aucun département'"/>
+                            <VnBarChart data="deptChartData" orientation="'horizontal'" emptyLabel="'Aucun département'" onBarClick.bind="openDepartmentEmployees"/>
                         </div>
                         <div class="vn-card">
                             <h2 class="vn-card-title">Taux d'attrition mensuel</h2>
@@ -170,7 +170,7 @@
                             <h2 class="vn-card-title">Mes dernières demandes de congé</h2>
                             <ul class="vn-record-list">
                                 <t t-foreach="state.employee.leave_lines.slice(0, 5)" t-as="l" t-key="l.id">
-                                    <li class="vn-record-item">
+                                    <li class="vn-record-item vn-record-item-clickable" t-on-click="() => this.openRecordForm('hr.leave', l.id)">
                                         <span class="vn-record-title" t-esc="l.type"/>
                                         <span class="vn-record-sub" t-esc="l.request_date_from + ' → ' + l.request_date_to"/>
                                         <span t-attf-class="vn-badge {{statusBadgeClass(l.state)}}" t-esc="l.state"/>
@@ -196,19 +196,19 @@
                     <div class="vn-dashboard-col">
                         <div class="vn-card">
                             <h2 class="vn-card-title">Mes congés — 6 derniers mois</h2>
-                            <VnBarChart data="state.leaveTrend" orientation="'vertical'" emptyLabel="'Aucun congé sur la période'"/>
+                            <VnBarChart data="state.leaveTrend" orientation="'vertical'" emptyLabel="'Aucun congé sur la période'" onBarClick.bind="openLeaveMonth"/>
                         </div>
 
                         <div class="vn-card" t-if="state.skills.length">
                             <h2 class="vn-card-title">Mes compétences</h2>
-                            <VnBarChart data="state.skills" orientation="'horizontal'" color="'var(--vn-graphite)'" emptyLabel="'Aucune compétence renseignée'"/>
+                            <VnBarChart data="state.skills" orientation="'horizontal'" color="'var(--vn-graphite)'" emptyLabel="'Aucune compétence renseignée'" onBarClick.bind="openMyProfile"/>
                         </div>
 
                         <div class="vn-card" t-if="state.employee and state.employee.expense_lines and state.employee.expense_lines.length">
                             <h2 class="vn-card-title">Mes dernières notes de frais</h2>
                             <ul class="vn-record-list">
                                 <t t-foreach="state.employee.expense_lines.slice(0, 5)" t-as="x" t-key="x_index">
-                                    <li class="vn-record-item">
+                                    <li class="vn-record-item vn-record-item-clickable" t-on-click="() => this.openRecordForm('hr.expense', x.id)">
                                         <span class="vn-record-title" t-esc="x.name"/>
                                         <span class="vn-record-sub" t-esc="x.total_amount"/>
                                         <span t-attf-class="vn-badge {{statusBadgeClass(x.state)}}" t-esc="x.state"/>

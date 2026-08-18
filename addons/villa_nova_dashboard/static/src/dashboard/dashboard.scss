@@ -273,6 +273,21 @@
     gap: var(--vn-space-3);
     padding: var(--vn-space-1) 0;
     font-size: 0.8rem;
+
+    &.vn-bar-chart-clickable {
+        cursor: pointer;
+        border-radius: var(--vn-radius-sm);
+        margin: 0 calc(-1 * var(--vn-space-2));
+        padding-left: var(--vn-space-2);
+        padding-right: var(--vn-space-2);
+        transition: background-color var(--vn-transition-fast);
+
+        &:hover {
+            background-color: $o-gray-100;
+
+            .vn-bar-chart-h-label { color: $vn-crimson-dark; }
+        }
+    }
 }
 
 .vn-bar-chart-h-label {
@@ -319,6 +334,18 @@
     flex-direction: column;
     align-items: center;
     height: 100%;
+
+    &.vn-bar-chart-clickable {
+        cursor: pointer;
+        border-radius: var(--vn-radius-sm);
+        transition: background-color var(--vn-transition-fast);
+
+        &:hover {
+            background-color: $o-gray-100;
+
+            .vn-bar-chart-v-label { color: $vn-crimson-dark; }
+        }
+    }
 }
 
 .vn-bar-chart-v-value {

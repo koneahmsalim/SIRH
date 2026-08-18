@@ -8,7 +8,9 @@
         </div>
         <div t-elif="props.orientation === 'horizontal'" class="vn-bar-chart vn-bar-chart-h">
             <t t-foreach="props.data" t-as="row" t-key="row_index">
-                <div class="vn-bar-chart-h-row">
+                <div class="vn-bar-chart-h-row"
+                     t-att-class="{'vn-bar-chart-clickable': props.onBarClick}"
+                     t-on-click="() => props.onBarClick and props.onBarClick(row)">
                     <span class="vn-bar-chart-h-label" t-esc="row.label"/>
                     <div class="vn-bar-chart-h-track">
                         <div class="vn-bar-chart-h-fill"
@@ -20,7 +22,9 @@
         </div>
         <div t-else="" class="vn-bar-chart vn-bar-chart-v">
             <t t-foreach="props.data" t-as="col" t-key="col_index">
-                <div class="vn-bar-chart-v-col">
+                <div class="vn-bar-chart-v-col"
+                     t-att-class="{'vn-bar-chart-clickable': props.onBarClick}"
+                     t-on-click="() => props.onBarClick and props.onBarClick(col)">
                     <span class="vn-bar-chart-v-value" t-esc="col.value"/>
                     <div class="vn-bar-chart-v-track">
                         <div class="vn-bar-chart-v-fill"

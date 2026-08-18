@@ -12,6 +12,7 @@ export class VnBarChart extends Component {
         orientation: { type: String, optional: true }, // "horizontal" | "vertical"
         color: { type: String, optional: true },
         emptyLabel: { type: String, optional: true },
+        onBarClick: { type: Function, optional: true }, // (row) => void - omis => barre non cliquable
     };
     static defaultProps = {
         orientation: "vertical",
