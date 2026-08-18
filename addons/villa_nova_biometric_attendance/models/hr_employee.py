@@ -1,4 +1,6 @@
-from datetime import timedelta
+from datetime import datetime, time, timedelta
+
+import pytz
 
 from odoo import fields, models
 
@@ -23,7 +25,19 @@ class HrEmployee(models.Model):
         Attendance = self.env['hr.attendance']
         MachineAttendance = self.env['zk.machine.attendance']
 
-        window_start = fields.Datetime.now() - timedelta(days=REBUILD_WINDOW_DAYS)
+        # Fenetre alignee sur un debut de journee calendaire (minuit heure du
+        # boitier), jamais sur "maintenant moins N jours" : un horodatage
+        # exact coupe le jour le plus ancien de la fenetre en deux (les
+        # pointages du matin tombent avant l'heure de coupure et sont
+        # ignores), ce qui a deja produit une reconstruction erronee - entree
+        # recalculee sur un pointage de l'apres-midi, en collision avec
+        # l'ancien enregistrement correct reste hors fenetre et donc jamais
+        # supprime (erreur native "l'employe a deja effectue un pointage a
+        # l'entree").
+        window_start_date = DEVICE_TZ.localize(fields.Datetime.now()).date() - timedelta(days=REBUILD_WINDOW_DAYS)
+        window_start = DEVICE_TZ.localize(
+            datetime.combine(window_start_date, time.min)
+        ).astimezone(pytz.utc).replace(tzinfo=None)
         punches = MachineAttendance.search([
             ('employee_id', '=', self.id),
             ('punch_type', 'not in', list(NATIVE_PUNCH_CODES)),

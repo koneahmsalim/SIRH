@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <template id="presence_report">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="wizard">
+                <t t-call="web.external_layout">
+                    <div class="page">
+                        <h2>Rapport de présence</h2>
+                        <p>
+                            Période du <span t-esc="wizard.date_from.strftime('%d/%m/%Y')"/>
+                            au <span t-esc="wizard.date_to.strftime('%d/%m/%Y')"/>
+                            — seuil de retard : <span t-esc="threshold_label"/>
+                        </p>
+
+                        <t t-if="wizard.report_type in ('late', 'both')">
+                            <h3>Retards</h3>
+                            <table class="table table-sm" t-if="late_lines">
+                                <thead>
+                                    <tr>
+                                        <th>Employé</th>
+                                        <th>Département</th>
+                                        <th>Date</th>
+                                        <th>Heure d'arrivée</th>
+                                        <th>Retard</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr t-foreach="late_lines" t-as="line">
+                                        <td t-esc="line['employee'].name"/>
+                                        <td t-esc="line['employee'].department_id.name or ''"/>
+                                        <td t-esc="line['date'].strftime('%d/%m/%Y')"/>
+                                        <td t-esc="line['check_in_local'].strftime('%H:%M')"/>
+                                        <td t-esc="format_delay(line['delay_minutes'])"/>
+                                    </tr>
+                                </tbody>
+                            </table>
+                            <p t-else="">Aucun retard sur la période.</p>
+                        </t>
+
+                        <t t-if="wizard.report_type in ('absent', 'both')">
+                            <h3>Non pointé</h3>
+                            <table class="table table-sm" t-if="absent_lines">
+                                <thead>
+                                    <tr>
+                                        <th>Employé</th>
+                                        <th>Département</th>
+                                        <th>Date</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr t-foreach="absent_lines" t-as="line">
+                                        <td t-esc="line['employee'].name"/>
+                                        <td t-esc="line['employee'].department_id.name or ''"/>
+                                        <td t-esc="line['date'].strftime('%d/%m/%Y')"/>
+                                    </tr>
+                                </tbody>
+                            </table>
+                            <p t-else="">Aucune absence sur la période.</p>
+                        </t>
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+
+</odoo>
