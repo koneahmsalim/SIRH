@@ -449,6 +449,33 @@
     color: $vn-graphite;
 }
 
+// Certains formulaires (ex. Evaluations) embarquent des tableaux o2m tres
+// larges (Documents/Activites/Journal des messages) directement dans le
+// panneau lateral (.oe_chatter). Un <table> garde un plancher de largeur
+// base sur son contenu qui resiste au retrecissement flex meme avec
+// min-width:0 sur les ancetres (les tableaux echappent en partie a
+// l'algorithme normal de retrecissement flex) : le deficit d'espace est
+// alors entierement absorbe par .o_form_sheet_bg (le formulaire lui-meme),
+// ecrase a quelques pixels de large - le texte s'affiche caractere par
+// caractere. Verifie reproductible quelle que soit la largeur d'ecran
+// disponible (teste jusqu'a 2200px), donc pas un probleme de manque de
+// place mais de repartition. Un plancher explicite sur le formulaire force
+// l'algorithme a respecter sa taille minimale ; min-width:0 sur le chatter
+// laisse en plus son .table-responsive interne defiler horizontalement
+// plutot que de forcer tout le panneau a s'elargir.
+.o_form_sheet_bg {
+    min-width: 400px;
+}
+
+.oe_chatter {
+    min-width: 0;
+
+    .table-responsive {
+        max-width: 100%;
+        overflow-x: auto;
+    }
+}
+
 // Smart buttons (coin superieur droit des formulaires) : la couleur de
 // marque est deja reprise automatiquement (le coeur lit $o-brand-primary
 // pour la valeur chiffree) - on affine juste le rayon et le survol.
