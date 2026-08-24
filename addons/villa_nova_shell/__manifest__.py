@@ -16,7 +16,7 @@
     'category': 'Theme',
     'author': 'Villa Nova',
     'license': 'LGPL-3',
-    'depends': ['web', 'villa_nova_theme'],
+    'depends': ['web', 'bus', 'villa_nova_theme'],
     'assets': {
         'web.assets_backend': [
             'villa_nova_shell/static/src/sidebar/sidebar.scss',
@@ -25,6 +25,7 @@
             'villa_nova_shell/static/src/sidebar/sidebar.js',
             'villa_nova_shell/static/src/sidebar/section_panel.xml',
             'villa_nova_shell/static/src/sidebar/section_panel.js',
+            'villa_nova_shell/static/src/reload_watchdog/reload_watchdog_service.js',
         ],
     },
     'installable': True,
