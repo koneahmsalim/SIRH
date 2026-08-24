@@ -65,6 +65,28 @@ class HrEmployee(models.Model):
             ('employee_id', '=', self.id), ('date', 'in', list(by_day.keys())),
         ]).unlink()
 
+        # Une presence "ouverte" (sans sortie) plus ancienne que la fenetre
+        # de reconstruction bloque tout recalcul futur pour cet employe : la
+        # contrainte native d'Odoo refuse de creer une nouvelle presence
+        # tant qu'une autre reste ouverte, quelle que soit son anciennete -
+        # y compris quand la nouvelle presence est un jour bien plus recent.
+        # Le pointage de sortie correspondant, s'il existe, est hors de la
+        # fenetre qu'on vient d'interroger : impossible de le retrouver. On
+        # cloture donc cette presence orpheline a la fin de sa propre
+        # journee (hypothese : pointage de sortie jamais remonte par le
+        # boitier) plutot que de bloquer indefiniment tous les recalculs
+        # suivants pour cet employe des qu'il repointe.
+        stale_open = Attendance.search([
+            ('employee_id', '=', self.id),
+            ('check_out', '=', False),
+            ('check_in', '<', window_start),
+        ])
+        for att in stale_open:
+            day_end = DEVICE_TZ.localize(
+                datetime.combine(DEVICE_TZ.localize(att.check_in).date(), time.max)
+            ).astimezone(pytz.utc).replace(tzinfo=None, microsecond=0)
+            att.check_out = day_end
+
         # Toutes les presences du jour sont creees en un seul appel : les
         # creer une par une declenche le recalcul natif des heures sup. une
         # fois par appel, ce qui peut generer des doublons en collision sur

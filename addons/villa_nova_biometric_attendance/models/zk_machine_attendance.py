@@ -1,6 +1,10 @@
+import logging
+
 import pytz
 
 from odoo import api, models
+
+_logger = logging.getLogger(__name__)
 
 # Codes reellement geres nativement par hr_biometric_attendance pour deduire
 # entree/sortie ; tout le reste (notamment 255, code generique envoye par le
@@ -28,6 +32,27 @@ class ZkMachineAttendance(models.Model):
         # Une importation groupee (plusieurs pointages du meme jour pour un
         # meme employe) peut repeter le meme employe plusieurs fois dans le
         # recordset : on ne reconstruit qu'une fois chacun.
+        #
+        # Chaque reconstruction est isolee dans son propre savepoint : un
+        # employe dont les donnees bloquent le recalcul (cas reel rencontre -
+        # une presence orpheline trop ancienne) ne doit jamais faire echouer
+        # toute la synchronisation - sinon AUCUN pointage n'est enregistre
+        # pour PERSONNE a chaque execution du cron (comportement observe :
+        # le cron tournait bien toutes les 15 minutes mais echouait a chaque
+        # fois sur le meme employe, donnant l'impression que rien ne se
+        # synchronisait jamais automatiquement). Le pointage brut, lui,
+        # reste toujours enregistre (deja cree via super().create() plus
+        # haut, hors de ce savepoint) : la reconstruction sera retentee au
+        # prochain pointage de cet employe.
         for employee in employees.browse(set(employees.ids)):
-            employee._villa_nova_rebuild_attendance_from_punches()
+            try:
+                with self.env.cr.savepoint():
+                    employee._villa_nova_rebuild_attendance_from_punches()
+            except Exception:
+                _logger.exception(
+                    "Villa Nova biometrie : echec de la reconstruction des presences "
+                    "pour %s (id=%s) - pointage brut conserve, nouvelle tentative au "
+                    "prochain pointage.",
+                    employee.name, employee.id,
+                )
         return records
