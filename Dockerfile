@@ -8,7 +8,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends iputils-ping &&
 # captures ici avant - invisible tant que ce conteneur n'etait jamais
 # reconstruit depuis zero (ex. un vrai build pour un nouveau deploiement).
 RUN pip3 install --break-system-packages pyzk pandas future
-
+COPY ./addons /mnt/extra-addons
 # script Windows -> normalise les fins de ligne, sinon le shebang echoue
 # silencieusement au build sur un serveur Linux (Render).
 COPY docker-cmd.sh /docker-cmd.sh
