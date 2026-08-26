@@ -5,7 +5,7 @@ services:
     environment:
       POSTGRES_DB: postgres
       POSTGRES_USER: odoo
-      POSTGRES_PASSWORD: REDACTED
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Copiez .env.example vers .env}
     volumes:
       - postgres_data:/var/lib/postgresql/data
 
@@ -22,7 +22,7 @@ services:
     environment:
       HOST: postgres
       USER: odoo
-      PASSWORD: REDACTED
+      PASSWORD: ${POSTGRES_PASSWORD:?Copiez .env.example vers .env}
 
 volumes:
   postgres_data:

@@ -1,0 +1,19 @@
+[options]
+
+; Copiez ce fichier en "odoo.conf" (jamais commite) dans ce meme dossier.
+; admin_passwd protege la gestion des bases (creer/supprimer/sauvegarder
+; via /web/database/manager) - a changer imperativement pour toute
+; instance accessible depuis internet.
+admin_passwd = change_me_before_any_real_deployment
+
+db_host = postgres
+db_port = 5432
+db_user = odoo
+db_password = change_me
+
+addons_path = /mnt/extra-addons,/usr/lib/python3/dist-packages/odoo/addons
+
+proxy_mode = True
+
+dbfilter = ^SIRH$
+list_db = True

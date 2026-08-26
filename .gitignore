@@ -4,3 +4,5 @@ __pycache__/
 .DS_Store
 *.dump
 scripts/*.log
+.env
+config/odoo.conf
