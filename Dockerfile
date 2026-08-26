@@ -2,15 +2,17 @@ FROM odoo:18
 
 USER root
 RUN apt-get update && apt-get install -y --no-install-recommends iputils-ping && rm -rf /var/lib/apt/lists/*
-RUN pip3 install --break-system-packages pyzk
-USER odoo
+# pandas : utilise par hrms_dashboard (join_resign_trends, get_attrition_rate).
+# future : dependance transitive constatee dans le conteneur reel.
+# Installes manuellement dans le conteneur a un moment donne, jamais
+# captures ici avant - invisible tant que ce conteneur n'etait jamais
+# reconstruit depuis zero (ex. un vrai build pour un nouveau deploiement).
+RUN pip3 install --break-system-packages pyzk pandas future
 
-# db_port fixe a 5432 (Postgres) volontairement : sur Render, $PORT designe
-# le port HTTP public du service (routage), qui entre en collision avec
-# l'usage interne de $PORT par l'entrypoint officiel Odoo (fallback pour
-# db_port). En fixant db_port et en donnant un repli local a chaque
-# variable (${VAR:-defaut}), la meme ligne fonctionne aussi bien en local
-# via docker-compose (HOST/USER/PASSWORD deja fixes la-bas, PORT absent ->
-# 8069 par defaut) que sur Render (PORT/HOST/USER/PASSWORD injectes par la
-# plateforme).
-CMD odoo --db_host="${HOST:-postgres}" --db_port=5432 --db_user="${USER:-odoo}" --db_password="${PASSWORD:-odoo}" --http-port="${PORT:-8069}"
+# script Windows -> normalise les fins de ligne, sinon le shebang echoue
+# silencieusement au build sur un serveur Linux (Render).
+COPY docker-cmd.sh /docker-cmd.sh
+RUN sed -i 's/\r$//' /docker-cmd.sh && chmod +x /docker-cmd.sh
+
+USER odoo
+CMD ["/docker-cmd.sh"]
