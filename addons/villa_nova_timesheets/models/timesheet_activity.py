@@ -100,9 +100,18 @@ class VillaNovaTimesheetActivity(models.Model):
         if self.visibility_scope == 'all':
             return True
         if self.visibility_scope == 'managers':
-            return bool(employee.child_ids) or employee.user_id.has_group('hr_timesheet.group_hr_timesheet_approver')
+            # has_group() exige un utilisateur unique (ensure_one interne) :
+            # un employe sans compte utilisateur lie (employee.user_id vide)
+            # le fait planter - reproduit en listant "Toutes les feuilles de
+            # temps", qui evalue la visibilite pour chaque employe present
+            # dans les lignes, y compris ceux sans compte Odoo.
+            return bool(employee.child_ids) or bool(
+                employee.user_id and employee.user_id.has_group('hr_timesheet.group_hr_timesheet_approver')
+            )
         if self.visibility_scope == 'direction_generale':
-            return employee.user_id.has_group('villa_nova_recruitment.group_direction_generale')
+            return bool(
+                employee.user_id and employee.user_id.has_group('villa_nova_recruitment.group_direction_generale')
+            )
         if self.visibility_scope == 'commercial':
             return employee.department_id.name in ('Entités Commerciales', 'Ventes')
         if self.visibility_scope == 'department':
