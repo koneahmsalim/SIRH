@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="villa_nova_timesheets.MyTimesheetsWeek">
+        <div class="vn-mytimesheets">
+            <div class="vn-myweek-header">
+                <div class="vn-myweek-title">
+                    <h1>Mes feuilles de temps</h1>
+                    <p class="vn-myweek-week-label" t-esc="weekLabel"/>
+                </div>
+                <div class="vn-myweek-nav">
+                    <button class="btn vn-myweek-nav-btn" t-on-click="prevWeek" title="Semaine précédente">
+                        <i class="fa fa-chevron-left"/>
+                    </button>
+                    <button class="btn vn-myweek-today-btn" t-on-click="goCurrentWeek">Cette semaine</button>
+                    <button class="btn vn-myweek-nav-btn" t-on-click="nextWeek" title="Semaine suivante">
+                        <i class="fa fa-chevron-right"/>
+                    </button>
+                </div>
+                <button class="btn vn-myweek-list-link vn-mytimesheets-full-link" t-on-click="openFullList">
+                    Vue complète <i class="fa fa-arrow-right ms-1"/>
+                </button>
+            </div>
+
+            <div class="vn-mytimesheets-view">
+                <View resModel="'account.analytic.line'"
+                      type="'list'"
+                      viewId="listViewId"
+                      searchViewId="searchViewId"
+                      domain="domain"
+                      context="viewContext"
+                />
+            </div>
+        </div>
+    </t>
+
+</templates>

@@ -16,6 +16,7 @@
         'views/timesheet_activity_views.xml',
         'views/account_analytic_line_views.xml',
         'views/my_week_action.xml',
+        'views/my_timesheets_week_action.xml',
         'data/villa.nova.timesheet.activity.csv',
     ],
     'assets': {
@@ -23,6 +24,9 @@
             'villa_nova_timesheets/static/src/my_week/my_week.scss',
             'villa_nova_timesheets/static/src/my_week/my_week.xml',
             'villa_nova_timesheets/static/src/my_week/my_week.js',
+            'villa_nova_timesheets/static/src/my_timesheets_week/my_timesheets_week.scss',
+            'villa_nova_timesheets/static/src/my_timesheets_week/my_timesheets_week.xml',
+            'villa_nova_timesheets/static/src/my_timesheets_week/my_timesheets_week.js',
         ],
     },
     'installable': True,

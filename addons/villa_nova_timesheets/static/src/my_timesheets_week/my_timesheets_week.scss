@@ -1,0 +1,21 @@
+// "Mes feuilles de temps" reutilise l'entete de navigation de "Ma semaine"
+// (memes classes vn-myweek-header/nav/title, deja chargees globalement) au
+// dessus de la vue liste standard Odoo, filtree sur la semaine selectionnee.
+
+.vn-mytimesheets {
+    padding: var(--vn-space-6);
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+.vn-mytimesheets-full-link {
+    margin-left: auto;
+}
+
+.vn-mytimesheets-view {
+    background: $o-view-background-color;
+    border: 1px solid $o-gray-200;
+    border-radius: var(--vn-radius-lg);
+    box-shadow: var(--vn-shadow-1);
+    overflow: hidden;
+}

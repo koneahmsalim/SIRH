@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- "Mes feuilles de temps" navigue semaine par semaine (comme "Ma
+         semaine") plutot que d'afficher tout regroupe en sections repliables
+         - une semaine a la fois, avec la liste standard (colonnes, edition
+         inline) en dessous, inchangee. -->
+    <record id="action_villa_nova_my_timesheets_week" model="ir.actions.client">
+        <field name="name">Mes feuilles de temps</field>
+        <field name="tag">villa_nova_timesheets.my_timesheets_week</field>
+        <field name="context" eval="&quot;{'default_list_view_id': %d, 'default_search_view_id': %d}&quot; % (
+            ref('hr_timesheet.hr_timesheet_line_tree'),
+            ref('hr_timesheet.hr_timesheet_line_my_timesheet_search'),
+        )"/>
+    </record>
+
+    <record id="hr_timesheet.timesheet_menu_activity_user" model="ir.ui.menu">
+        <field name="action" ref="action_villa_nova_my_timesheets_week"/>
+    </record>
+
+    <record id="hr_timesheet.timesheet_menu_activity_mine" model="ir.ui.menu">
+        <field name="action" ref="action_villa_nova_my_timesheets_week"/>
+    </record>
+
+</odoo>
