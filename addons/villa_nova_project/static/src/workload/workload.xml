@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="villa_nova_project.Workload">
+        <div class="vn-workload">
+            <div class="vn-workload-header">
+                <div class="vn-workload-title">
+                    <h1>Charge de travail</h1>
+                    <p class="vn-workload-week-label" t-esc="weekLabel"/>
+                </div>
+                <div class="vn-workload-nav">
+                    <button class="btn vn-workload-nav-btn" t-on-click="prevWindow" title="Période précédente">
+                        <i class="fa fa-chevron-left"/>
+                    </button>
+                    <button class="btn vn-workload-today-btn" t-on-click="goToday">Aujourd'hui</button>
+                    <button class="btn vn-workload-nav-btn" t-on-click="nextWindow" title="Période suivante">
+                        <i class="fa fa-chevron-right"/>
+                    </button>
+                </div>
+                <div class="vn-workload-legend">
+                    <span class="vn-workload-legend-item"><span class="vn-workload-swatch vn-workload-cell-light"/> Sous la capacité</span>
+                    <span class="vn-workload-legend-item"><span class="vn-workload-swatch vn-workload-cell-full"/> À pleine capacité</span>
+                    <span class="vn-workload-legend-item"><span class="vn-workload-swatch vn-workload-cell-over"/> Surchargé</span>
+                </div>
+            </div>
+
+            <div t-if="state.loading" class="vn-skeleton" style="height: 300px; border-radius: var(--vn-radius-lg);"/>
+
+            <table t-elif="rows.length" class="vn-workload-table">
+                <thead>
+                    <tr>
+                        <th class="vn-workload-user-col">Personne</th>
+                        <t t-foreach="days" t-as="d" t-key="d_index">
+                            <th t-att-class="{'vn-workload-day-weekend': d.getDay() === 0 || d.getDay() === 6}">
+                                <span class="vn-workload-day-dow" t-esc="d.toLocaleDateString('fr-FR', {weekday: 'short'})"/>
+                                <span class="vn-workload-day-num" t-esc="d.getDate()"/>
+                            </th>
+                        </t>
+                    </tr>
+                </thead>
+                <tbody>
+                    <t t-foreach="rows" t-as="row" t-key="row.userId">
+                        <tr>
+                            <td class="vn-workload-user-col" t-esc="row.userName"/>
+                            <t t-foreach="days" t-as="d" t-key="d_index">
+                                <t t-set="load" t-value="cellLoad(row, d)"/>
+                                <td class="vn-workload-cell" t-att-class="load.cls" t-att-title="load.tasks.join(', ')">
+                                    <span t-if="load.hours > 0" t-esc="load.hours.toFixed(1) + 'h'"/>
+                                </td>
+                            </t>
+                        </tr>
+                    </t>
+                </tbody>
+            </table>
+
+            <div t-else="" class="vn-empty-state">
+                <span class="vn-empty-title">Aucune tâche avec heures allouées et dates sur cette période</span>
+            </div>
+        </div>
+    </t>
+
+</templates>

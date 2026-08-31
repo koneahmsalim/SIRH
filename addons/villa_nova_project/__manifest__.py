@@ -16,6 +16,7 @@
         'views/my_tasks_action.xml',
         'views/portfolio_action.xml',
         'views/timeline_action.xml',
+        'views/workload_action.xml',
     ],
     'assets': {
         'web.assets_backend': [
@@ -29,6 +30,9 @@
             'villa_nova_project/static/src/timeline/timeline.scss',
             'villa_nova_project/static/src/timeline/timeline.xml',
             'villa_nova_project/static/src/timeline/timeline.js',
+            'villa_nova_project/static/src/workload/workload.scss',
+            'villa_nova_project/static/src/workload/workload.xml',
+            'villa_nova_project/static/src/workload/workload.js',
         ],
     },
     'installable': True,

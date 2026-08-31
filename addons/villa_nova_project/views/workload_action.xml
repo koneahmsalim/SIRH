@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="action_villa_nova_workload" model="ir.actions.client">
+        <field name="name">Charge de travail</field>
+        <field name="tag">villa_nova_project.workload</field>
+    </record>
+
+    <menuitem id="menu_villa_nova_workload"
+              name="Charge de travail"
+              parent="project.menu_main_pm"
+              action="action_villa_nova_workload"
+              groups="project.group_project_manager"
+              sequence="4"/>
+
+</odoo>

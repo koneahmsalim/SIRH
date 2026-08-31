@@ -44,6 +44,39 @@ class ProjectTask(models.Model):
             })
         return result
 
+    @api.model
+    def get_workload_data(self, date_from, date_to):
+        """Une ligne par (tache, assigne) avec ses dates - la repartition
+        heures/jour et l'agregation par utilisateur se font cote client
+        (comme pour la Timeline), pour ne faire qu'un seul appel serveur."""
+        window_start = fields.Datetime.from_string(date_from)
+        window_end = fields.Datetime.from_string(date_to)
+        tasks = self.search([
+            ('user_ids', '!=', False),
+            ('state', 'not in', ['1_done', '1_canceled']),
+            '|', ('date_start', '!=', False), ('date_deadline', '!=', False),
+        ])
+
+        result = []
+        for task in tasks:
+            start = task.date_start or task.date_deadline
+            end = task.date_deadline or task.date_start
+            if end < window_start or start > window_end:
+                continue
+            span_days = (end.date() - start.date()).days + 1
+            hours_per_day = (task.allocated_hours or 0) / span_days if span_days else 0
+            for user in task.user_ids:
+                result.append({
+                    'user_id': user.id,
+                    'user_name': user.name,
+                    'task_id': task.id,
+                    'task_name': task.name,
+                    'date_start': fields.Datetime.to_string(start),
+                    'date_deadline': fields.Datetime.to_string(end),
+                    'hours_per_day': hours_per_day,
+                })
+        return result
+
     def action_villa_nova_view_depend_on(self):
         """"Bloque par" (depend_on_ids) n'a nativement qu'un onglet dans le
         formulaire, pas de bouton statistique contrairement a "Bloque"

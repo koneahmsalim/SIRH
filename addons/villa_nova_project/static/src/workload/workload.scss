@@ -1,0 +1,159 @@
+.vn-workload {
+    padding: var(--vn-space-6);
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+.vn-workload-header {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: var(--vn-space-4);
+    margin-bottom: var(--vn-space-4);
+}
+
+.vn-workload-title {
+    h1 {
+        font-family: $o-headings-font-family;
+        font-weight: $o-font-weight-bold;
+        font-size: 1.4rem;
+        color: $vn-graphite;
+        margin: 0;
+    }
+}
+
+.vn-workload-week-label {
+    margin: 0.15rem 0 0;
+    color: $vn-slate;
+    font-size: 0.88rem;
+    text-transform: capitalize;
+}
+
+.vn-workload-nav {
+    display: flex;
+    align-items: center;
+    gap: var(--vn-space-2);
+}
+
+.vn-workload-nav-btn {
+    width: 34px;
+    height: 34px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    border: 1px solid $o-gray-200;
+    border-radius: var(--vn-radius-md);
+    background: $o-view-background-color;
+    color: $vn-graphite;
+
+    &:hover { border-color: $vn-crimson; color: $vn-crimson-dark; }
+}
+
+.vn-workload-today-btn {
+    border: 1px solid $o-gray-200;
+    border-radius: var(--vn-radius-full);
+    padding: var(--vn-space-2) var(--vn-space-4);
+    font-size: 0.82rem;
+    font-weight: $o-font-weight-medium;
+    color: $vn-graphite;
+    background: $o-view-background-color;
+
+    &:hover { border-color: $vn-crimson; color: $vn-crimson-dark; }
+}
+
+.vn-workload-legend {
+    margin-left: auto;
+    display: flex;
+    gap: var(--vn-space-4);
+}
+
+.vn-workload-legend-item {
+    display: flex;
+    align-items: center;
+    gap: var(--vn-space-1);
+    font-size: 0.76rem;
+    color: $vn-slate;
+}
+
+.vn-workload-swatch {
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    border-radius: 3px;
+}
+
+.vn-workload-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: $o-view-background-color;
+    border: 1px solid $o-gray-200;
+    border-radius: var(--vn-radius-lg);
+    overflow: hidden;
+    box-shadow: var(--vn-shadow-1);
+
+    th, td {
+        border-bottom: 1px solid $o-gray-100;
+        border-right: 1px solid $o-gray-100;
+        text-align: center;
+        padding: var(--vn-space-2);
+    }
+
+    thead th {
+        background: $o-gray-100;
+        font-weight: $o-font-weight-medium;
+        color: $vn-slate;
+    }
+}
+
+.vn-workload-user-col {
+    text-align: left !important;
+    white-space: nowrap;
+    font-size: 0.82rem;
+    color: $vn-graphite;
+    min-width: 160px;
+}
+
+.vn-workload-day-dow {
+    display: block;
+    font-size: 0.65rem;
+    text-transform: uppercase;
+    color: $vn-slate;
+}
+
+.vn-workload-day-num {
+    display: block;
+    font-size: 0.8rem;
+    font-variant-numeric: tabular-nums;
+    color: $vn-graphite;
+}
+
+.vn-workload-day-weekend {
+    background: $o-gray-100;
+}
+
+.vn-workload-cell {
+    font-size: 0.78rem;
+    font-weight: $o-font-weight-medium;
+    font-variant-numeric: tabular-nums;
+    min-width: 48px;
+}
+
+.vn-workload-cell-empty {
+    color: $o-gray-300;
+}
+
+.vn-workload-cell-light {
+    background: rgba($o-success, 0.12);
+    color: darken($o-success, 10%);
+}
+
+.vn-workload-cell-full {
+    background: rgba($vn-crimson, 0.14);
+    color: $vn-crimson-dark;
+}
+
+.vn-workload-cell-over {
+    background: rgba($o-danger, 0.18);
+    color: darken($o-danger, 8%);
+}
