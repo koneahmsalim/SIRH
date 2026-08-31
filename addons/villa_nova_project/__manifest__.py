@@ -12,6 +12,7 @@
     'data': [
         'views/project_task_list_view.xml',
         'views/project_task_form_view.xml',
+        'views/project_project_form_view.xml',
         'views/my_tasks_action.xml',
         'views/portfolio_action.xml',
         'views/timeline_action.xml',

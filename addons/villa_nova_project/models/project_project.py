@@ -4,9 +4,33 @@ OVERDUE_RATIO_LATE = 0.3
 RISK_DEADLINE_DAYS = 14
 RISK_PROGRESS_THRESHOLD = 70
 
+CANONICAL_STAGE_XMLIDS = [
+    'project.project_stage_0',
+    'project.project_stage_1',
+    'project.project_stage_2',
+    'project.project_stage_3',
+]
+
 
 class ProjectProject(models.Model):
     _inherit = 'project.project'
+
+    @api.model_create_multi
+    def create(self, vals_list):
+        """Un projet cree sans stades Kanban (type_ids) affiche un tableau
+        vide sans que rien ne l'indique - deja rattrape une fois sur les
+        projets existants (hooks.backfill_missing_stages), applique ici a
+        toute creation future pour que ca n'arrive plus."""
+        projects = super().create(vals_list)
+        without_stages = projects.filtered(lambda p: not p.type_ids)
+        if without_stages:
+            stages = self.env['project.task.type'].browse([
+                self.env.ref(xmlid).id for xmlid in CANONICAL_STAGE_XMLIDS
+                if self.env.ref(xmlid, raise_if_not_found=False)
+            ])
+            if stages:
+                without_stages.write({'type_ids': [(6, 0, stages.ids)]})
+        return projects
 
     @api.model
     def get_portfolio_data(self):

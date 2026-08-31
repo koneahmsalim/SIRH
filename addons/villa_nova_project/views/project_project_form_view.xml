@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- A la creation d'un projet, rien ne permet de lister/assigner les
+         premieres taches sans quitter le formulaire pour aller sur le
+         tableau Kanban - onglet dedie pour saisir plusieurs taches (et
+         leurs assignes) d'un coup, comme des lignes de commande. Present
+         sur le formulaire complet (edition ulterieure du projet). -->
+    <record id="edit_project_villa_nova_tasks" model="ir.ui.view">
+        <field name="name">project.project.form.villa.nova.tasks</field>
+        <field name="model">project.project</field>
+        <field name="inherit_id" ref="project.edit_project"/>
+        <field name="arch" type="xml">
+            <page name="description" position="before">
+                <page name="villa_nova_tasks" string="Tâches">
+                    <field name="task_ids">
+                        <list editable="bottom">
+                            <field name="name" placeholder="Nom de la tâche..."/>
+                            <field name="user_ids" widget="many2many_avatar_user"/>
+                            <field name="date_deadline"/>
+                            <field name="priority" widget="priority"/>
+                        </list>
+                    </field>
+                </page>
+            </page>
+        </field>
+    </record>
+
+    <!-- Le bouton "Nouveau" du Kanban Projets n'ouvre PAS edit_project mais
+         une boite de dialogue minimaliste (project_project_view_form_simplified,
+         puis sa variante "_footer" avec le bouton "Creer le projet") - sans
+         cet ajout ici, le nouvel onglet Taches ci-dessus n'apparait jamais
+         au moment precis de la creation, seulement en rouvrant le projet
+         apres coup. On cible la vue de base (non-primary) : ses extensions
+         sont reprises automatiquement par la variante "_footer" qui en herite. -->
+    <record id="project_project_view_form_simplified_villa_nova_tasks" model="ir.ui.view">
+        <field name="name">project.project.view.form.simplified.villa.nova.tasks</field>
+        <field name="model">project.project</field>
+        <field name="inherit_id" ref="project.project_project_view_form_simplified"/>
+        <field name="arch" type="xml">
+            <div name="alias_def" position="after">
+                <div class="mt-3">
+                    <label for="task_ids" string="Premières tâches"/>
+                    <field name="task_ids">
+                        <list editable="bottom">
+                            <field name="name" placeholder="Nom de la tâche..."/>
+                            <field name="user_ids" widget="many2many_avatar_user"/>
+                            <field name="date_deadline"/>
+                            <field name="priority" widget="priority"/>
+                        </list>
+                    </field>
+                </div>
+            </div>
+        </field>
+    </record>
+
+</odoo>
