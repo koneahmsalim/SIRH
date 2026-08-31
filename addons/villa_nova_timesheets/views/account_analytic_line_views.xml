@@ -24,4 +24,16 @@
             </field>
         </field>
     </record>
+
+    <!-- "Mes feuilles de temps" regroupees par semaine par defaut, plutot que
+         filtrees sur la seule semaine en cours : on retire "search_default_week"
+         (qui limitait deja l'affichage a la semaine courante) et on active le
+         regroupement par date au grain semaine. -->
+    <record id="hr_timesheet.act_hr_timesheet_line" model="ir.actions.act_window">
+        <field name="context">{
+            "is_timesheet": 1,
+            "is_my_timesheets": 1,
+            "group_by": ["date:week"],
+        }</field>
+    </record>
 </odoo>
