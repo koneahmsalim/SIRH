@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="villa_nova_project.Goals">
+        <div class="vn-goals">
+            <div class="vn-goals-header">
+                <h1>Objectifs</h1>
+                <button class="btn btn-primary vn-goals-new-btn" t-on-click="createGoal">
+                    <i class="fa fa-plus me-1"/> Nouvel objectif
+                </button>
+            </div>
+
+            <div t-if="state.loading" class="vn-goals-grid">
+                <t t-foreach="[1,2,3]" t-as="i" t-key="i">
+                    <span class="vn-skeleton" style="height: 150px; border-radius: var(--vn-radius-lg);"/>
+                </t>
+            </div>
+
+            <div t-elif="state.goals.length" class="vn-goals-grid">
+                <t t-foreach="state.goals" t-as="goal" t-key="goal.id">
+                    <div class="vn-card vn-card-interactive vn-goal-card"
+                         t-on-click="() => this.openGoal(goal.id)" role="button">
+                        <div class="vn-goal-card-head">
+                            <span class="vn-goal-card-name" t-esc="goal.name"/>
+                            <span class="vn-badge" t-att-class="STATUS_BADGE_CLASS[goal.status]" t-esc="STATUS_LABELS[goal.status]"/>
+                        </div>
+                        <div class="vn-goal-progress">
+                            <div class="vn-goal-progress-track">
+                                <div class="vn-goal-progress-bar" t-att-style="'width:' + goal.progress + '%'"/>
+                            </div>
+                            <span class="vn-goal-progress-value" t-esc="Math.round(goal.progress) + '%'"/>
+                        </div>
+                        <div class="vn-goal-card-footer">
+                            <img t-if="goal.owner_id" t-att-src="avatarUrl(goal.owner_id[0])" t-att-title="goal.owner_id[1]" class="vn-goal-owner-avatar"/>
+                            <span t-if="goal.project_ids.length" class="vn-goal-projects-count" t-esc="goal.project_ids.length + ' projet(s) associé(s)'"/>
+                            <span t-else="" class="vn-goal-projects-count">Suivi manuel</span>
+                            <span t-if="goal.target_date" class="vn-goal-deadline" t-esc="goal.target_date"/>
+                        </div>
+                    </div>
+                </t>
+            </div>
+
+            <div t-else="" class="vn-empty-state">
+                <span class="vn-empty-title">Aucun objectif pour l'instant</span>
+            </div>
+        </div>
+    </t>
+
+</templates>

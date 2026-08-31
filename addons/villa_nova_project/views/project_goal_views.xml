@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="view_villa_nova_project_goal_form" model="ir.ui.view">
+        <field name="name">villa_nova_project.goal.form</field>
+        <field name="model">villa_nova_project.goal</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <div class="oe_title">
+                        <h1><field name="name" placeholder="ex. Doubler le chiffre d'affaires du pôle conseil"/></h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="owner_id" widget="many2one_avatar_user"/>
+                            <field name="target_date"/>
+                            <field name="status" widget="badge"
+                                   decoration-success="status == 'on_track'"
+                                   decoration-warning="status == 'at_risk'"
+                                   decoration-danger="status == 'off_track'"
+                                   decoration-info="status == 'done'"/>
+                        </group>
+                        <group>
+                            <field name="project_ids" widget="many2many_tags"/>
+                            <field name="progress" widget="percentage" readonly="project_ids"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Description" name="description">
+                            <field name="description" placeholder="Pourquoi cet objectif compte..."/>
+                        </page>
+                    </notebook>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids"/>
+                    <field name="message_ids"/>
+                </div>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_villa_nova_project_goal_list" model="ir.ui.view">
+        <field name="name">villa_nova_project.goal.list</field>
+        <field name="model">villa_nova_project.goal</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="name"/>
+                <field name="owner_id" widget="many2one_avatar_user"/>
+                <field name="target_date"/>
+                <field name="progress" widget="percentage"/>
+                <field name="status" widget="badge"
+                       decoration-success="status == 'on_track'"
+                       decoration-warning="status == 'at_risk'"
+                       decoration-danger="status == 'off_track'"
+                       decoration-info="status == 'done'"/>
+            </list>
+        </field>
+    </record>
+
+</odoo>

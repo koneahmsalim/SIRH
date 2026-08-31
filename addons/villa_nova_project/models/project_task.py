@@ -13,6 +13,19 @@ class ProjectTask(models.Model):
         help="Date de début prévue de la tâche, utilisée par la vue Timeline.",
     )
 
+    def write(self, vals):
+        res = super().write(vals)
+        if 'state' in vals and self.project_id:
+            # villa_nova_project.goal.progress depend de project.task via une
+            # recherche directe (task_ids exclut nativement les taches
+            # fermees, donc pas trackable par @api.depends) - on force le
+            # recalcul explicitement au lieu de laisser l'objectif se figer.
+            goals = self.env['villa_nova_project.goal'].sudo().search(
+                [('project_ids', 'in', self.project_id.ids)])
+            if goals:
+                goals._compute_progress()
+        return res
+
     @api.model
     def get_timeline_data(self, date_from, date_to):
         """Taches ayant une des deux dates (debut planifie ou echeance) et

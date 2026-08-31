@@ -1,0 +1,112 @@
+.vn-goals {
+    padding: var(--vn-space-6);
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+.vn-goals-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: var(--vn-space-6);
+
+    h1 {
+        font-family: $o-headings-font-family;
+        font-weight: $o-font-weight-bold;
+        font-size: 1.4rem;
+        color: $vn-graphite;
+        margin: 0;
+    }
+}
+
+.vn-goals-new-btn {
+    margin-left: auto;
+    background: $vn-crimson;
+    border-color: $vn-crimson;
+
+    &:hover { background: $vn-crimson-dark; border-color: $vn-crimson-dark; }
+}
+
+.vn-goals-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: var(--vn-space-4);
+}
+
+.vn-goal-card {
+    display: flex;
+    flex-direction: column;
+    gap: var(--vn-space-3);
+    padding: var(--vn-space-4);
+    cursor: pointer;
+}
+
+.vn-goal-card-head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: var(--vn-space-2);
+}
+
+.vn-goal-card-name {
+    font-family: $o-headings-font-family;
+    font-weight: $o-font-weight-bold;
+    font-size: 1rem;
+    color: $vn-graphite;
+}
+
+.vn-goal-progress {
+    display: flex;
+    align-items: center;
+    gap: var(--vn-space-2);
+}
+
+.vn-goal-progress-track {
+    flex: 1 1 auto;
+    height: 6px;
+    border-radius: var(--vn-radius-full);
+    background: $o-gray-200;
+    overflow: hidden;
+}
+
+.vn-goal-progress-bar {
+    height: 100%;
+    background: $vn-crimson;
+    border-radius: var(--vn-radius-full);
+    transition: width var(--vn-transition-base);
+}
+
+.vn-goal-progress-value {
+    flex-shrink: 0;
+    font-size: 0.76rem;
+    font-weight: $o-font-weight-medium;
+    color: $vn-slate;
+    font-variant-numeric: tabular-nums;
+    min-width: 2.4em;
+    text-align: right;
+}
+
+.vn-goal-card-footer {
+    display: flex;
+    align-items: center;
+    gap: var(--vn-space-2);
+    margin-top: auto;
+}
+
+.vn-goal-owner-avatar {
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.vn-goal-projects-count {
+    font-size: 0.76rem;
+    color: $vn-slate;
+}
+
+.vn-goal-deadline {
+    margin-left: auto;
+    font-size: 0.74rem;
+    color: $vn-slate;
+    font-variant-numeric: tabular-nums;
+}

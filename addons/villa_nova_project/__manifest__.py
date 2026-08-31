@@ -20,6 +20,8 @@
         'views/timeline_action.xml',
         'views/workload_action.xml',
         'views/automation_rules_view.xml',
+        'views/project_goal_views.xml',
+        'views/goals_action.xml',
     ],
     'assets': {
         'web.assets_backend': [
@@ -36,6 +38,9 @@
             'villa_nova_project/static/src/workload/workload.scss',
             'villa_nova_project/static/src/workload/workload.xml',
             'villa_nova_project/static/src/workload/workload.js',
+            'villa_nova_project/static/src/goals/goals.scss',
+            'villa_nova_project/static/src/goals/goals.xml',
+            'villa_nova_project/static/src/goals/goals.js',
         ],
     },
     'installable': True,

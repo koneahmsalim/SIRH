@@ -4,3 +4,5 @@ access_ir_actions_server_villa_nova_project_manager,ir.actions.server.villa.nova
 access_ir_model_fields_villa_nova_project_manager,ir.model.fields.villa.nova.project.manager,base.model_ir_model_fields,project.group_project_manager,1,0,0,0
 access_ir_model_fields_selection_villa_nova_project_manager,ir.model.fields.selection.villa.nova.project.manager,base.model_ir_model_fields_selection,project.group_project_manager,1,0,0,0
 access_ir_model_villa_nova_project_manager,ir.model.villa.nova.project.manager,base.model_ir_model,project.group_project_manager,1,0,0,0
+access_villa_nova_project_goal_user,villa_nova_project.goal.user,model_villa_nova_project_goal,project.group_project_user,1,0,0,0
+access_villa_nova_project_goal_manager,villa_nova_project.goal.manager,model_villa_nova_project_goal,project.group_project_manager,1,1,1,1
