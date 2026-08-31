@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- "Mes taches" regroupees automatiquement par echeance (Aujourd'hui /
+         A venir / Plus tard / Sans echeance) plutot que la liste plate ou le
+         kanban par stade personnel natifs. -->
+    <record id="action_villa_nova_my_tasks" model="ir.actions.client">
+        <field name="name">Mes tâches</field>
+        <field name="tag">villa_nova_project.my_tasks</field>
+        <field name="context" eval="&quot;{'default_list_view_id': %d, 'default_search_view_id': %d}&quot; % (
+            ref('villa_nova_project.view_task_list_my_tasks'),
+            ref('project.view_task_search_form'),
+        )"/>
+    </record>
+
+    <record id="project.menu_project_management_my_tasks" model="ir.ui.menu">
+        <field name="action" ref="action_villa_nova_my_tasks"/>
+    </record>
+
+</odoo>

@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="villa_nova_project.MyTasks">
+        <div class="vn-mytasks">
+            <div class="vn-mytasks-header">
+                <h1>Mes tâches</h1>
+                <button class="btn vn-mytasks-full-link" t-on-click="openFullList">
+                    Vue complète <i class="fa fa-arrow-right ms-1"/>
+                </button>
+            </div>
+
+            <t t-foreach="sections" t-as="section" t-key="section.key">
+                <div class="vn-mytasks-section">
+                    <div class="vn-mytasks-section-head">
+                        <h2 t-esc="section.title"/>
+                        <span t-if="section.hint" class="vn-mytasks-section-hint" t-esc="section.hint"/>
+                    </div>
+                    <div class="vn-mytasks-view">
+                        <View resModel="'project.task'"
+                              type="'list'"
+                              viewId="listViewId"
+                              searchViewId="searchViewId"
+                              domain="section.domain"
+                              context="section.context"
+                              display="{'controlPanel': false}"
+                        />
+                    </div>
+                </div>
+            </t>
+        </div>
+    </t>
+
+</templates>

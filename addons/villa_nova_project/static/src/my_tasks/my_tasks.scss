@@ -1,0 +1,59 @@
+.vn-mytasks {
+    padding: var(--vn-space-6);
+    max-width: 1100px;
+    margin: 0 auto;
+}
+
+.vn-mytasks-header {
+    display: flex;
+    align-items: baseline;
+    gap: var(--vn-space-4);
+    margin-bottom: var(--vn-space-6);
+
+    h1 {
+        font-family: $o-headings-font-family;
+        font-weight: $o-font-weight-bold;
+        font-size: 1.4rem;
+        color: $vn-graphite;
+        margin: 0;
+    }
+}
+
+.vn-mytasks-full-link {
+    margin-left: auto;
+    font-size: 0.82rem;
+    color: $vn-slate;
+
+    &:hover { color: $vn-crimson-dark; }
+}
+
+.vn-mytasks-section {
+    margin-bottom: var(--vn-space-8);
+}
+
+.vn-mytasks-section-head {
+    display: flex;
+    align-items: baseline;
+    gap: var(--vn-space-2);
+    margin-bottom: var(--vn-space-2);
+    padding-bottom: var(--vn-space-2);
+    border-bottom: 2px solid $o-gray-200;
+
+    h2 {
+        font-family: $o-headings-font-family;
+        font-weight: $o-font-weight-bold;
+        font-size: 1rem;
+        color: $vn-graphite;
+        margin: 0;
+    }
+}
+
+.vn-mytasks-section-hint {
+    font-size: 0.76rem;
+    color: $vn-slate;
+}
+
+.vn-mytasks-view {
+    .o_list_renderer { border: none; }
+    .o_list_table { box-shadow: none; }
+}
