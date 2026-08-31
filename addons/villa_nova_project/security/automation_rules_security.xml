@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        <!-- Un chef de projet ne doit voir/gerer que les regles d'automatisation
+             qui concernent les taches/projets, pas celles d'autres modules
+             (recrutement, etc.) auxquelles il n'a par ailleurs pas acces. -->
+        <record id="rule_base_automation_villa_nova_project_manager" model="ir.rule">
+            <field name="name">Règles d'automatisation - projets uniquement (chef de projet)</field>
+            <field name="model_id" ref="base_automation.model_base_automation"/>
+            <field name="domain_force">[('model_name', 'in', ['project.task', 'project.project'])]</field>
+            <field name="groups" eval="[(4, ref('project.group_project_manager'))]"/>
+        </record>
+
+        <!-- Lecture seule (voir security/ir.model.access.csv) limitee aux
+             actions des 2 regles projet ci-dessus, pas toutes les actions
+             serveur de la base - un ir.actions.server independant (bouton
+             d'un autre module, etc.) n'a rien a faire ici. -->
+        <record id="rule_ir_actions_server_villa_nova_project_manager" model="ir.rule">
+            <field name="name">Actions des règles d'automatisation - projets uniquement (chef de projet)</field>
+            <field name="model_id" ref="base.model_ir_actions_server"/>
+            <field name="domain_force">[('base_automation_id.model_name', 'in', ['project.task', 'project.project'])]</field>
+            <field name="groups" eval="[(4, ref('project.group_project_manager'))]"/>
+        </record>
+    </data>
+</odoo>

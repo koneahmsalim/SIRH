@@ -1,0 +1,6 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_base_automation_villa_nova_project_manager,base.automation.villa.nova.project.manager,base_automation.model_base_automation,project.group_project_manager,1,1,1,0
+access_ir_actions_server_villa_nova_project_manager,ir.actions.server.villa.nova.project.manager,base.model_ir_actions_server,project.group_project_manager,1,0,0,0
+access_ir_model_fields_villa_nova_project_manager,ir.model.fields.villa.nova.project.manager,base.model_ir_model_fields,project.group_project_manager,1,0,0,0
+access_ir_model_fields_selection_villa_nova_project_manager,ir.model.fields.selection.villa.nova.project.manager,base.model_ir_model_fields_selection,project.group_project_manager,1,0,0,0
+access_ir_model_villa_nova_project_manager,ir.model.villa.nova.project.manager,base.model_ir_model,project.group_project_manager,1,0,0,0

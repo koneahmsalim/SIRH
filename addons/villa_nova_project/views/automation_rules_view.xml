@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Vue simplifiee pour les chefs de projet (pas les administrateurs,
+         qui gardent l'ecran technique complet) : la condition de
+         declenchement (Trigger) reste modifiable - c'est deja une UI
+         conviviale nativement (menus deroulants avec libelles clairs,
+         pas de domaine a ecrire a la main) - mais la liste d'actions
+         passe en lecture seule. Ce n'est pas une simple restriction : les
+         actions sont du code Python execute cote serveur (ir.actions.server),
+         et donner ce droit d'edition a un profil non-administrateur serait
+         une vraie faille d'escalade de privileges, pas juste une limite
+         d'ergonomie. -->
+    <record id="view_base_automation_form_villa_nova_project_manager" model="ir.ui.view">
+        <field name="name">base.automation.form.villa.nova.project.manager</field>
+        <field name="model">base.automation</field>
+        <field name="inherit_id" ref="base_automation.view_base_automation_form"/>
+        <field name="mode">primary</field>
+        <field name="arch" type="xml">
+            <field name="action_server_ids" position="attributes">
+                <attribute name="readonly">1</attribute>
+            </field>
+            <page name="actions" position="attributes">
+                <attribute name="string">Actions (lecture seule - modifiable par un administrateur)</attribute>
+            </page>
+        </field>
+    </record>
+
+    <record id="action_villa_nova_automation_rules" model="ir.actions.act_window">
+        <field name="name">Règles d'automatisation</field>
+        <field name="res_model">base.automation</field>
+        <field name="view_mode">list,form</field>
+        <field name="domain">[('model_name', 'in', ['project.task', 'project.project'])]</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Aucune règle pour l'instant.
+            </p>
+            <p>
+                Automatise des actions sur les tâches et les projets : notifier
+                quelqu'un, créer un rappel... Le "quoi" (l'action) reste
+                configuré par un administrateur ; vous pouvez ajuster librement
+                le "quand" (le déclencheur) de chaque règle.
+            </p>
+        </field>
+    </record>
+
+    <!-- Sequences explicites : sans elles, la vue liste (sans enregistrement
+         act_window.view dedie, donc generee par defaut) se retrouve triee
+         APRES la vue formulaire dans le champ calcule "views" de l'action,
+         et le client web ouvre directement un nouvel enregistrement au lieu
+         de la liste. -->
+    <record id="action_villa_nova_automation_rules_view_list" model="ir.actions.act_window.view">
+        <field name="sequence" eval="1"/>
+        <field name="view_mode">list</field>
+        <field name="view_id" ref="base_automation.view_base_automation_tree"/>
+        <field name="act_window_id" ref="action_villa_nova_automation_rules"/>
+    </record>
+
+    <record id="action_villa_nova_automation_rules_view_form" model="ir.actions.act_window.view">
+        <field name="sequence" eval="10"/>
+        <field name="view_mode">form</field>
+        <field name="view_id" ref="view_base_automation_form_villa_nova_project_manager"/>
+        <field name="act_window_id" ref="action_villa_nova_automation_rules"/>
+    </record>
+
+    <menuitem id="menu_villa_nova_automation_rules"
+              name="Règles d'automatisation"
+              parent="project.menu_project_config"
+              action="action_villa_nova_automation_rules"
+              groups="project.group_project_manager"
+              sequence="50"/>
+
+</odoo>

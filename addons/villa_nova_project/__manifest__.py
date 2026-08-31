@@ -8,8 +8,10 @@
     'category': 'Services/Project',
     'author': 'Villa Nova',
     'license': 'LGPL-3',
-    'depends': ['project', 'hr_timesheet', 'villa_nova_theme'],
+    'depends': ['project', 'hr_timesheet', 'villa_nova_theme', 'base_automation'],
     'data': [
+        'security/ir.model.access.csv',
+        'security/automation_rules_security.xml',
         'views/project_task_list_view.xml',
         'views/project_task_form_view.xml',
         'views/project_project_form_view.xml',
@@ -17,6 +19,7 @@
         'views/portfolio_action.xml',
         'views/timeline_action.xml',
         'views/workload_action.xml',
+        'views/automation_rules_view.xml',
     ],
     'assets': {
         'web.assets_backend': [
