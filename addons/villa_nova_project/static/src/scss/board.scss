@@ -1,0 +1,92 @@
+// Habillage du Kanban "Gestion de projet" natif (taches + projets) facon
+// Asana : le radius/ombre/hover de carte est deja gere globalement par
+// villa_nova_theme (.o_kanban_record) - ici on affine seulement ce qui est
+// specifique aux tableaux de taches et a la liste de projets, sans toucher
+// a l'arch XML native (deja tres complete : jalons, sous-taches, avatars,
+// proprietes personnalisees, indicateur de sante on_track/at_risk/off_track).
+
+// --------------------------------------------------------------------------
+// Tableau de taches (project.task, vue "view_task_kanban")
+// --------------------------------------------------------------------------
+.o_kanban_project_tasks {
+    .o_kanban_group {
+        background-color: $o-gray-100;
+        border-radius: var(--vn-radius-md);
+        padding: var(--vn-space-2);
+    }
+
+    .o_column_title {
+        font-family: $o-headings-font-family;
+        font-weight: $o-font-weight-bold;
+        font-size: 0.85rem;
+        color: $vn-graphite;
+        text-transform: uppercase;
+        letter-spacing: 0.03em;
+    }
+
+    .o_kanban_counter_side {
+        background-color: $o-gray-200;
+        color: $vn-slate;
+        border-radius: var(--vn-radius-full);
+        font-weight: $o-font-weight-medium;
+    }
+
+    .o_kanban_record {
+        padding: var(--vn-space-3);
+
+        main > .fw-bold.fs-5 {
+            font-family: $o-headings-font-family;
+            font-size: 0.92rem;
+        }
+    }
+
+    // Pile d'avatars assignes : leger chevauchement + liseré, plus "equipe"
+    // qu'une simple rangee d'images collees.
+    .o_field_many2manytags.avatar .o_tag_badge_text,
+    .o_kanban_record .o_field_widget[name="user_ids"] .o_avatar {
+        img, .o_avatar_empty {
+            border: 2px solid $o-view-background-color;
+            margin-left: -6px;
+
+            &:first-child { margin-left: 0; }
+        }
+    }
+
+    // Etoile de priorite sur l'accent de marque plutot que le jaune Bootstrap
+    // par defaut, pour rester coherent avec le reste de l'application.
+    .o_priority_star.fa-star {
+        color: $vn-crimson;
+    }
+
+    .o_kanban_progressbar {
+        .progress-bar.bg-success-done, .progress-bar.bg-success { background-color: $o-success !important; }
+        .progress-bar.bg-warning { background-color: $o-warning !important; }
+        .progress-bar.bg-danger { background-color: $o-danger !important; }
+        .progress-bar.bg-info { background-color: $o-info !important; }
+    }
+}
+
+// --------------------------------------------------------------------------
+// Liste de projets (project.project, vue "o_project_kanban")
+// --------------------------------------------------------------------------
+.o_project_kanban {
+    .o_kanban_record {
+        padding: var(--vn-space-4);
+    }
+
+    .o_project_kanban_main .fs-4.fw-bold {
+        font-family: $o-headings-font-family;
+        font-size: 1.05rem;
+    }
+
+    // Barre de sante du projet (on_track/at_risk/off_track/on_hold/done) :
+    // memes couleurs semantiques que le reste de l'app plutot que le
+    // Bootstrap par defaut.
+    .o_kanban_progressbar {
+        .progress-bar.bg-success { background-color: $o-success !important; }
+        .progress-bar.bg-warning { background-color: $o-warning !important; }
+        .progress-bar.bg-danger { background-color: $o-danger !important; }
+        .progress-bar.bg-info { background-color: $o-info !important; }
+        .progress-bar.bg-purple { background-color: $vn-crimson-dark !important; }
+    }
+}
