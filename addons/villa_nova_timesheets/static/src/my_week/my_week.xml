@@ -50,6 +50,12 @@
                             </span>
                         </div>
 
+                        <div t-if="day.attendanceMismatch" class="vn-myweek-attendance-gap"
+                             t-att-title="'Badgeuse : ' + day.attendanceHours.toFixed(1) + 'h ce jour-là'">
+                            <i class="fa fa-exclamation-triangle"/>
+                            Présence <t t-esc="day.attendanceHours.toFixed(1)"/>h ≠ feuille <t t-esc="day.total.toFixed(1)"/>h
+                        </div>
+
                         <div class="vn-myweek-entries">
                             <t t-foreach="day.entries" t-as="entry" t-key="entry.id">
                                 <div class="vn-myweek-entry" t-att-class="{'vn-myweek-entry-overtime': entry.overtime_amount > 0}">
@@ -83,7 +89,11 @@
                                     </button>
                                 </div>
                             </t>
-                            <div t-if="!day.entries.length and state.openDay !== day.index" class="vn-myweek-empty">
+                            <div t-if="!day.entries.length and state.openDay !== day.index and day.onLeave"
+                                 class="vn-myweek-empty vn-myweek-empty-leave">
+                                <i class="fa fa-suitcase me-1"/> En congé <t t-esc="'(' + day.onLeave + ')'"/>
+                            </div>
+                            <div t-elif="!day.entries.length and state.openDay !== day.index" class="vn-myweek-empty">
                                 Rien enregistré
                             </div>
                         </div>
@@ -95,8 +105,8 @@
                             <div t-if="state.recentCombos.length" class="vn-myweek-recent">
                                 <span class="vn-myweek-recent-label">Récent :</span>
                                 <t t-foreach="state.recentCombos" t-as="combo" t-key="combo_index">
-                                    <button class="vn-myweek-recent-chip" t-on-click="() => this.applyCombo(combo)">
-                                        <t t-esc="combo.villa_nova_activity_id ? combo.villa_nova_activity_id[1] : combo.project_id[1]"/>
+                                    <button class="vn-myweek-recent-chip" t-att-title="combo.label" t-on-click="() => this.applyCombo(combo)">
+                                        <t t-esc="combo.label"/>
                                     </button>
                                 </t>
                             </div>
@@ -117,8 +127,12 @@
 
                             <select class="vn-myweek-select" t-on-change="onActivityChange">
                                 <option value="">Code activité...</option>
-                                <t t-foreach="state.activities" t-as="act" t-key="act.id">
-                                    <option t-att-value="act.id" t-att-selected="state.form.activity_id === act.id" t-esc="act.display_name"/>
+                                <t t-foreach="groupedActivities" t-as="group" t-key="group[0]">
+                                    <optgroup t-att-label="group[0]">
+                                        <t t-foreach="group[1]" t-as="act" t-key="act.id">
+                                            <option t-att-value="act.id" t-att-selected="state.form.activity_id === act.id" t-esc="act.display_name"/>
+                                        </t>
+                                    </optgroup>
                                 </t>
                             </select>
 

@@ -133,4 +133,4 @@ class VillaNovaTimesheetActivity(models.Model):
         if not employee:
             return []
         activities = self._get_available_for_employee(employee)
-        return activities.read(['id', 'display_name', 'code', 'name', 'project_required'])
+        return activities.read(['id', 'display_name', 'code', 'name', 'project_required', 'category_lvl1'])

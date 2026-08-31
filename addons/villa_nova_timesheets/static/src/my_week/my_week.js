@@ -7,6 +7,7 @@ import { user } from "@web/core/user";
 const DAY_LABELS = ["Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", "Dimanche"];
 const QUICK_HOURS = [0.5, 1, 2, 4, 8];
 const DAILY_HOURS_LIMIT = 8;
+const ATTENDANCE_GAP_THRESHOLD = 1;
 
 function toISODate(d) {
     const pad = (n) => String(n).padStart(2, "0");
@@ -82,6 +83,23 @@ export class VillaNovaMyWeek extends Component {
         return this.state.days.reduce((sum, d) => sum + d.overtime, 0);
     }
 
+    // 328 codes actifs au total, jusqu'a une cinquantaine visibles pour un
+    // seul departement (ex. Finance) : un menu plat est illisible. La
+    // categorie niveau 1 est deja renseignee sur 100% des codes, on
+    // l'utilise pour decouper le menu en groupes plutot que d'inventer une
+    // nouvelle taxonomie.
+    get groupedActivities() {
+        const groups = new Map();
+        for (const act of this.state.activities) {
+            const key = act.category_lvl1 || "Autres";
+            if (!groups.has(key)) {
+                groups.set(key, []);
+            }
+            groups.get(key).push(act);
+        }
+        return [...groups.entries()].sort((a, b) => a[0].localeCompare(b[0], "fr"));
+    }
+
     isToday(dateStr) {
         return dateStr === toISODate(new Date());
     }
@@ -119,7 +137,7 @@ export class VillaNovaMyWeek extends Component {
         const start = toISODate(this.state.weekStart);
         const end = toISODate(addDays(this.state.weekStart, 6));
 
-        const [lines, recentLines] = await Promise.all([
+        const [lines, recentLines, attendances, leaves] = await Promise.all([
             this.orm.searchRead(
                 "account.analytic.line",
                 [["employee_id", "=", this.state.employeeId], ["date", ">=", start], ["date", "<=", end]],
@@ -135,6 +153,28 @@ export class VillaNovaMyWeek extends Component {
                 ["project_id", "task_id", "villa_nova_activity_id"],
                 { order: "date desc", limit: 200 }
             ),
+            // Africa/Abidjan = UTC+0 : la partie date d'un datetime naif
+            // renvoye par l'ORM correspond deja au jour calendaire local,
+            // aucune conversion de fuseau necessaire ici.
+            this.orm.searchRead(
+                "hr.attendance",
+                [
+                    ["employee_id", "=", this.state.employeeId],
+                    ["check_in", ">=", `${start} 00:00:00`],
+                    ["check_in", "<", `${toISODate(addDays(this.state.weekStart, 7))} 00:00:00`],
+                ],
+                ["check_in", "worked_hours"]
+            ),
+            this.orm.searchRead(
+                "hr.leave",
+                [
+                    ["employee_id", "=", this.state.employeeId],
+                    ["state", "=", "validate"],
+                    ["date_from", "<=", `${end} 23:59:59`],
+                    ["date_to", ">=", `${start} 00:00:00`],
+                ],
+                ["date_from", "date_to", "holiday_status_id"]
+            ),
         ]);
 
         // Preload tasks for projects already used this week, so the dropdown
@@ -145,10 +185,20 @@ export class VillaNovaMyWeek extends Component {
             )
         );
 
+        const attendanceByDay = new Map();
+        for (const att of attendances) {
+            const day = att.check_in.slice(0, 10);
+            attendanceByDay.set(day, (attendanceByDay.get(day) || 0) + (att.worked_hours || 0));
+        }
+
         const days = [];
         for (let i = 0; i < 7; i++) {
             const dateObj = addDays(this.state.weekStart, i);
             const dateStr = toISODate(dateObj);
+            const leave = leaves.find(
+                (l) => l.date_from.slice(0, 10) <= dateStr && l.date_to.slice(0, 10) >= dateStr
+            );
+            const attendanceHours = attendanceByDay.get(dateStr) || 0;
             // Ordre de saisie (id croissant) pour determiner, activite par
             // activite, la part normale et la part additionnelle : une
             // activite peut chevaucher le seuil de 8h (ex. 7h deja saisies +
@@ -165,6 +215,7 @@ export class VillaNovaMyWeek extends Component {
                 running += l.unit_amount;
             }
             const total = running;
+            const attendanceGap = attendanceHours - total;
             days.push({
                 index: i,
                 date: dateStr,
@@ -174,6 +225,9 @@ export class VillaNovaMyWeek extends Component {
                 total,
                 normal: Math.min(total, DAILY_HOURS_LIMIT),
                 overtime: Math.max(total - DAILY_HOURS_LIMIT, 0),
+                onLeave: leave ? leave.holiday_status_id[1] : null,
+                attendanceHours,
+                attendanceMismatch: attendanceHours > 0 && Math.abs(attendanceGap) >= ATTENDANCE_GAP_THRESHOLD,
             });
         }
         this.state.days = days;
@@ -187,8 +241,19 @@ export class VillaNovaMyWeek extends Component {
                 l.villa_nova_activity_id ? l.villa_nova_activity_id[0] : 0
             }`;
             if (!seen.has(key)) {
+                // Activite + projet dans le libelle (pas juste l'activite
+                // seule) : plusieurs combinaisons recentes partagent souvent
+                // la meme activite avec des projets differents, et
+                // n'afficher que l'activite rendait les puces "Recent"
+                // indiscernables entre elles.
+                const label = l.villa_nova_activity_id
+                    ? l.project_id
+                        ? `${l.villa_nova_activity_id[1]} · ${l.project_id[1]}`
+                        : l.villa_nova_activity_id[1]
+                    : l.project_id[1];
                 seen.set(key, {
                     count: 0,
+                    label,
                     project_id: l.project_id,
                     task_id: l.task_id,
                     villa_nova_activity_id: l.villa_nova_activity_id,
