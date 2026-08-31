@@ -1,0 +1,144 @@
+.vn-portfolio {
+    padding: var(--vn-space-6);
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+.vn-portfolio-header {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: var(--vn-space-3);
+    margin-bottom: var(--vn-space-6);
+
+    h1 {
+        font-family: $o-headings-font-family;
+        font-weight: $o-font-weight-bold;
+        font-size: 1.4rem;
+        color: $vn-graphite;
+        margin: 0;
+    }
+}
+
+.vn-portfolio-summary {
+    display: flex;
+    gap: var(--vn-space-2);
+}
+
+.vn-portfolio-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: var(--vn-space-4);
+}
+
+.vn-portfolio-card {
+    display: flex;
+    flex-direction: column;
+    gap: var(--vn-space-3);
+    padding: var(--vn-space-4);
+    border-left: 3px solid $o-gray-300;
+    cursor: pointer;
+
+    &.vn-portfolio-health-on_track { border-left-color: $o-success; }
+    &.vn-portfolio-health-at_risk { border-left-color: $o-warning; }
+    &.vn-portfolio-health-late { border-left-color: $o-danger; }
+}
+
+.vn-portfolio-card-head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: var(--vn-space-2);
+}
+
+.vn-portfolio-card-name {
+    font-family: $o-headings-font-family;
+    font-weight: $o-font-weight-bold;
+    font-size: 1rem;
+    color: $vn-graphite;
+}
+
+.vn-portfolio-progress {
+    display: flex;
+    align-items: center;
+    gap: var(--vn-space-2);
+}
+
+.vn-portfolio-progress-track {
+    flex: 1 1 auto;
+    height: 6px;
+    border-radius: var(--vn-radius-full);
+    background: $o-gray-200;
+    overflow: hidden;
+}
+
+.vn-portfolio-progress-bar {
+    height: 100%;
+    background: $vn-crimson;
+    border-radius: var(--vn-radius-full);
+    transition: width var(--vn-transition-base);
+}
+
+.vn-portfolio-progress-value {
+    flex-shrink: 0;
+    font-size: 0.76rem;
+    font-weight: $o-font-weight-medium;
+    color: $vn-slate;
+    font-variant-numeric: tabular-nums;
+    min-width: 2.4em;
+    text-align: right;
+}
+
+.vn-portfolio-card-meta {
+    font-size: 0.78rem;
+    color: $vn-slate;
+}
+
+.vn-portfolio-overdue {
+    color: $o-danger;
+    font-weight: $o-font-weight-medium;
+}
+
+.vn-portfolio-card-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: auto;
+}
+
+.vn-portfolio-avatars {
+    display: flex;
+    align-items: center;
+}
+
+.vn-portfolio-avatar {
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    border: 2px solid $o-view-background-color;
+    margin-left: -8px;
+    object-fit: cover;
+
+    &:first-child { margin-left: 0; }
+}
+
+.vn-portfolio-avatar-more {
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    border: 2px solid $o-view-background-color;
+    margin-left: -8px;
+    background: $o-gray-200;
+    color: $vn-slate;
+    font-size: 0.65rem;
+    font-weight: $o-font-weight-medium;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.vn-portfolio-deadline {
+    font-size: 0.74rem;
+    color: $vn-slate;
+    font-variant-numeric: tabular-nums;
+}

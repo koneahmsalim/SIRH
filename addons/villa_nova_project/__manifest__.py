@@ -13,6 +13,7 @@
         'views/project_task_list_view.xml',
         'views/project_task_form_view.xml',
         'views/my_tasks_action.xml',
+        'views/portfolio_action.xml',
     ],
     'assets': {
         'web.assets_backend': [
@@ -20,6 +21,9 @@
             'villa_nova_project/static/src/my_tasks/my_tasks.scss',
             'villa_nova_project/static/src/my_tasks/my_tasks.xml',
             'villa_nova_project/static/src/my_tasks/my_tasks.js',
+            'villa_nova_project/static/src/portfolio/portfolio.scss',
+            'villa_nova_project/static/src/portfolio/portfolio.xml',
+            'villa_nova_project/static/src/portfolio/portfolio.js',
         ],
     },
     'installable': True,

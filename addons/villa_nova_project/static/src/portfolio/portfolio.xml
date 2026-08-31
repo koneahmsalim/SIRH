@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="villa_nova_project.Portfolio">
+        <div class="vn-portfolio">
+            <div class="vn-portfolio-header">
+                <h1>Portfolio</h1>
+                <div t-if="!state.loading" class="vn-portfolio-summary">
+                    <span t-if="summary.on_track" class="vn-badge vn-badge-success" t-esc="summary.on_track + ' à jour'"/>
+                    <span t-if="summary.at_risk" class="vn-badge vn-badge-warning" t-esc="summary.at_risk + ' à risque'"/>
+                    <span t-if="summary.late" class="vn-badge vn-badge-danger" t-esc="summary.late + ' en retard'"/>
+                </div>
+            </div>
+
+            <div t-if="state.loading" class="vn-portfolio-grid">
+                <t t-foreach="[1,2,3,4,5,6]" t-as="i" t-key="i">
+                    <span class="vn-skeleton" style="height: 170px; border-radius: var(--vn-radius-lg);"/>
+                </t>
+            </div>
+
+            <div t-else="" class="vn-portfolio-grid">
+                <t t-foreach="state.projects" t-as="project" t-key="project.id">
+                    <div class="vn-card vn-card-interactive vn-portfolio-card"
+                         t-att-class="'vn-portfolio-health-' + project.health"
+                         t-on-click="() => this.openProject(project.id)" role="button">
+                        <div class="vn-portfolio-card-head">
+                            <span class="vn-portfolio-card-name" t-esc="project.name"/>
+                            <span class="vn-badge" t-att-class="HEALTH_BADGE_CLASS[project.health]" t-esc="HEALTH_LABELS[project.health]"/>
+                        </div>
+
+                        <div class="vn-portfolio-progress">
+                            <div class="vn-portfolio-progress-track">
+                                <div class="vn-portfolio-progress-bar" t-att-style="'width:' + project.progress + '%'"/>
+                            </div>
+                            <span class="vn-portfolio-progress-value" t-esc="project.progress + '%'"/>
+                        </div>
+
+                        <div class="vn-portfolio-card-meta">
+                            <span t-esc="project.open_task_count + ' tâches ouvertes'"/>
+                            <span t-if="project.overdue_count" class="vn-portfolio-overdue" t-esc="'· ' + project.overdue_count + ' en retard'"/>
+                        </div>
+
+                        <div class="vn-portfolio-card-footer">
+                            <div class="vn-portfolio-avatars">
+                                <t t-foreach="project.team.slice(0, 5)" t-as="member" t-key="member.id">
+                                    <img t-att-src="avatarUrl(member.id)" t-att-title="member.name" class="vn-portfolio-avatar"/>
+                                </t>
+                                <span t-if="project.team.length > 5" class="vn-portfolio-avatar-more" t-esc="'+' + (project.team.length - 5)"/>
+                            </div>
+                            <span t-if="project.date" class="vn-portfolio-deadline" t-esc="project.date"/>
+                        </div>
+                    </div>
+                </t>
+            </div>
+        </div>
+    </t>
+
+</templates>
