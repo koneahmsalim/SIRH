@@ -21,12 +21,16 @@ function addDays(date, n) {
     return d;
 }
 
-// "Mes feuilles de temps" avec navigation semaine par semaine (meme
-// disposition que "Ma semaine" : precedent / Cette semaine / suivant),
-// plutot que la liste native filtree sur la seule semaine en cours ou
-// regroupee en sections repliables. La vue liste standard (colonnes,
-// edition inline, recherche) est reutilisee telle quelle en dessous.
-export class VillaNovaMyTimesheetsWeek extends Component {
+// "Mes feuilles de temps" / "Toutes les feuilles de temps" avec navigation
+// semaine par semaine (meme disposition que "Ma semaine" : precedent /
+// Cette semaine / suivant), plutot que la liste native filtree sur la seule
+// semaine en cours ou regroupee en sections repliables. La vue liste
+// standard (colonnes, edition inline, recherche) est reutilisee telle
+// quelle en dessous. Un seul composant sert les deux menus : le titre, le
+// perimetre (moi seul ou tout le monde - le filtrage par departement/equipe
+// reste gere par les regles d'acces existantes, pas ici) et les vues a
+// utiliser viennent du contexte de l'action, cote XML.
+export class VillaNovaTimesheetsWeek extends Component {
     static template = "villa_nova_timesheets.MyTimesheetsWeek";
     static components = { View };
     static props = ["*"];
@@ -34,8 +38,12 @@ export class VillaNovaMyTimesheetsWeek extends Component {
     setup() {
         this.actionService = useService("action");
         this.state = useState({ weekStart: startOfWeek(new Date()) });
-        this.listViewId = this.props.action.context.default_list_view_id || false;
-        this.searchViewId = this.props.action.context.default_search_view_id || false;
+        const ctx = this.props.action.context;
+        this.listViewId = ctx.default_list_view_id || false;
+        this.searchViewId = ctx.default_search_view_id || false;
+        this.title = ctx.default_title || "Mes feuilles de temps";
+        this.scopeMine = ctx.default_scope_mine !== false;
+        this.fullAction = ctx.default_full_action || "hr_timesheet.act_hr_timesheet_line";
     }
 
     get weekLabel() {
@@ -54,20 +62,26 @@ export class VillaNovaMyTimesheetsWeek extends Component {
     get domain() {
         const start = toISODate(this.state.weekStart);
         const end = toISODate(addDays(this.state.weekStart, 6));
-        return [
-            ["user_id", "=", user.userId],
+        const domain = [
             ["project_id", "!=", false],
             ["date", ">=", start],
             ["date", "<=", end],
         ];
+        if (this.scopeMine) {
+            domain.push(["user_id", "=", user.userId]);
+        }
+        return domain;
     }
 
     get viewContext() {
-        return {
+        const ctx = {
             is_timesheet: 1,
-            is_my_timesheets: 1,
             default_date: this.isCurrentWeek ? toISODate(new Date()) : toISODate(this.state.weekStart),
         };
+        if (this.scopeMine) {
+            ctx.is_my_timesheets = 1;
+        }
+        return ctx;
     }
 
     prevWeek() {
@@ -81,8 +95,8 @@ export class VillaNovaMyTimesheetsWeek extends Component {
     }
 
     openFullList() {
-        this.actionService.doAction("hr_timesheet.act_hr_timesheet_line", { clearBreadcrumbs: false });
+        this.actionService.doAction(this.fullAction, { clearBreadcrumbs: false });
     }
 }
 
-registry.category("actions").add("villa_nova_timesheets.my_timesheets_week", VillaNovaMyTimesheetsWeek);
+registry.category("actions").add("villa_nova_timesheets.my_timesheets_week", VillaNovaTimesheetsWeek);

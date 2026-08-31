@@ -5,7 +5,7 @@
         <div class="vn-mytimesheets">
             <div class="vn-myweek-header">
                 <div class="vn-myweek-title">
-                    <h1>Mes feuilles de temps</h1>
+                    <h1 t-esc="title"/>
                     <p class="vn-myweek-week-label" t-esc="weekLabel"/>
                 </div>
                 <div class="vn-myweek-nav">

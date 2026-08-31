@@ -17,6 +17,7 @@
         'views/account_analytic_line_views.xml',
         'views/my_week_action.xml',
         'views/my_timesheets_week_action.xml',
+        'views/all_timesheets_week_action.xml',
         'data/villa.nova.timesheet.activity.csv',
     ],
     'assets': {

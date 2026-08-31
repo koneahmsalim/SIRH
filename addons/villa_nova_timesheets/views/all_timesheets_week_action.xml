@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Meme disposition que "Mes feuilles de temps" (navigation semaine par
+         semaine), mais sans filtre sur l'utilisateur courant : les regles
+         d'acces existantes (departement/equipe pour un approbateur, tout
+         pour un administrateur) continuent de s'appliquer normalement,
+         exactement comme sur l'action native "Toutes les feuilles de temps"
+         qu'elle remplace dans le menu. -->
+    <record id="action_villa_nova_all_timesheets_week" model="ir.actions.client">
+        <field name="name">Toutes les feuilles de temps</field>
+        <field name="tag">villa_nova_timesheets.my_timesheets_week</field>
+        <field name="context" eval="&quot;{'default_list_view_id': %d, 'default_search_view_id': %d, 'default_title': 'Toutes les feuilles de temps', 'default_scope_mine': False, 'default_full_action': 'hr_timesheet.timesheet_action_all'}&quot; % (
+            ref('hr_timesheet.timesheet_view_tree_user'),
+            ref('hr_timesheet.hr_timesheet_line_search'),
+        )"/>
+    </record>
+
+    <record id="hr_timesheet.timesheet_menu_activity_all" model="ir.ui.menu">
+        <field name="action" ref="action_villa_nova_all_timesheets_week"/>
+    </record>
+
+</odoo>
