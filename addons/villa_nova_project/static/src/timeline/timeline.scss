@@ -220,15 +220,31 @@ $vn-timeline-sidebar-width: 240px;
     align-items: center;
     padding: 0 var(--vn-space-2);
     overflow: hidden;
-    cursor: pointer;
+    cursor: grab;
     z-index: 3;
+    touch-action: none;
     transition: filter var(--vn-transition-fast);
 
     &:hover { filter: brightness(0.92); }
+    &:active { cursor: grabbing; }
 
     &.vn-timeline-bar-1_done { background: $o-success; }
     &.vn-timeline-bar-1_canceled { background: $o-gray-400; }
     &.vn-timeline-bar-04_waiting_normal { background: $o-warning; }
+}
+
+.vn-timeline-bar-handle {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 7px;
+    cursor: ew-resize;
+    touch-action: none;
+
+    &.vn-timeline-bar-handle-start { left: 0; }
+    &.vn-timeline-bar-handle-end { right: 0; }
+
+    &:hover { background: rgba(0, 0, 0, 0.18); }
 }
 
 .vn-timeline-bar-label {

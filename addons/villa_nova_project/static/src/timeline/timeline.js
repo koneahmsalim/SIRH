@@ -48,8 +48,10 @@ export class VillaNovaTimeline extends Component {
             loading: true,
             windowStart: startOfWeek(addDays(new Date(), -7)),
             tasks: [],
+            drag: null,
         });
         this._taskRowIndex = {};
+        this._suppressNextClick = false;
 
         onWillStart(() => this.loadTasks());
     }
@@ -116,11 +118,91 @@ export class VillaNovaTimeline extends Component {
     }
 
     _barGeometry(t) {
+        const drag = this.state.drag;
+        if (drag && drag.taskId === t.id) {
+            return { left: drag.previewLeft, width: drag.previewWidth, endLeft: drag.previewLeft + drag.previewWidth };
+        }
         const start = new Date(t.date_start);
         const end = new Date(t.date_deadline);
         const left = daysBetween(this.state.windowStart, start) * DAY_WIDTH;
         const width = Math.max(DAY_WIDTH, (daysBetween(start, end) + 1) * DAY_WIDTH);
         return { left, width, endLeft: left + width };
+    }
+
+    // ------------------------------------------------------------------
+    // Glisser-deposer : deplacer une barre entiere (mode "move") ou etirer
+    // un bord (mode "resize-start"/"resize-end"). setPointerCapture sur
+    // l'element cible garantit que pointermove/pointerup continuent
+    // d'arriver meme si le curseur sort de la barre pendant le geste -
+    // pas besoin d'ecouteurs globaux sur window.
+    // ------------------------------------------------------------------
+    onBarPointerDown(ev, task, mode) {
+        ev.preventDefault();
+        ev.stopPropagation();
+        const geom = this._barGeometry(task);
+        this.state.drag = {
+            taskId: task.id,
+            mode,
+            pointerId: ev.pointerId,
+            startClientX: ev.clientX,
+            originLeft: geom.left,
+            originWidth: geom.width,
+            previewLeft: geom.left,
+            previewWidth: geom.width,
+        };
+        ev.currentTarget.setPointerCapture(ev.pointerId);
+    }
+
+    onBarPointerMove(ev) {
+        const drag = this.state.drag;
+        if (!drag || ev.pointerId !== drag.pointerId) return;
+        const deltaPx = ev.clientX - drag.startClientX;
+        const deltaDays = Math.round(deltaPx / DAY_WIDTH);
+
+        if (drag.mode === "move") {
+            drag.previewLeft = drag.originLeft + deltaDays * DAY_WIDTH;
+            drag.previewWidth = drag.originWidth;
+        } else if (drag.mode === "resize-end") {
+            drag.previewLeft = drag.originLeft;
+            drag.previewWidth = Math.max(DAY_WIDTH, drag.originWidth + deltaDays * DAY_WIDTH);
+        } else if (drag.mode === "resize-start") {
+            const newWidth = Math.max(DAY_WIDTH, drag.originWidth - deltaDays * DAY_WIDTH);
+            drag.previewLeft = drag.originLeft - (newWidth - drag.originWidth);
+            drag.previewWidth = newWidth;
+        }
+    }
+
+    async onBarPointerUp(ev) {
+        const drag = this.state.drag;
+        if (!drag || ev.pointerId !== drag.pointerId) return;
+        this.state.drag = null;
+
+        if (drag.previewLeft === drag.originLeft && drag.previewWidth === drag.originWidth) {
+            return; // simple clic, pas un geste - laisse le clic ouvrir la tache
+        }
+        this._suppressNextClick = true;
+
+        const newStart = addDays(this.state.windowStart, Math.round(drag.previewLeft / DAY_WIDTH));
+        const newEnd = addDays(this.state.windowStart, Math.round((drag.previewLeft + drag.previewWidth) / DAY_WIDTH) - 1);
+
+        const vals = {};
+        if (drag.mode === "move" || drag.mode === "resize-start") {
+            vals.date_start = toISODate(newStart);
+        }
+        if (drag.mode === "move" || drag.mode === "resize-end") {
+            vals.date_deadline = toISODate(newEnd);
+        }
+
+        await this.orm.write("project.task", [drag.taskId], vals);
+        await this.loadTasks();
+    }
+
+    onBarClick(taskId) {
+        if (this._suppressNextClick) {
+            this._suppressNextClick = false;
+            return;
+        }
+        this.openTask(taskId);
     }
 
     get dependencyLines() {

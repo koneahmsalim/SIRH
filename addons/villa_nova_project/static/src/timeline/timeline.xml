@@ -63,8 +63,19 @@
                                 <div class="vn-timeline-bar" t-att-class="'vn-timeline-bar-' + row.task.state"
                                      t-att-style="'left:' + row.left + 'px; width:' + row.width + 'px'"
                                      t-att-title="row.task.name"
-                                     t-on-click="() => this.openTask(row.task.id)">
+                                     t-on-pointerdown="(ev) => this.onBarPointerDown(ev, row.task, 'move')"
+                                     t-on-pointermove="onBarPointerMove"
+                                     t-on-pointerup="onBarPointerUp"
+                                     t-on-click="() => this.onBarClick(row.task.id)">
+                                    <span class="vn-timeline-bar-handle vn-timeline-bar-handle-start"
+                                          t-on-pointerdown.stop="(ev) => this.onBarPointerDown(ev, row.task, 'resize-start')"
+                                          t-on-pointermove="onBarPointerMove"
+                                          t-on-pointerup="onBarPointerUp"/>
                                     <span class="vn-timeline-bar-label" t-esc="row.task.name"/>
+                                    <span class="vn-timeline-bar-handle vn-timeline-bar-handle-end"
+                                          t-on-pointerdown.stop="(ev) => this.onBarPointerDown(ev, row.task, 'resize-end')"
+                                          t-on-pointermove="onBarPointerMove"
+                                          t-on-pointerup="onBarPointerUp"/>
                                 </div>
                             </div>
                         </t>
