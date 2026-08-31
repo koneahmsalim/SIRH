@@ -6,6 +6,7 @@ import { user } from "@web/core/user";
 
 const DAY_LABELS = ["Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", "Dimanche"];
 const QUICK_HOURS = [0.5, 1, 2, 4, 8];
+const DAILY_HOURS_LIMIT = 8;
 
 function toISODate(d) {
     const pad = (n) => String(n).padStart(2, "0");
@@ -77,6 +78,10 @@ export class VillaNovaMyWeek extends Component {
         return this.state.days.reduce((sum, d) => sum + d.total, 0);
     }
 
+    get weekOvertime() {
+        return this.state.days.reduce((sum, d) => sum + d.overtime, 0);
+    }
+
     isToday(dateStr) {
         return dateStr === toISODate(new Date());
     }
@@ -145,13 +150,16 @@ export class VillaNovaMyWeek extends Component {
             const dateObj = addDays(this.state.weekStart, i);
             const dateStr = toISODate(dateObj);
             const dayLines = lines.filter((l) => l.date === dateStr);
+            const total = dayLines.reduce((s, l) => s + l.unit_amount, 0);
             days.push({
                 index: i,
                 date: dateStr,
                 label: DAY_LABELS[i],
                 dayNum: dateObj.getDate(),
                 entries: dayLines,
-                total: dayLines.reduce((s, l) => s + l.unit_amount, 0),
+                total,
+                normal: Math.min(total, DAILY_HOURS_LIMIT),
+                overtime: Math.max(total - DAILY_HOURS_LIMIT, 0),
             });
         }
         this.state.days = days;

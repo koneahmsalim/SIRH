@@ -20,6 +20,8 @@
                 <div class="vn-myweek-total">
                     <span class="vn-myweek-total-value" t-esc="weekTotal.toFixed(1)"/>
                     <span class="vn-myweek-total-label">heures cette semaine</span>
+                    <span t-if="weekOvertime > 0" class="vn-badge vn-badge-warning vn-myweek-total-overtime"
+                          t-esc="'dont ' + weekOvertime.toFixed(1) + 'h temps additionnel'"/>
                 </div>
                 <button class="btn vn-myweek-list-link" t-on-click="openFullList">
                     Vue liste complète <i class="fa fa-arrow-right ms-1"/>
@@ -40,7 +42,12 @@
                                 <span class="vn-myweek-day-name" t-esc="day.label"/>
                                 <span class="vn-myweek-day-num" t-esc="day.dayNum"/>
                             </div>
-                            <span t-if="day.total > 0" class="vn-badge vn-badge-neutral vn-myweek-day-total" t-esc="day.total.toFixed(1) + 'h'"/>
+                            <span t-if="day.total > 0" class="vn-myweek-day-badges">
+                                <span class="vn-badge vn-badge-neutral vn-myweek-day-total" t-esc="day.normal.toFixed(1) + 'h'"/>
+                                <span t-if="day.overtime > 0" class="vn-badge vn-badge-warning vn-myweek-day-total"
+                                      t-att-title="'Au-delà de ' + 8 + 'h/jour : compté comme temps additionnel'"
+                                      t-esc="'+' + day.overtime.toFixed(1) + 'h'"/>
+                            </span>
                         </div>
 
                         <div class="vn-myweek-entries">
@@ -73,6 +80,9 @@
                         </div>
 
                         <div t-if="state.openDay === day.index" class="vn-myweek-add-form">
+                            <div t-if="day.total >= 8" class="vn-myweek-overtime-hint">
+                                Journée déjà à <t t-esc="day.total.toFixed(1)"/>h : les heures ajoutées ici seront comptées comme temps additionnel.
+                            </div>
                             <div t-if="state.recentCombos.length" class="vn-myweek-recent">
                                 <span class="vn-myweek-recent-label">Récent :</span>
                                 <t t-foreach="state.recentCombos" t-as="combo" t-key="combo_index">
