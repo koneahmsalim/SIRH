@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="villa_nova_project.Timeline">
+        <div class="vn-timeline">
+            <div class="vn-timeline-header">
+                <h1>Timeline</h1>
+                <div class="vn-timeline-nav">
+                    <button class="btn vn-timeline-nav-btn" t-on-click="prevWindow" title="Période précédente">
+                        <i class="fa fa-chevron-left"/>
+                    </button>
+                    <button class="btn vn-timeline-today-btn" t-on-click="goToday">Aujourd'hui</button>
+                    <button class="btn vn-timeline-nav-btn" t-on-click="nextWindow" title="Période suivante">
+                        <i class="fa fa-chevron-right"/>
+                    </button>
+                </div>
+            </div>
+
+            <div t-if="state.loading" class="vn-skeleton" style="height: 400px; border-radius: var(--vn-radius-lg);"/>
+
+            <div t-else="" class="vn-timeline-body">
+                <div class="vn-timeline-sidebar">
+                    <div class="vn-timeline-sidebar-head"/>
+                    <t t-foreach="rows" t-as="row" t-key="row_index">
+                        <div t-if="row.type === 'group'" class="vn-timeline-row-label vn-timeline-group-label" t-esc="row.label"/>
+                        <div t-else="" class="vn-timeline-row-label vn-timeline-task-label"
+                             t-esc="row.task.name" t-att-title="row.task.name"
+                             t-on-click="() => this.openTask(row.task.id)"/>
+                    </t>
+                </div>
+
+                <div class="vn-timeline-scroll">
+                    <div class="vn-timeline-axis" t-att-style="'width:' + gridWidth + 'px'">
+                        <div class="vn-timeline-months">
+                            <t t-foreach="months" t-as="m" t-key="m.key">
+                                <span class="vn-timeline-month" t-att-style="'width:' + (m.count * DAY_WIDTH) + 'px'" t-esc="m.label"/>
+                            </t>
+                        </div>
+                        <div class="vn-timeline-days">
+                            <t t-foreach="days" t-as="d" t-key="d_index">
+                                <span class="vn-timeline-day" t-att-class="{'vn-timeline-day-weekend': d.getDay() === 0 || d.getDay() === 6}" t-esc="d.getDate()"/>
+                            </t>
+                        </div>
+                    </div>
+
+                    <div class="vn-timeline-grid" t-att-style="'width:' + gridWidth + 'px; height:' + (rows.length * ROW_HEIGHT) + 'px'">
+                        <div class="vn-timeline-today-line" t-att-style="'left:' + todayOffset + 'px'"/>
+
+                        <svg class="vn-timeline-deps" t-att-width="gridWidth" t-att-height="rows.length * ROW_HEIGHT">
+                            <defs>
+                                <marker id="vn-timeline-arrow" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+                                    <path d="M0,0 L6,3 L0,6 Z" class="vn-timeline-dep-arrow"/>
+                                </marker>
+                            </defs>
+                            <t t-foreach="dependencyLines" t-as="line" t-key="line_index">
+                                <path t-att-d="line.d" class="vn-timeline-dep-path" marker-end="url(#vn-timeline-arrow)"/>
+                            </t>
+                        </svg>
+
+                        <t t-foreach="rows" t-as="row" t-key="row_index">
+                            <div t-if="row.type === 'group'" class="vn-timeline-grid-row vn-timeline-grid-group-row"/>
+                            <div t-else="" class="vn-timeline-grid-row">
+                                <div class="vn-timeline-bar" t-att-class="'vn-timeline-bar-' + row.task.state"
+                                     t-att-style="'left:' + row.left + 'px; width:' + row.width + 'px'"
+                                     t-att-title="row.task.name"
+                                     t-on-click="() => this.openTask(row.task.id)">
+                                    <span class="vn-timeline-bar-label" t-esc="row.task.name"/>
+                                </div>
+                            </div>
+                        </t>
+                    </div>
+                </div>
+            </div>
+
+            <div t-if="!state.loading and !state.tasks.length" class="vn-empty-state">
+                <span class="vn-empty-title">Aucune tâche avec une échéance sur cette période</span>
+            </div>
+        </div>
+    </t>
+
+</templates>

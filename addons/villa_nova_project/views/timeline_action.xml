@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="action_villa_nova_timeline" model="ir.actions.client">
+        <field name="name">Timeline</field>
+        <field name="tag">villa_nova_project.timeline</field>
+    </record>
+
+    <menuitem id="menu_villa_nova_timeline"
+              name="Timeline"
+              parent="project.menu_main_pm"
+              action="action_villa_nova_timeline"
+              groups="project.group_project_manager,project.group_project_user"
+              sequence="3"/>
+
+</odoo>

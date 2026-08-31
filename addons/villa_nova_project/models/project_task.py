@@ -1,8 +1,48 @@
-from odoo import models, _
+from odoo import api, fields, models, _
 
 
 class ProjectTask(models.Model):
     _inherit = 'project.task'
+
+    # Odoo Community n'a pas de champ de debut planifie sur les taches
+    # (date_end = date de cloture reelle, pas une date prevue) - necessaire
+    # pour tracer une barre dans la Timeline (villa_nova_project), pas
+    # seulement un point d'echeance.
+    date_start = fields.Datetime(
+        string="Début planifié",
+        help="Date de début prévue de la tâche, utilisée par la vue Timeline.",
+    )
+
+    @api.model
+    def get_timeline_data(self, date_from, date_to):
+        """Taches ayant une des deux dates (debut planifie ou echeance) et
+        dont l'intervalle [debut, echeance] chevauche la fenetre visible.
+        Sans date_start, l'echeance sert aussi de debut (barre d'un jour) -
+        et inversement."""
+        window_start = fields.Datetime.from_string(date_from)
+        window_end = fields.Datetime.from_string(date_to)
+        tasks = self.search([
+            ('project_id', '!=', False),
+            '|', ('date_start', '!=', False), ('date_deadline', '!=', False),
+        ], order='project_id, date_start, date_deadline')
+
+        result = []
+        for task in tasks:
+            start = task.date_start or task.date_deadline
+            end = task.date_deadline or task.date_start
+            if end < window_start or start > window_end:
+                continue
+            result.append({
+                'id': task.id,
+                'name': task.name,
+                'project_id': task.project_id.id,
+                'project_name': task.project_id.name,
+                'date_start': fields.Datetime.to_string(start),
+                'date_deadline': fields.Datetime.to_string(end),
+                'state': task.state,
+                'depend_on_ids': task.depend_on_ids.ids,
+            })
+        return result
 
     def action_villa_nova_view_depend_on(self):
         """"Bloque par" (depend_on_ids) n'a nativement qu'un onglet dans le

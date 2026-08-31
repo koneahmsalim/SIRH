@@ -23,6 +23,10 @@
                     </div>
                 </button>
             </xpath>
+            <xpath expr="//label[@for='date_deadline']" position="before">
+                <label for="date_start"/>
+                <field name="date_start"/>
+            </xpath>
         </field>
     </record>
 

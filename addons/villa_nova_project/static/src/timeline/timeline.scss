@@ -1,0 +1,241 @@
+$vn-timeline-row-height: 36px;
+$vn-timeline-head-height: 48px;
+$vn-timeline-sidebar-width: 240px;
+
+.vn-timeline {
+    padding: var(--vn-space-6);
+    max-width: 1600px;
+    margin: 0 auto;
+}
+
+.vn-timeline-header {
+    display: flex;
+    align-items: center;
+    gap: var(--vn-space-4);
+    margin-bottom: var(--vn-space-4);
+
+    h1 {
+        font-family: $o-headings-font-family;
+        font-weight: $o-font-weight-bold;
+        font-size: 1.4rem;
+        color: $vn-graphite;
+        margin: 0;
+    }
+}
+
+.vn-timeline-nav {
+    display: flex;
+    align-items: center;
+    gap: var(--vn-space-2);
+    margin-left: auto;
+}
+
+.vn-timeline-nav-btn {
+    width: 34px;
+    height: 34px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    border: 1px solid $o-gray-200;
+    border-radius: var(--vn-radius-md);
+    background: $o-view-background-color;
+    color: $vn-graphite;
+
+    &:hover { border-color: $vn-crimson; color: $vn-crimson-dark; }
+}
+
+.vn-timeline-today-btn {
+    border: 1px solid $o-gray-200;
+    border-radius: var(--vn-radius-full);
+    padding: var(--vn-space-2) var(--vn-space-4);
+    font-size: 0.82rem;
+    font-weight: $o-font-weight-medium;
+    color: $vn-graphite;
+    background: $o-view-background-color;
+
+    &:hover { border-color: $vn-crimson; color: $vn-crimson-dark; }
+}
+
+.vn-timeline-body {
+    display: flex;
+    align-items: flex-start;
+    border: 1px solid $o-gray-200;
+    border-radius: var(--vn-radius-lg);
+    box-shadow: var(--vn-shadow-1);
+    overflow: hidden;
+    background: $o-view-background-color;
+}
+
+// ---------------------------------------------------------------------
+// Colonne fixe (noms des taches)
+// ---------------------------------------------------------------------
+.vn-timeline-sidebar {
+    flex: 0 0 $vn-timeline-sidebar-width;
+    width: $vn-timeline-sidebar-width;
+    border-right: 1px solid $o-gray-200;
+}
+
+.vn-timeline-sidebar-head {
+    height: $vn-timeline-head-height;
+    border-bottom: 1px solid $o-gray-200;
+    background: $o-gray-100;
+}
+
+.vn-timeline-row-label {
+    height: $vn-timeline-row-height;
+    display: flex;
+    align-items: center;
+    padding: 0 var(--vn-space-3);
+    font-size: 0.8rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    border-bottom: 1px solid $o-gray-100;
+}
+
+.vn-timeline-group-label {
+    font-family: $o-headings-font-family;
+    font-weight: $o-font-weight-bold;
+    color: $vn-graphite;
+    background: $o-gray-100;
+}
+
+.vn-timeline-task-label {
+    color: $vn-slate;
+    cursor: pointer;
+
+    &:hover { color: $vn-crimson-dark; }
+}
+
+// ---------------------------------------------------------------------
+// Zone defilante (axe + grille)
+// ---------------------------------------------------------------------
+.vn-timeline-scroll {
+    flex: 1 1 auto;
+    overflow-x: auto;
+}
+
+.vn-timeline-axis {
+    height: $vn-timeline-head-height;
+    border-bottom: 1px solid $o-gray-200;
+    background: $o-gray-100;
+    position: sticky;
+    top: 0;
+}
+
+.vn-timeline-months {
+    display: flex;
+    height: 24px;
+}
+
+.vn-timeline-month {
+    flex-shrink: 0;
+    font-size: 0.72rem;
+    font-weight: $o-font-weight-medium;
+    color: $vn-slate;
+    text-transform: capitalize;
+    padding-left: var(--vn-space-2);
+    line-height: 24px;
+    border-left: 1px solid $o-gray-200;
+    overflow: hidden;
+    white-space: nowrap;
+}
+
+.vn-timeline-days {
+    display: flex;
+    height: 24px;
+}
+
+.vn-timeline-day {
+    flex-shrink: 0;
+    width: 32px;
+    font-size: 0.68rem;
+    color: $vn-slate;
+    text-align: center;
+    line-height: 24px;
+    font-variant-numeric: tabular-nums;
+}
+
+.vn-timeline-day-weekend {
+    background: $o-gray-100;
+}
+
+.vn-timeline-grid {
+    position: relative;
+    background-image: repeating-linear-gradient(
+        to right,
+        $o-gray-100 0,
+        $o-gray-100 1px,
+        transparent 1px,
+        transparent 32px
+    );
+}
+
+.vn-timeline-grid-row {
+    position: relative;
+    height: $vn-timeline-row-height;
+    border-bottom: 1px solid $o-gray-100;
+}
+
+.vn-timeline-grid-group-row {
+    background: rgba($o-gray-100, 0.6);
+}
+
+.vn-timeline-today-line {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: $vn-crimson;
+    z-index: 2;
+    opacity: 0.6;
+}
+
+.vn-timeline-deps {
+    position: absolute;
+    top: 0;
+    left: 0;
+    pointer-events: none;
+    z-index: 1;
+}
+
+.vn-timeline-dep-path {
+    fill: none;
+    stroke: $vn-slate-light;
+    stroke-width: 1.5;
+}
+
+.vn-timeline-dep-arrow {
+    fill: $vn-slate-light;
+}
+
+.vn-timeline-bar {
+    position: absolute;
+    top: 6px;
+    height: $vn-timeline-row-height - 12px;
+    border-radius: var(--vn-radius-sm);
+    background: $vn-crimson;
+    display: flex;
+    align-items: center;
+    padding: 0 var(--vn-space-2);
+    overflow: hidden;
+    cursor: pointer;
+    z-index: 3;
+    transition: filter var(--vn-transition-fast);
+
+    &:hover { filter: brightness(0.92); }
+
+    &.vn-timeline-bar-1_done { background: $o-success; }
+    &.vn-timeline-bar-1_canceled { background: $o-gray-400; }
+    &.vn-timeline-bar-04_waiting_normal { background: $o-warning; }
+}
+
+.vn-timeline-bar-label {
+    font-size: 0.72rem;
+    font-weight: $o-font-weight-medium;
+    color: #fff;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}

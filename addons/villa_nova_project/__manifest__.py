@@ -14,6 +14,7 @@
         'views/project_task_form_view.xml',
         'views/my_tasks_action.xml',
         'views/portfolio_action.xml',
+        'views/timeline_action.xml',
     ],
     'assets': {
         'web.assets_backend': [
@@ -24,6 +25,9 @@
             'villa_nova_project/static/src/portfolio/portfolio.scss',
             'villa_nova_project/static/src/portfolio/portfolio.xml',
             'villa_nova_project/static/src/portfolio/portfolio.js',
+            'villa_nova_project/static/src/timeline/timeline.scss',
+            'villa_nova_project/static/src/timeline/timeline.xml',
+            'villa_nova_project/static/src/timeline/timeline.js',
         ],
     },
     'installable': True,
