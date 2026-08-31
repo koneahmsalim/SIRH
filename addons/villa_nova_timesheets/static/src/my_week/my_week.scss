@@ -183,9 +183,17 @@
     padding: var(--vn-space-2);
     border-radius: var(--vn-radius-sm);
     background: $o-gray-100;
+    border-left: 3px solid transparent;
     transition: background-color var(--vn-transition-fast);
 
     &:hover { background: $o-gray-200; }
+
+    &.vn-myweek-entry-overtime {
+        border-left-color: $o-warning;
+        background: rgba($o-warning, 0.08);
+
+        &:hover { background: rgba($o-warning, 0.14); }
+    }
 }
 
 .vn-myweek-entry-main {
@@ -218,6 +226,11 @@
     font-weight: $o-font-weight-medium;
     color: $vn-graphite;
     font-variant-numeric: tabular-nums;
+}
+
+.vn-myweek-entry-hours-overtime {
+    color: darken($o-warning, 10%);
+    font-weight: $o-font-weight-bold;
 }
 
 .vn-myweek-entry-del {

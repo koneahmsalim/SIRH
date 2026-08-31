@@ -52,7 +52,7 @@
 
                         <div class="vn-myweek-entries">
                             <t t-foreach="day.entries" t-as="entry" t-key="entry.id">
-                                <div class="vn-myweek-entry">
+                                <div class="vn-myweek-entry" t-att-class="{'vn-myweek-entry-overtime': entry.overtime_amount > 0}">
                                     <div class="vn-myweek-entry-main">
                                         <span class="vn-myweek-entry-title" t-esc="entry.name"/>
                                         <span class="vn-myweek-entry-sub">
@@ -63,7 +63,16 @@
                                             </t>
                                         </span>
                                     </div>
-                                    <span class="vn-myweek-entry-hours" t-esc="entry.unit_amount.toFixed(1) + 'h'"/>
+                                    <span class="vn-myweek-entry-hours">
+                                        <t t-if="entry.overtime_amount === 0" t-esc="entry.unit_amount.toFixed(1) + 'h'"/>
+                                        <t t-elif="entry.normal_amount === 0">
+                                            <span class="vn-myweek-entry-hours-overtime" t-esc="entry.unit_amount.toFixed(1) + 'h'"/>
+                                        </t>
+                                        <t t-else="">
+                                            <t t-esc="entry.normal_amount.toFixed(1) + 'h'"/><span
+                                                class="vn-myweek-entry-hours-overtime" t-esc="' +' + entry.overtime_amount.toFixed(1) + 'h'"/>
+                                        </t>
+                                    </span>
                                     <button t-if="state.deletingId !== entry.id" class="vn-myweek-entry-del"
                                             t-on-click="() => this.askDelete(entry.id)" title="Supprimer">
                                         <i class="fa fa-times"/>

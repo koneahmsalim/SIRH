@@ -149,8 +149,22 @@ export class VillaNovaMyWeek extends Component {
         for (let i = 0; i < 7; i++) {
             const dateObj = addDays(this.state.weekStart, i);
             const dateStr = toISODate(dateObj);
-            const dayLines = lines.filter((l) => l.date === dateStr);
-            const total = dayLines.reduce((s, l) => s + l.unit_amount, 0);
+            // Ordre de saisie (id croissant) pour determiner, activite par
+            // activite, la part normale et la part additionnelle : une
+            // activite peut chevaucher le seuil de 8h (ex. 7h deja saisies +
+            // activite de 3h => 1h normale + 2h additionnelle sur cette
+            // meme activite, pas juste "avant/apres" au niveau du jour).
+            const dayLines = lines
+                .filter((l) => l.date === dateStr)
+                .sort((a, b) => a.id - b.id);
+            let running = 0;
+            for (const l of dayLines) {
+                const normalPart = Math.max(0, Math.min(l.unit_amount, DAILY_HOURS_LIMIT - running));
+                l.normal_amount = normalPart;
+                l.overtime_amount = l.unit_amount - normalPart;
+                running += l.unit_amount;
+            }
+            const total = running;
             days.push({
                 index: i,
                 date: dateStr,
