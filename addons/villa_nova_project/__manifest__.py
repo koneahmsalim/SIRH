@@ -8,7 +8,7 @@
     'category': 'Services/Project',
     'author': 'Villa Nova',
     'license': 'LGPL-3',
-    'depends': ['project', 'hr_timesheet', 'villa_nova_theme', 'base_automation'],
+    'depends': ['project', 'hr_timesheet', 'villa_nova_theme', 'base_automation', 'website'],
     'data': [
         'security/ir.model.access.csv',
         'security/automation_rules_security.xml',
@@ -22,6 +22,7 @@
         'views/automation_rules_view.xml',
         'views/project_goal_views.xml',
         'views/goals_action.xml',
+        'views/public_form_templates.xml',
     ],
     'assets': {
         'web.assets_backend': [

@@ -21,6 +21,11 @@
                             <field name="priority" widget="priority"/>
                         </list>
                     </field>
+                    <group class="mt-4">
+                        <field name="public_form_url" widget="CopyClipboardURL"
+                               string="Formulaire public"
+                               help="Toute personne disposant de ce lien peut soumettre une demande, sans compte - elle devient une tâche dans ce projet."/>
+                    </group>
                 </page>
             </page>
         </field>

@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <template id="public_task_form" name="Formulaire de demande - Projet">
+        <t t-call="website.layout">
+            <div class="container py-5" style="max-width: 640px;">
+                <h1 class="mb-1" t-esc="project.name"/>
+                <p class="text-muted mb-4">Décrivez votre demande : elle sera ajoutée aux tâches de ce projet.</p>
+
+                <div t-if="error" class="alert alert-danger" t-esc="error"/>
+
+                <form t-attf-action="/projet/formulaire/#{project.id}/#{project.access_token}/soumettre" method="post">
+                    <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                    <!-- Piege a robots : reste vide pour un visiteur humain. -->
+                    <div style="position: absolute; left: -5000px;" aria-hidden="true">
+                        <input type="text" name="website" tabindex="-1" autocomplete="off"/>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label" for="pf_name">Titre de la demande *</label>
+                        <input type="text" class="form-control" id="pf_name" name="name" required="required" maxlength="200"
+                               t-att-value="values and values.get('name')"/>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label" for="pf_description">Détails</label>
+                        <textarea class="form-control" id="pf_description" name="description" rows="5" maxlength="5000"><t t-esc="values and values.get('description')"/></textarea>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label" for="pf_requester_name">Votre nom</label>
+                            <input type="text" class="form-control" id="pf_requester_name" name="requester_name" maxlength="120"
+                                   t-att-value="values and values.get('requester_name')"/>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label" for="pf_requester_email">Votre e-mail</label>
+                            <input type="email" class="form-control" id="pf_requester_email" name="requester_email" maxlength="120"
+                                   t-att-value="values and values.get('requester_email')"/>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Envoyer la demande</button>
+                </form>
+            </div>
+        </t>
+    </template>
+
+    <template id="public_task_form_thanks" name="Formulaire de demande - Merci">
+        <t t-call="website.layout">
+            <div class="container py-5 text-center" style="max-width: 640px;">
+                <h1>Merci !</h1>
+                <p class="text-muted">
+                    Votre demande a bien été transmise à l'équipe du projet «
+                    <t t-esc="project.name"/> ».
+                </p>
+            </div>
+        </t>
+    </template>
+
+</odoo>

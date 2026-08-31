@@ -32,6 +32,14 @@ class ProjectProject(models.Model):
                 without_stages.write({'type_ids': [(6, 0, stages.ids)]})
         return projects
 
+    public_form_url = fields.Char(string="Lien du formulaire public", compute='_compute_public_form_url')
+
+    def _compute_public_form_url(self):
+        base_url = self.env['ir.config_parameter'].sudo().get_param('web.base.url')
+        for project in self:
+            project._portal_ensure_token()
+            project.public_form_url = '%s/projet/formulaire/%d/%s' % (base_url, project.id, project.access_token)
+
     @api.model
     def get_portfolio_data(self):
         """Sante calculee automatiquement a partir des vraies taches
