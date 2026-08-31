@@ -9,14 +9,23 @@
     'category': 'Human Resources/Timesheets',
     'author': 'Villa Nova',
     'license': 'LGPL-3',
-    'depends': ['hr_timesheet', 'villa_nova_leaves', 'hr_attendance'],
+    'depends': ['hr_timesheet', 'villa_nova_leaves', 'hr_attendance', 'villa_nova_theme'],
     'data': [
         'security/ir.model.access.csv',
+        'security/default_user_groups.xml',
         'views/timesheet_activity_views.xml',
         'views/account_analytic_line_views.xml',
+        'views/my_week_action.xml',
         'data/villa.nova.timesheet.activity.csv',
     ],
+    'assets': {
+        'web.assets_backend': [
+            'villa_nova_timesheets/static/src/my_week/my_week.scss',
+            'villa_nova_timesheets/static/src/my_week/my_week.xml',
+            'villa_nova_timesheets/static/src/my_week/my_week.js',
+        ],
+    },
     'installable': True,
     'application': False,
-    'post_init_hook': 'link_activity_departments',
+    'post_init_hook': 'post_init',
 }

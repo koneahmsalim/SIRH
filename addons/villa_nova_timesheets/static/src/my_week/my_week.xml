@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="villa_nova_timesheets.MyWeek">
+        <div class="vn-myweek">
+            <div class="vn-myweek-header">
+                <div class="vn-myweek-title">
+                    <h1>Ma semaine</h1>
+                    <p class="vn-myweek-week-label" t-esc="weekLabel"/>
+                </div>
+                <div class="vn-myweek-nav">
+                    <button class="btn vn-myweek-nav-btn" t-on-click="prevWeek" title="Semaine précédente">
+                        <i class="fa fa-chevron-left"/>
+                    </button>
+                    <button class="btn vn-myweek-today-btn" t-on-click="goToday">Aujourd'hui</button>
+                    <button class="btn vn-myweek-nav-btn" t-on-click="nextWeek" title="Semaine suivante">
+                        <i class="fa fa-chevron-right"/>
+                    </button>
+                </div>
+                <div class="vn-myweek-total">
+                    <span class="vn-myweek-total-value" t-esc="weekTotal.toFixed(1)"/>
+                    <span class="vn-myweek-total-label">heures cette semaine</span>
+                </div>
+                <button class="btn vn-myweek-list-link" t-on-click="openFullList">
+                    Vue liste complète <i class="fa fa-arrow-right ms-1"/>
+                </button>
+            </div>
+
+            <div t-if="state.loading" class="vn-myweek-days">
+                <t t-foreach="[1,2,3,4,5,6,7]" t-as="i" t-key="i">
+                    <span class="vn-skeleton" style="height: 220px; border-radius: var(--vn-radius-lg);"/>
+                </t>
+            </div>
+
+            <div t-else="" class="vn-myweek-days">
+                <t t-foreach="state.days" t-as="day" t-key="day.date">
+                    <div class="vn-myweek-day" t-att-class="{'vn-myweek-day-today': isToday(day.date)}">
+                        <div class="vn-myweek-day-head">
+                            <div>
+                                <span class="vn-myweek-day-name" t-esc="day.label"/>
+                                <span class="vn-myweek-day-num" t-esc="day.dayNum"/>
+                            </div>
+                            <span t-if="day.total > 0" class="vn-badge vn-badge-neutral vn-myweek-day-total" t-esc="day.total.toFixed(1) + 'h'"/>
+                        </div>
+
+                        <div class="vn-myweek-entries">
+                            <t t-foreach="day.entries" t-as="entry" t-key="entry.id">
+                                <div class="vn-myweek-entry">
+                                    <div class="vn-myweek-entry-main">
+                                        <span class="vn-myweek-entry-title" t-esc="entry.name"/>
+                                        <span class="vn-myweek-entry-sub">
+                                            <t t-if="entry.villa_nova_activity_id" t-esc="entry.villa_nova_activity_id[1]"/>
+                                            <t t-if="entry.project_id">
+                                                <t t-if="entry.villa_nova_activity_id"> · </t>
+                                                <t t-esc="entry.project_id[1]"/>
+                                            </t>
+                                        </span>
+                                    </div>
+                                    <span class="vn-myweek-entry-hours" t-esc="entry.unit_amount.toFixed(1) + 'h'"/>
+                                    <button t-if="state.deletingId !== entry.id" class="vn-myweek-entry-del"
+                                            t-on-click="() => this.askDelete(entry.id)" title="Supprimer">
+                                        <i class="fa fa-times"/>
+                                    </button>
+                                    <button t-else="" class="vn-myweek-entry-del vn-myweek-entry-del-confirm"
+                                            t-on-click="() => this.confirmDelete(entry.id)" title="Confirmer la suppression">
+                                        Supprimer ?
+                                    </button>
+                                </div>
+                            </t>
+                            <div t-if="!day.entries.length and state.openDay !== day.index" class="vn-myweek-empty">
+                                Rien enregistré
+                            </div>
+                        </div>
+
+                        <div t-if="state.openDay === day.index" class="vn-myweek-add-form">
+                            <div t-if="state.recentCombos.length" class="vn-myweek-recent">
+                                <span class="vn-myweek-recent-label">Récent :</span>
+                                <t t-foreach="state.recentCombos" t-as="combo" t-key="combo_index">
+                                    <button class="vn-myweek-recent-chip" t-on-click="() => this.applyCombo(combo)">
+                                        <t t-esc="combo.villa_nova_activity_id ? combo.villa_nova_activity_id[1] : combo.project_id[1]"/>
+                                    </button>
+                                </t>
+                            </div>
+
+                            <select class="vn-myweek-select" t-on-change="onProjectChange">
+                                <option value="">Projet / mandat...</option>
+                                <t t-foreach="state.projects" t-as="p" t-key="p.id">
+                                    <option t-att-value="p.id" t-att-selected="state.form.project_id === p.id" t-esc="p.name"/>
+                                </t>
+                            </select>
+
+                            <select t-if="state.form.project_id" class="vn-myweek-select" t-on-change="onTaskChange">
+                                <option value="">Tâche...</option>
+                                <t t-foreach="tasksForCurrentProject()" t-as="tk" t-key="tk.id">
+                                    <option t-att-value="tk.id" t-att-selected="state.form.task_id === tk.id" t-esc="tk.name"/>
+                                </t>
+                            </select>
+
+                            <select class="vn-myweek-select" t-on-change="onActivityChange">
+                                <option value="">Code activité...</option>
+                                <t t-foreach="state.activities" t-as="act" t-key="act.id">
+                                    <option t-att-value="act.id" t-att-selected="state.form.activity_id === act.id" t-esc="act.display_name"/>
+                                </t>
+                            </select>
+
+                            <input type="text" class="vn-myweek-input" placeholder="Description (optionnel)"
+                                   t-att-value="state.form.name" t-on-change="onDescriptionChange"/>
+
+                            <div class="vn-myweek-hours-row">
+                                <t t-foreach="QUICK_HOURS" t-as="h" t-key="h">
+                                    <button class="vn-myweek-hour-btn" t-att-class="{'vn-myweek-hour-btn-active': state.form.unit_amount === h}"
+                                            t-on-click="() => this.setHours(h)" t-esc="h + 'h'"/>
+                                </t>
+                                <input type="number" step="0.25" min="0" class="vn-myweek-hour-custom"
+                                       t-att-value="state.form.unit_amount" t-on-change="onHoursInput"/>
+                            </div>
+
+                            <div class="vn-myweek-form-actions">
+                                <button class="btn btn-secondary btn-sm" t-on-click="closeAddForm">Annuler</button>
+                                <button class="btn btn-primary btn-sm" t-on-click="() => this.saveEntry(day.index)">Enregistrer</button>
+                            </div>
+                        </div>
+                        <button t-else="" class="vn-myweek-add-btn" t-on-click="() => this.openAddForm(day.index)">
+                            <i class="fa fa-plus"/> Ajouter
+                        </button>
+                    </div>
+                </t>
+            </div>
+        </div>
+    </t>
+
+</templates>

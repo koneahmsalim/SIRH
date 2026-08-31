@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        <!-- Sans ce groupe, un nouvel employe ne peut saisir aucune feuille
+             de temps (ni via "Ma semaine" ni via la grille standard). On
+             l'ajoute au modele des nouveaux utilisateurs pour que toute
+             creation future de compte employe l'obtienne par defaut. -->
+        <record id="base.default_user" model="res.users">
+            <field name="groups_id" eval="[(4, ref('hr_timesheet.group_hr_timesheet_user'))]"/>
+        </record>
+    </data>
+</odoo>

@@ -1,0 +1,346 @@
+// ==========================================================================
+// "Ma semaine" : saisie de feuille de temps en carnet (une carte par jour),
+// pas en tableur - raccourcis d'heures et activites recentes pour eviter de
+// re-selectionner projet/tache/activite a chaque ligne. Reutilise
+// entierement account.analytic.line, aucun nouveau modele.
+// ==========================================================================
+
+.vn-myweek {
+    padding: var(--vn-space-6);
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+.vn-myweek-header {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: var(--vn-space-4);
+    margin-bottom: var(--vn-space-6);
+}
+
+.vn-myweek-title {
+    h1 {
+        font-family: $o-headings-font-family;
+        font-weight: $o-font-weight-bold;
+        font-size: 1.4rem;
+        color: $vn-graphite;
+        margin: 0;
+    }
+}
+
+.vn-myweek-week-label {
+    margin: 0.15rem 0 0;
+    color: $vn-slate;
+    font-size: 0.88rem;
+    text-transform: capitalize;
+}
+
+.vn-myweek-nav {
+    display: flex;
+    align-items: center;
+    gap: var(--vn-space-2);
+}
+
+.vn-myweek-nav-btn {
+    width: 34px;
+    height: 34px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    border: 1px solid $o-gray-200;
+    border-radius: var(--vn-radius-md);
+    background: $o-view-background-color;
+    color: $vn-graphite;
+
+    &:hover { border-color: $vn-crimson; color: $vn-crimson-dark; }
+}
+
+.vn-myweek-today-btn {
+    border: 1px solid $o-gray-200;
+    border-radius: var(--vn-radius-full);
+    padding: var(--vn-space-2) var(--vn-space-4);
+    font-size: 0.82rem;
+    font-weight: $o-font-weight-medium;
+    color: $vn-graphite;
+    background: $o-view-background-color;
+
+    &:hover { border-color: $vn-crimson; color: $vn-crimson-dark; }
+}
+
+.vn-myweek-total {
+    margin-left: auto;
+    text-align: right;
+    line-height: 1.15;
+}
+
+.vn-myweek-total-value {
+    display: block;
+    font-family: $o-headings-font-family;
+    font-weight: $o-font-weight-bold;
+    font-size: 1.5rem;
+    color: $vn-crimson-dark;
+    font-variant-numeric: tabular-nums;
+}
+
+.vn-myweek-total-label {
+    font-size: 0.72rem;
+    color: $vn-slate;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+.vn-myweek-list-link {
+    font-size: 0.82rem;
+    color: $vn-slate;
+    padding: var(--vn-space-2) 0;
+
+    &:hover { color: $vn-crimson-dark; }
+}
+
+// --------------------------------------------------------------------------
+// Grille des 7 jours
+// --------------------------------------------------------------------------
+.vn-myweek-days {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+    gap: var(--vn-space-4);
+    align-items: start;
+}
+
+.vn-myweek-day {
+    background: $o-view-background-color;
+    border: 1px solid $o-gray-200;
+    border-radius: var(--vn-radius-lg);
+    box-shadow: var(--vn-shadow-1);
+    padding: var(--vn-space-4);
+    display: flex;
+    flex-direction: column;
+    gap: var(--vn-space-3);
+    min-height: 180px;
+
+    &.vn-myweek-day-today {
+        border-color: rgba($vn-crimson, 0.35);
+        box-shadow: 0 0 0 1px rgba($vn-crimson, 0.18), var(--vn-shadow-1);
+    }
+}
+
+.vn-myweek-day-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+}
+
+.vn-myweek-day-name {
+    display: block;
+    font-family: $o-headings-font-family;
+    font-weight: $o-font-weight-bold;
+    font-size: 0.85rem;
+    color: $vn-graphite;
+}
+
+.vn-myweek-day-num {
+    display: block;
+    font-size: 0.75rem;
+    color: $vn-slate;
+    font-variant-numeric: tabular-nums;
+}
+
+.vn-myweek-day-total {
+    font-variant-numeric: tabular-nums;
+}
+
+.vn-myweek-entries {
+    display: flex;
+    flex-direction: column;
+    gap: var(--vn-space-2);
+    flex: 1 1 auto;
+}
+
+.vn-myweek-empty {
+    color: $vn-slate;
+    font-size: 0.8rem;
+    font-style: italic;
+    padding: var(--vn-space-2) 0;
+}
+
+.vn-myweek-entry {
+    display: flex;
+    align-items: center;
+    gap: var(--vn-space-2);
+    padding: var(--vn-space-2);
+    border-radius: var(--vn-radius-sm);
+    background: $o-gray-100;
+    transition: background-color var(--vn-transition-fast);
+
+    &:hover { background: $o-gray-200; }
+}
+
+.vn-myweek-entry-main {
+    flex: 1 1 auto;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+.vn-myweek-entry-title {
+    font-size: 0.82rem;
+    font-weight: $o-font-weight-medium;
+    color: $vn-graphite;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.vn-myweek-entry-sub {
+    font-size: 0.72rem;
+    color: $vn-slate;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.vn-myweek-entry-hours {
+    flex-shrink: 0;
+    font-size: 0.78rem;
+    font-weight: $o-font-weight-medium;
+    color: $vn-graphite;
+    font-variant-numeric: tabular-nums;
+}
+
+.vn-myweek-entry-del {
+    flex-shrink: 0;
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    color: $vn-slate;
+    font-size: 0.7rem;
+    background: transparent;
+
+    &:hover { background: rgba($o-danger, 0.12); color: $o-danger; }
+
+    &.vn-myweek-entry-del-confirm {
+        width: auto;
+        border-radius: var(--vn-radius-full);
+        padding: 0 var(--vn-space-2);
+        background: $o-danger;
+        color: #fff;
+        font-size: 0.68rem;
+        white-space: nowrap;
+
+        &:hover { background: darken($o-danger, 8%); }
+    }
+}
+
+// --------------------------------------------------------------------------
+// Bouton "Ajouter" + formulaire inline
+// --------------------------------------------------------------------------
+.vn-myweek-add-btn {
+    border: 1px dashed $o-gray-300;
+    border-radius: var(--vn-radius-md);
+    padding: var(--vn-space-2);
+    font-size: 0.8rem;
+    font-weight: $o-font-weight-medium;
+    color: $vn-slate;
+    background: transparent;
+    transition: border-color var(--vn-transition-fast), color var(--vn-transition-fast);
+
+    i { margin-right: var(--vn-space-1); }
+
+    &:hover { border-color: $vn-crimson; color: $vn-crimson-dark; }
+}
+
+.vn-myweek-add-form {
+    display: flex;
+    flex-direction: column;
+    gap: var(--vn-space-2);
+    padding-top: var(--vn-space-2);
+    border-top: 1px solid $o-gray-100;
+}
+
+.vn-myweek-recent {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--vn-space-1);
+    margin-bottom: var(--vn-space-1);
+}
+
+.vn-myweek-recent-label {
+    font-size: 0.68rem;
+    color: $vn-slate;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    margin-right: 2px;
+}
+
+.vn-myweek-recent-chip {
+    font-size: 0.72rem;
+    padding: 2px var(--vn-space-2);
+    border-radius: var(--vn-radius-full);
+    background: rgba($vn-crimson, 0.1);
+    color: $vn-crimson-dark;
+    max-width: 140px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+
+    &:hover { background: rgba($vn-crimson, 0.22); }
+}
+
+.vn-myweek-select, .vn-myweek-input {
+    width: 100%;
+    font-size: 0.8rem;
+    padding: var(--vn-space-2);
+    border: 1px solid $o-gray-200;
+    border-radius: var(--vn-radius-sm);
+    background: $o-view-background-color;
+    color: $vn-graphite;
+
+    &:focus { border-color: $vn-crimson; outline: none; }
+}
+
+.vn-myweek-hours-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--vn-space-1);
+    align-items: center;
+}
+
+.vn-myweek-hour-btn {
+    font-size: 0.75rem;
+    font-weight: $o-font-weight-medium;
+    padding: var(--vn-space-1) var(--vn-space-2);
+    border: 1px solid $o-gray-200;
+    border-radius: var(--vn-radius-full);
+    background: $o-view-background-color;
+    color: $vn-graphite;
+
+    &:hover { border-color: $vn-crimson; }
+
+    &.vn-myweek-hour-btn-active {
+        background: $vn-crimson;
+        border-color: $vn-crimson;
+        color: #fff;
+    }
+}
+
+.vn-myweek-hour-custom {
+    width: 56px;
+    font-size: 0.78rem;
+    padding: var(--vn-space-1) var(--vn-space-2);
+    border: 1px solid $o-gray-200;
+    border-radius: var(--vn-radius-sm);
+    font-variant-numeric: tabular-nums;
+}
+
+.vn-myweek-form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: var(--vn-space-2);
+    margin-top: var(--vn-space-1);
+}

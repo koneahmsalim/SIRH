@@ -122,3 +122,15 @@ class VillaNovaTimesheetActivity(models.Model):
     def _get_available_for_employee(self, employee):
         activities = self.search([])
         return activities.filtered(lambda a: a._is_visible_for_employee(employee))
+
+    @api.model
+    def get_activities_for_me(self):
+        """Codes activite disponibles pour l'utilisateur courant, au format
+        leger utilise par l'interface "Ma semaine" (villa_nova_timesheets).
+        Reutilise _get_available_for_employee plutot que de dupliquer la
+        logique de visibilite (departement/groupe) cote client."""
+        employee = self.env.user.employee_id
+        if not employee:
+            return []
+        activities = self._get_available_for_employee(employee)
+        return activities.read(['id', 'display_name', 'code', 'name', 'project_required'])
