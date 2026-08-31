@@ -11,6 +11,7 @@
     'depends': ['project', 'hr_timesheet', 'villa_nova_theme'],
     'data': [
         'views/project_task_list_view.xml',
+        'views/project_task_form_view.xml',
         'views/my_tasks_action.xml',
     ],
     'assets': {

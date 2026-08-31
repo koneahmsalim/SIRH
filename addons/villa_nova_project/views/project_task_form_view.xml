@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- "Bloque par" (depend_on_ids) n'a nativement qu'un onglet enfoui
+         ("Blocked By") dans le formulaire, sans le bouton statistique que
+         "Bloque" (action_dependent_tasks) a deja juste a cote - on ajoute
+         le pendant symetrique pour que la dependance saute aux yeux sans
+         avoir a explorer les onglets. -->
+    <record id="view_task_form2_villa_nova" model="ir.ui.view">
+        <field name="name">project.task.form.villa.nova</field>
+        <field name="model">project.task</field>
+        <field name="inherit_id" ref="project.view_task_form2"/>
+        <field name="arch" type="xml">
+            <xpath expr="//button[@name='action_dependent_tasks']" position="before">
+                <button name="action_villa_nova_view_depend_on" type="object"
+                        invisible="depend_on_count == 0 or not allow_task_dependencies" class="oe_stat_button" icon="fa-hourglass-half"
+                        groups="project.group_project_task_dependencies">
+                    <div class="o_field_widget o_stat_info">
+                        <span class="o_stat_text">Bloqué par</span>
+                        <span class="o_stat_value">
+                            <field name="closed_depend_on_count"/> / <field name="depend_on_count"/>
+                        </span>
+                    </div>
+                </button>
+            </xpath>
+        </field>
+    </record>
+
+</odoo>

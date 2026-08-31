@@ -67,6 +67,17 @@
 }
 
 // --------------------------------------------------------------------------
+// Formulaire de tache (project.view_task_form2) : jalon mis en valeur des
+// qu'il est renseigne, plutot qu'un champ texte comme un autre.
+// --------------------------------------------------------------------------
+.o_form_project_tasks {
+    .o_field_widget[name="milestone_id"] .o_input:not(:placeholder-shown) {
+        color: $vn-crimson-dark;
+        font-weight: $o-font-weight-medium;
+    }
+}
+
+// --------------------------------------------------------------------------
 // Liste de projets (project.project, vue "o_project_kanban")
 // --------------------------------------------------------------------------
 .o_project_kanban {
