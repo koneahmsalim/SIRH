@@ -85,7 +85,7 @@ class HrEmployee(models.Model):
             day_end = DEVICE_TZ.localize(
                 datetime.combine(DEVICE_TZ.localize(att.check_in).date(), time.max)
             ).astimezone(pytz.utc).replace(tzinfo=None, microsecond=0)
-            att.check_out = day_end
+            att.write({'check_out': day_end, 'out_mode': 'auto_check_out'})
 
         # Toutes les presences du jour sont creees en un seul appel : les
         # creer une par une declenche le recalcul natif des heures sup. une
@@ -110,9 +110,14 @@ class HrEmployee(models.Model):
             # microseconde residuelle fait alors traiter deux fois le meme
             # jour calendaire (deux tuples distincts), ce qui provoque une
             # violation de la contrainte d'unicite employe+jour.
-            vals = {'employee_id': self.id, 'check_in': check_in.replace(microsecond=0)}
+            vals = {
+                'employee_id': self.id,
+                'check_in': check_in.replace(microsecond=0),
+                'in_mode': 'badge',
+            }
             if check_out:
                 vals['check_out'] = check_out.replace(microsecond=0)
+                vals['out_mode'] = 'badge'
             vals_list.append(vals)
         if vals_list:
             Attendance.create(vals_list)
