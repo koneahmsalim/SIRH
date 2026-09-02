@@ -37,10 +37,21 @@
 }
 
 .vn-training-cover {
+    position: relative;
     height: 130px;
     background-size: cover;
     background-position: center;
     background-color: var(--vn-mist, #f0f0f0);
+}
+
+.vn-training-mandatory {
+    position: absolute;
+    top: var(--vn-space-2);
+    left: var(--vn-space-2);
+}
+
+.vn-training-due {
+    color: var(--vn-crimson, #b3203a);
 }
 
 .vn-training-body {

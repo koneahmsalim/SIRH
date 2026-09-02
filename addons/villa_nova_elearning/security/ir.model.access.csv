@@ -1,0 +1,2 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_villa_nova_elearning_assign_wizard_officer,villa.nova.elearning.assign.wizard.officer,model_villa_nova_elearning_assign_wizard,website_slides.group_website_slides_officer,1,1,1,1

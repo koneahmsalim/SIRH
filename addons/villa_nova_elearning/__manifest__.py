@@ -10,7 +10,9 @@
     'license': 'LGPL-3',
     'depends': ['website_slides', 'villa_nova_theme'],
     'data': [
+        'security/ir.model.access.csv',
         'views/my_trainings_action.xml',
+        'wizard/assign_training_wizard_views.xml',
     ],
     'assets': {
         'web.assets_backend': [
@@ -21,4 +23,5 @@
     },
     'installable': True,
     'application': False,
+    'post_init_hook': 'post_init',
 }

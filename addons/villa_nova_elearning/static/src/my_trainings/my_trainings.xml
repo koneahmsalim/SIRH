@@ -26,7 +26,9 @@
                 <t t-foreach="state.trainings" t-as="training" t-key="training.channel_id">
                     <div class="vn-card vn-card-interactive vn-training-card"
                          t-on-click="() => this.openCourse(training)" role="button">
-                        <div class="vn-training-cover" t-attf-style="background-image: url({{courseImageUrl(training.channel_id)}})"/>
+                        <div class="vn-training-cover" t-attf-style="background-image: url({{courseImageUrl(training.channel_id)}})">
+                            <span t-if="training.mandatory" class="vn-badge vn-badge-brand vn-training-mandatory">Obligatoire</span>
+                        </div>
                         <div class="vn-training-body">
                             <div class="vn-training-head">
                                 <span class="vn-training-name" t-esc="training.name"/>
@@ -40,6 +42,7 @@
                             </div>
                             <div class="vn-training-meta">
                                 <span t-esc="training.completed_slides + ' / ' + training.total_slides + ' leçons'"/>
+                                <span t-if="training.due_date" class="vn-training-due" t-esc="'· échéance ' + training.due_date"/>
                             </div>
                         </div>
                     </div>
