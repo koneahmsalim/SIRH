@@ -100,8 +100,8 @@
                         domain="[('check_in', '&gt;=', context_today().strftime('%Y-%m-%d')),
                                  ('check_in', '&lt;', (context_today() + datetime.timedelta(days=1)).strftime('%Y-%m-%d'))]"/>
                 <filter string="Cette semaine" name="villa_nova_this_week"
-                        domain="[('check_in', '&gt;=', (context_today() - datetime.timedelta(days=context_today().weekday())).strftime('%Y-%m-%d')),
-                                 ('check_in', '&lt;', (context_today() + datetime.timedelta(days=7 - context_today().weekday())).strftime('%Y-%m-%d'))]"/>
+                        domain="[('check_in', '&gt;=', (context_today() + relativedelta(days=-6, weekday=0)).strftime('%Y-%m-%d')),
+                                 ('check_in', '&lt;', (context_today() + relativedelta(days=1, weekday=0)).strftime('%Y-%m-%d'))]"/>
                 <filter string="Ce mois" name="villa_nova_this_month"
                         domain="[('check_in', '&gt;=', context_today().strftime('%Y-%m-01')),
                                  ('check_in', '&lt;', (context_today() + relativedelta(months=1)).strftime('%Y-%m-01'))]"/>
@@ -138,8 +138,8 @@
                         domain="[('check_in', '&gt;=', context_today().strftime('%Y-%m-%d')),
                                  ('check_in', '&lt;', (context_today() + datetime.timedelta(days=1)).strftime('%Y-%m-%d'))]"/>
                 <filter string="Cette semaine" name="villa_nova_this_week"
-                        domain="[('check_in', '&gt;=', (context_today() - datetime.timedelta(days=context_today().weekday())).strftime('%Y-%m-%d')),
-                                 ('check_in', '&lt;', (context_today() + datetime.timedelta(days=7 - context_today().weekday())).strftime('%Y-%m-%d'))]"/>
+                        domain="[('check_in', '&gt;=', (context_today() + relativedelta(days=-6, weekday=0)).strftime('%Y-%m-%d')),
+                                 ('check_in', '&lt;', (context_today() + relativedelta(days=1, weekday=0)).strftime('%Y-%m-%d'))]"/>
                 <filter string="Ce mois" name="villa_nova_this_month"
                         domain="[('check_in', '&gt;=', context_today().strftime('%Y-%m-01')),
                                  ('check_in', '&lt;', (context_today() + relativedelta(months=1)).strftime('%Y-%m-01'))]"/>
