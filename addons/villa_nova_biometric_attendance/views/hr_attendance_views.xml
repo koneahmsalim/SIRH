@@ -107,21 +107,22 @@
                                  ('check_in', '&lt;', (context_today() + relativedelta(months=1)).strftime('%Y-%m-01'))]"/>
                 <separator/>
             </filter>
+            <!-- Regroupement par blocs separes par un separateur, chacun
+                 avec une seule idee : le natif melangeait deja "Au
+                 travail/Erreurs/Checkout auto" (statut) - on laisse ce
+                 trio intact et on ajoute nos propres blocs a la suite au
+                 lieu de s'inserer au milieu, ce qui avait pousse "Checkout
+                 automatique" et "Heures supplementaires" a se retrouver
+                 colles a nos filtres de source sans separation. -->
             <filter name="auto_check" position="after">
-                <filter string="Heures supplémentaires" name="villa_nova_overtime" domain="[('overtime_hours', '&gt;', 0)]"/>
-            </filter>
-            <!-- Le natif ne permet de trier badge/appli/manuel que par
-                 regroupement ("Method") : ici des filtres a un clic, pour
-                 par ex. retrouver d'un coup les pointages a distance (partis
-                 direct en clientele) ou auditer les saisies qui ne viennent
-                 ni du boitier ni de l'appli. -->
-            <filter name="errors" position="after">
                 <separator/>
                 <filter string="Arrivé en retard" name="villa_nova_late" domain="[('villa_nova_punctuality', '=', 'late')]"/>
                 <separator/>
                 <filter string="Via le boîtier" name="villa_nova_source_badge" domain="['|', ('in_mode', '=', 'badge'), ('out_mode', '=', 'badge')]"/>
                 <filter string="Via l'application" name="villa_nova_source_systray" domain="['|', ('in_mode', '=', 'systray'), ('out_mode', '=', 'systray')]"/>
                 <filter string="Saisie manuelle" name="villa_nova_source_manual" domain="[('in_mode', '=', 'manual'), ('out_mode', 'in', ('manual', False))]"/>
+                <separator/>
+                <filter string="Heures supplémentaires" name="villa_nova_overtime" domain="[('overtime_hours', '&gt;', 0)]"/>
             </filter>
         </field>
     </record>
@@ -144,7 +145,7 @@
                                  ('check_in', '&lt;', (context_today() + relativedelta(months=1)).strftime('%Y-%m-01'))]"/>
                 <separator/>
             </filter>
-            <filter name="archivedemployees" position="after">
+            <filter name="refused" position="after">
                 <separator/>
                 <filter string="Arrivé en retard" name="villa_nova_late" domain="[('villa_nova_punctuality', '=', 'late')]"/>
                 <separator/>
