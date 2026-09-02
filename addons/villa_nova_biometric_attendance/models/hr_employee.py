@@ -2,7 +2,7 @@ from datetime import datetime, time, timedelta
 
 import pytz
 
-from odoo import fields, models
+from odoo import api, fields, models
 
 from .zk_machine_attendance import DEVICE_TZ, NATIVE_PUNCH_CODES
 
@@ -137,3 +137,75 @@ class HrEmployee(models.Model):
             vals_list.append(vals)
         if vals_list:
             Attendance.create(vals_list)
+
+    @api.model
+    def get_villa_nova_today_overview(self):
+        """Vue "qui est la aujourd'hui" pour la RH : 3 groupes qui
+        s'excluent (un employe n'apparait que dans un seul) - Present
+        (arrive a l'heure, toujours sur place), En retard (arrive en
+        retard aujourd'hui, present ou deja reparti - l'info utile est
+        qu'il est arrive en retard, pas s'il est encore la), Absent
+        (attendu aujourd'hui, aucun pointage, pas en conge). Un employe
+        arrive a l'heure puis deja reparti n'apparait dans aucun des 3 -
+        acceptable pour une vue "en un coup d'oeil", pas un rapport
+        exhaustif (voir le wizard Retards & absences pour ca)."""
+        today = DEVICE_TZ.localize(datetime.now()).date()
+        start_utc = DEVICE_TZ.localize(datetime.combine(today, time.min)).astimezone(pytz.utc).replace(tzinfo=None)
+        end_utc = DEVICE_TZ.localize(datetime.combine(today, time.max)).astimezone(pytz.utc).replace(tzinfo=None)
+
+        # Meme perimetre que le rapport retards/absences existant : les
+        # employes suivis par le boitier biometrique.
+        employees = self.search([('device_id_num', '!=', False)])
+        weekday = today.weekday()
+        working_employees = employees.filtered(
+            lambda e: weekday in {int(a.dayofweek) for a in e.resource_calendar_id.attendance_ids}
+        )
+
+        is_holiday = bool(self.env['resource.calendar.leaves'].search_count([
+            ('resource_id', '=', False),
+            ('date_from', '<=', end_utc), ('date_to', '>=', start_utc),
+        ]))
+
+        on_leave_ids = set()
+        if working_employees and not is_holiday:
+            leaves = self.env['hr.leave'].search([
+                ('employee_id', 'in', working_employees.ids),
+                ('state', '=', 'validate'),
+                ('date_from', '<=', end_utc), ('date_to', '>=', start_utc),
+            ])
+            on_leave_ids = set(leaves.employee_id.ids)
+
+        atts = self.env['hr.attendance'].search([
+            ('employee_id', 'in', working_employees.ids),
+            ('check_in', '>=', start_utc), ('check_in', '<=', end_utc),
+        ], order='check_in')
+        last_att_by_employee = {att.employee_id.id: att for att in atts}
+
+        def serialize(employee, att=None):
+            return {
+                'id': employee.id,
+                'name': employee.name,
+                'department': employee.department_id.name or '',
+                'check_in': fields.Datetime.to_string(att.check_in) if att else False,
+            }
+
+        present, late, absent = [], [], []
+        if not is_holiday:
+            for employee in working_employees:
+                if employee.id in on_leave_ids:
+                    continue
+                att = last_att_by_employee.get(employee.id)
+                if not att:
+                    absent.append(serialize(employee))
+                elif att.villa_nova_punctuality == 'late':
+                    late.append(serialize(employee, att))
+                elif not att.check_out:
+                    present.append(serialize(employee, att))
+
+        return {
+            'date': fields.Date.to_string(today),
+            'is_holiday': is_holiday,
+            'present': sorted(present, key=lambda e: e['name']),
+            'late': sorted(late, key=lambda e: e['check_in'] or ''),
+            'absent': sorted(absent, key=lambda e: e['name']),
+        }

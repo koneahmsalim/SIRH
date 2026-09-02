@@ -14,11 +14,12 @@
     'category': 'Human Resources/Attendances',
     'author': 'Villa Nova',
     'license': 'LGPL-3',
-    'depends': ['hr_attendance', 'hr_biometric_attendance', 'hr_holidays'],
+    'depends': ['hr_attendance', 'hr_biometric_attendance', 'hr_holidays', 'villa_nova_theme'],
     'data': [
         'security/ir.model.access.csv',
         'views/biometric_device_details_views.xml',
         'views/hr_attendance_views.xml',
+        'views/today_overview_action.xml',
         'views/attendance_report_wizard_views.xml',
         'report/attendance_report_actions.xml',
         'report/attendance_report_templates.xml',
@@ -27,6 +28,9 @@
     'assets': {
         'web.assets_backend': [
             'villa_nova_biometric_attendance/static/src/attendance_menu_patch.js',
+            'villa_nova_biometric_attendance/static/src/today_overview/today_overview.scss',
+            'villa_nova_biometric_attendance/static/src/today_overview/today_overview.xml',
+            'villa_nova_biometric_attendance/static/src/today_overview/today_overview.js',
         ],
     },
     'installable': True,

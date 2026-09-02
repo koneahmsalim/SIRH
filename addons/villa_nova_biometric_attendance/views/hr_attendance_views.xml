@@ -171,6 +171,12 @@
          view_ids explicite pour eviter toute ambiguite : le modele a
          plusieurs vues list et deux vues kanban une fois la notre ajoutee. -->
     <record id="hr_attendance.hr_attendance_action" model="ir.actions.act_window">
+        <!-- Le natif ouvrait groupe par mois (Date > Employe), pratique
+             pour explorer l'historique mais pas pour l'usage quotidien
+             attendu ici : une RH qui ouvre l'app le matin doit voir tout
+             de suite qui est arrive aujourd'hui, pas devoir deplier un
+             groupe "septembre 2026" puis filtrer manuellement. -->
+        <field name="context">{"search_default_villa_nova_today": 1}</field>
         <field name="view_mode">list,kanban,calendar,pivot,form</field>
         <field name="view_ids" eval="[
             (5, 0, 0),

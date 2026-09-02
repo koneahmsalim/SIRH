@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="action_villa_nova_today_overview" model="ir.actions.client">
+        <field name="name">Aujourd'hui</field>
+        <field name="tag">villa_nova_biometric_attendance.today_overview</field>
+    </record>
+
+    <menuitem id="menu_villa_nova_today_overview"
+              name="Aujourd'hui"
+              parent="hr_attendance.menu_hr_attendance_root"
+              action="action_villa_nova_today_overview"
+              groups="hr_attendance.group_hr_attendance_officer"
+              sequence="1"/>
+
+</odoo>

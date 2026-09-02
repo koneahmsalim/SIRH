@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="villa_nova_biometric_attendance.TodayOverview">
+        <div class="vn-today">
+            <div class="vn-today-header">
+                <h1>Aujourd'hui</h1>
+                <span t-if="state.date" class="vn-today-date" t-esc="state.date"/>
+            </div>
+
+            <div t-if="state.loading" class="vn-today-columns">
+                <t t-foreach="[1,2,3]" t-as="i" t-key="i">
+                    <span class="vn-skeleton" style="height: 240px; border-radius: var(--vn-radius-lg);"/>
+                </t>
+            </div>
+
+            <div t-elif="state.isHoliday" class="vn-empty-state">
+                <p>Jour férié ou chômé pour l'ensemble de l'entreprise.</p>
+            </div>
+
+            <div t-else="" class="vn-today-columns">
+                <div class="vn-card vn-today-col">
+                    <div class="vn-today-col-head">
+                        <span class="vn-badge vn-badge-success" t-esc="state.present.length"/>
+                        <h2>Présents</h2>
+                    </div>
+                    <div t-if="!state.present.length" class="vn-today-col-empty">Personne pour l'instant.</div>
+                    <div t-foreach="state.present" t-as="emp" t-key="emp.id"
+                         class="vn-today-row" t-on-click="() => this.openEmployee(emp.id)" role="button">
+                        <span class="vn-today-row-name" t-esc="emp.name"/>
+                        <span class="vn-today-row-dept" t-esc="emp.department"/>
+                        <span class="vn-today-row-time" t-esc="this.formatTime(emp.check_in)"/>
+                    </div>
+                </div>
+
+                <div class="vn-card vn-today-col">
+                    <div class="vn-today-col-head">
+                        <span class="vn-badge vn-badge-danger" t-esc="state.late.length"/>
+                        <h2>En retard</h2>
+                    </div>
+                    <div t-if="!state.late.length" class="vn-today-col-empty">Aucun retard aujourd'hui.</div>
+                    <div t-foreach="state.late" t-as="emp" t-key="emp.id"
+                         class="vn-today-row" t-on-click="() => this.openEmployee(emp.id)" role="button">
+                        <span class="vn-today-row-name" t-esc="emp.name"/>
+                        <span class="vn-today-row-dept" t-esc="emp.department"/>
+                        <span class="vn-today-row-time" t-esc="this.formatTime(emp.check_in)"/>
+                    </div>
+                </div>
+
+                <div class="vn-card vn-today-col">
+                    <div class="vn-today-col-head">
+                        <span class="vn-badge vn-badge-neutral" t-esc="state.absent.length"/>
+                        <h2>Absents</h2>
+                    </div>
+                    <div t-if="!state.absent.length" class="vn-today-col-empty">Tout le monde a pointé.</div>
+                    <div t-foreach="state.absent" t-as="emp" t-key="emp.id"
+                         class="vn-today-row" t-on-click="() => this.openEmployee(emp.id)" role="button">
+                        <span class="vn-today-row-name" t-esc="emp.name"/>
+                        <span class="vn-today-row-dept" t-esc="emp.department"/>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </t>
+
+</templates>
