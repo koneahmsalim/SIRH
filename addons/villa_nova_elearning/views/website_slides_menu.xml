@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Le menu racine natif de l'app eLearning est reserve au groupe
+         Officer (createurs de cours) - avec ce groupe desormais restreint
+         a la RH (voir hooks.py), l'app entiere disparaissait pour tout le
+         monde d'autre, y compris notre propre menu "Mes formations".
+         La restriction sur la CREATION de cours est deja assuree au niveau
+         du modele (perm_create sur slide.channel, independant de ce menu) :
+         rendre l'icone visible a tous ne rouvre donc pas ce droit. -->
+    <record id="website_slides.website_slides_menu_root" model="ir.ui.menu">
+        <field name="groups_id" eval="[(6, 0, [])]"/>
+    </record>
+
+</odoo>

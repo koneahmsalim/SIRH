@@ -11,6 +11,7 @@
     'depends': ['website_slides', 'villa_nova_theme'],
     'data': [
         'security/ir.model.access.csv',
+        'views/website_slides_menu.xml',
         'views/my_trainings_action.xml',
         'wizard/assign_training_wizard_views.xml',
     ],
