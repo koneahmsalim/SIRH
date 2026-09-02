@@ -12,6 +12,14 @@ from .zk_machine_attendance import DEVICE_TZ, NATIVE_PUNCH_CODES
 # ne bougent plus de toute facon.
 REBUILD_WINDOW_DAYS = 5
 
+# Un meme geste physique produit parfois 2 pointages a quelques secondes
+# d'intervalle (double lecture d'empreinte sur le boitier) - observe en
+# usage reel : entree a 09:06:03 suivie d'un second pointage a 09:06:04,
+# interprete a tort comme une sortie immediate par la regle "dernier
+# pointage du jour = sortie" tant que ces quasi-doublons ne sont pas
+# fusionnes en un seul evenement.
+DUPLICATE_PUNCH_WINDOW = timedelta(minutes=2)
+
 
 class HrEmployee(models.Model):
     _inherit = 'hr.employee'
@@ -47,6 +55,14 @@ class HrEmployee(models.Model):
         for p in punches:
             day = DEVICE_TZ.localize(p.punching_time).date()
             by_day.setdefault(day, []).append(p.punching_time)
+
+        for day, times in by_day.items():
+            times.sort()
+            deduped = [times[0]]
+            for t in times[1:]:
+                if t - deduped[-1] > DUPLICATE_PUNCH_WINDOW:
+                    deduped.append(t)
+            by_day[day] = deduped
 
         # Ne recalcule que les presences deja issues d'un pointage biometrique
         # (memes horodatages), pour ne jamais toucher une saisie manuelle.
