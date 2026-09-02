@@ -12,6 +12,7 @@
                 <field name="check_out"/>
                 <field name="worked_hours"/>
                 <field name="overtime_hours"/>
+                <field name="villa_nova_punctuality"/>
                 <templates>
                     <t t-name="card">
                         <div class="oe_kanban_global_click">
@@ -20,6 +21,8 @@
                             <div>
                                 <i class="fa fa-sign-in me-1 text-success" title="Entree"/>
                                 <field name="check_in"/>
+                                <span t-if="record.villa_nova_punctuality.raw_value == 'late'" class="badge text-bg-danger ms-1">En retard</span>
+                                <span t-elif="record.villa_nova_punctuality.raw_value == 'on_time'" class="badge text-bg-success ms-1">À l'heure</span>
                             </div>
                             <div t-if="record.check_out.raw_value">
                                 <i class="fa fa-sign-out me-1 text-danger" title="Sortie"/>
@@ -54,6 +57,38 @@
         </field>
     </record>
 
+    <!-- Badge ponctualite sur les vues liste natives : reutilise le pattern
+         deja en place pour overtime_status (colonne optionnelle + widget
+         badge colore) plutot que le champ "color"/decoration de la ligne,
+         deja utilise nativement pour signaler les anomalies (>16h,
+         cloture technique, presence oubliee) - un autre sens pour la
+         meme couleur de ligne aurait ete ambigu. -->
+    <record id="view_attendance_tree_villa_nova" model="ir.ui.view">
+        <field name="name">hr.attendance.list.villa.nova</field>
+        <field name="model">hr.attendance</field>
+        <field name="inherit_id" ref="hr_attendance.view_attendance_tree"/>
+        <field name="arch" type="xml">
+            <field name="check_in" position="after">
+                <field name="villa_nova_punctuality" string="Ponctualité" widget="badge"
+                       decoration-success="villa_nova_punctuality == 'on_time'"
+                       decoration-danger="villa_nova_punctuality == 'late'"/>
+            </field>
+        </field>
+    </record>
+
+    <record id="view_attendance_tree_management_villa_nova" model="ir.ui.view">
+        <field name="name">hr.attendance.list.management.villa.nova</field>
+        <field name="model">hr.attendance</field>
+        <field name="inherit_id" ref="hr_attendance.view_attendance_tree_management"/>
+        <field name="arch" type="xml">
+            <field name="check_in" position="after">
+                <field name="villa_nova_punctuality" string="Ponctualité" widget="badge"
+                       decoration-success="villa_nova_punctuality == 'on_time'"
+                       decoration-danger="villa_nova_punctuality == 'late'"/>
+            </field>
+        </field>
+    </record>
+
     <!-- Filtres rapides supplementaires sur la vue "Aperçu". -->
     <record id="hr_attendance_view_filter_villa_nova" model="ir.ui.view">
         <field name="name">hr.attendance.view.filter.villa.nova</field>
@@ -75,6 +110,19 @@
             <filter name="auto_check" position="after">
                 <filter string="Heures supplémentaires" name="villa_nova_overtime" domain="[('overtime_hours', '&gt;', 0)]"/>
             </filter>
+            <!-- Le natif ne permet de trier badge/appli/manuel que par
+                 regroupement ("Method") : ici des filtres a un clic, pour
+                 par ex. retrouver d'un coup les pointages a distance (partis
+                 direct en clientele) ou auditer les saisies qui ne viennent
+                 ni du boitier ni de l'appli. -->
+            <filter name="errors" position="after">
+                <separator/>
+                <filter string="Arrivé en retard" name="villa_nova_late" domain="[('villa_nova_punctuality', '=', 'late')]"/>
+                <separator/>
+                <filter string="Via le boîtier" name="villa_nova_source_badge" domain="['|', ('in_mode', '=', 'badge'), ('out_mode', '=', 'badge')]"/>
+                <filter string="Via l'application" name="villa_nova_source_systray" domain="['|', ('in_mode', '=', 'systray'), ('out_mode', '=', 'systray')]"/>
+                <filter string="Saisie manuelle" name="villa_nova_source_manual" domain="[('in_mode', '=', 'manual'), ('out_mode', 'in', ('manual', False))]"/>
+            </filter>
         </field>
     </record>
 
@@ -95,6 +143,14 @@
                         domain="[('check_in', '&gt;=', context_today().strftime('%Y-%m-01')),
                                  ('check_in', '&lt;', (context_today() + relativedelta(months=1)).strftime('%Y-%m-01'))]"/>
                 <separator/>
+            </filter>
+            <filter name="archivedemployees" position="after">
+                <separator/>
+                <filter string="Arrivé en retard" name="villa_nova_late" domain="[('villa_nova_punctuality', '=', 'late')]"/>
+                <separator/>
+                <filter string="Via le boîtier" name="villa_nova_source_badge" domain="['|', ('in_mode', '=', 'badge'), ('out_mode', '=', 'badge')]"/>
+                <filter string="Via l'application" name="villa_nova_source_systray" domain="['|', ('in_mode', '=', 'systray'), ('out_mode', '=', 'systray')]"/>
+                <filter string="Saisie manuelle" name="villa_nova_source_manual" domain="[('in_mode', '=', 'manual'), ('out_mode', 'in', ('manual', False))]"/>
             </filter>
         </field>
     </record>
