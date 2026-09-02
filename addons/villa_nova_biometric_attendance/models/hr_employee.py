@@ -140,22 +140,29 @@ class HrEmployee(models.Model):
 
     @api.model
     def get_villa_nova_today_overview(self):
-        """Vue "qui est la aujourd'hui" pour la RH : 3 groupes qui
+        """Vue "qui est la aujourd'hui" pour la RH : 4 groupes qui
         s'excluent (un employe n'apparait que dans un seul) - Present
         (arrive a l'heure, toujours sur place), En retard (arrive en
         retard aujourd'hui, present ou deja reparti - l'info utile est
-        qu'il est arrive en retard, pas s'il est encore la), Absent
-        (attendu aujourd'hui, aucun pointage, pas en conge). Un employe
-        arrive a l'heure puis deja reparti n'apparait dans aucun des 3 -
-        acceptable pour une vue "en un coup d'oeil", pas un rapport
-        exhaustif (voir le wizard Retards & absences pour ca)."""
+        qu'il est arrive en retard, pas s'il est encore la), En conge
+        (conge valide couvrant aujourd'hui), Absent (attendu aujourd'hui,
+        aucun pointage, pas en conge). Un employe arrive a l'heure puis
+        deja reparti n'apparait dans aucun des 4 - acceptable pour une vue
+        "en un coup d'oeil", pas un rapport exhaustif (voir le wizard
+        Retards & absences pour ca).
+
+        Perimetre = tous les employes actifs avec un horaire de travail,
+        PAS seulement ceux relies au boitier biometrique (device_id_num) :
+        un employe jamais badge (cadre, teletravail, fiche non reliee au
+        boitier) restait sinon invisible de cette vue meme quand il est
+        en conge - constat reel remonte par un utilisateur (Mederic
+        Gbagba, sans device_id_num ni conge dans le systeme, absent de
+        toute categorie)."""
         today = DEVICE_TZ.localize(datetime.now()).date()
         start_utc = DEVICE_TZ.localize(datetime.combine(today, time.min)).astimezone(pytz.utc).replace(tzinfo=None)
         end_utc = DEVICE_TZ.localize(datetime.combine(today, time.max)).astimezone(pytz.utc).replace(tzinfo=None)
 
-        # Meme perimetre que le rapport retards/absences existant : les
-        # employes suivis par le boitier biometrique.
-        employees = self.search([('device_id_num', '!=', False)])
+        employees = self.search([('active', '=', True)])
         weekday = today.weekday()
         working_employees = employees.filtered(
             lambda e: weekday in {int(a.dayofweek) for a in e.resource_calendar_id.attendance_ids}
@@ -166,14 +173,14 @@ class HrEmployee(models.Model):
             ('date_from', '<=', end_utc), ('date_to', '>=', start_utc),
         ]))
 
-        on_leave_ids = set()
+        leave_by_employee = {}
         if working_employees and not is_holiday:
             leaves = self.env['hr.leave'].search([
                 ('employee_id', 'in', working_employees.ids),
                 ('state', '=', 'validate'),
                 ('date_from', '<=', end_utc), ('date_to', '>=', start_utc),
             ])
-            on_leave_ids = set(leaves.employee_id.ids)
+            leave_by_employee = {leave.employee_id.id: leave for leave in leaves}
 
         atts = self.env['hr.attendance'].search([
             ('employee_id', 'in', working_employees.ids),
@@ -181,18 +188,22 @@ class HrEmployee(models.Model):
         ], order='check_in')
         last_att_by_employee = {att.employee_id.id: att for att in atts}
 
-        def serialize(employee, att=None):
+        def serialize(employee, att=None, leave=None):
             return {
                 'id': employee.id,
                 'name': employee.name,
                 'department': employee.department_id.name or '',
                 'check_in': fields.Datetime.to_string(att.check_in) if att else False,
+                'leave_id': leave.id if leave else False,
+                'leave_type': leave.holiday_status_id.name if leave else False,
             }
 
-        present, late, absent = [], [], []
+        present, late, absent, on_leave = [], [], [], []
         if not is_holiday:
             for employee in working_employees:
-                if employee.id in on_leave_ids:
+                leave = leave_by_employee.get(employee.id)
+                if leave:
+                    on_leave.append(serialize(employee, leave=leave))
                     continue
                 att = last_att_by_employee.get(employee.id)
                 if not att:
@@ -208,4 +219,5 @@ class HrEmployee(models.Model):
             'present': sorted(present, key=lambda e: e['name']),
             'late': sorted(late, key=lambda e: e['check_in'] or ''),
             'absent': sorted(absent, key=lambda e: e['name']),
+            'on_leave': sorted(on_leave, key=lambda e: e['name']),
         }

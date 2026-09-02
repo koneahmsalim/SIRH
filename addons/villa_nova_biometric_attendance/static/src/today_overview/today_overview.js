@@ -14,7 +14,7 @@ export class VillaNovaTodayOverview extends Component {
     setup() {
         this.orm = useService("orm");
         this.actionService = useService("action");
-        this.state = useState({ loading: true, date: "", isHoliday: false, present: [], late: [], absent: [] });
+        this.state = useState({ loading: true, date: "", isHoliday: false, present: [], late: [], absent: [], onLeave: [] });
 
         onWillStart(() => this.load());
     }
@@ -27,6 +27,7 @@ export class VillaNovaTodayOverview extends Component {
         this.state.present = data.present;
         this.state.late = data.late;
         this.state.absent = data.absent;
+        this.state.onLeave = data.on_leave;
         this.state.loading = false;
     }
 
@@ -43,6 +44,20 @@ export class VillaNovaTodayOverview extends Component {
             type: "ir.actions.act_window",
             res_model: "hr.employee",
             res_id: employeeId,
+            view_mode: "form",
+            views: [[false, "form"]],
+            target: "current",
+        });
+    }
+
+    // Depuis "En conge", ouvrir directement la demande de conge (dates,
+    // type, justificatif) est plus utile a une RH que la fiche employe -
+    // c'est l'info qu'elle vient chercher en cliquant sur cette ligne.
+    openLeave(leaveId) {
+        this.actionService.doAction({
+            type: "ir.actions.act_window",
+            res_model: "hr.leave",
+            res_id: leaveId,
             view_mode: "form",
             views: [[false, "form"]],
             target: "current",
