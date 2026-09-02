@@ -24,6 +24,12 @@ DUPLICATE_PUNCH_WINDOW = timedelta(minutes=2)
 class HrEmployee(models.Model):
     _inherit = 'hr.employee'
 
+    villa_nova_attendance_exempt = fields.Boolean(
+        string="Exempté de pointage",
+        help="Ne pointe jamais (badge ou appli) et ne doit pas apparaitre dans "
+             "les vues de presence quotidiennes (ex. direction).",
+    )
+
     def _villa_nova_rebuild_attendance_from_punches(self):
         """Regle "premier pointage du jour = entree, dernier = sortie" (validee
         en usage reel) plutot qu'une simple alternance : plus fiable des que la
@@ -162,7 +168,7 @@ class HrEmployee(models.Model):
         start_utc = DEVICE_TZ.localize(datetime.combine(today, time.min)).astimezone(pytz.utc).replace(tzinfo=None)
         end_utc = DEVICE_TZ.localize(datetime.combine(today, time.max)).astimezone(pytz.utc).replace(tzinfo=None)
 
-        employees = self.search([('active', '=', True)])
+        employees = self.search([('active', '=', True), ('villa_nova_attendance_exempt', '=', False)])
         weekday = today.weekday()
         working_employees = employees.filtered(
             lambda e: weekday in {int(a.dayofweek) for a in e.resource_calendar_id.attendance_ids}
