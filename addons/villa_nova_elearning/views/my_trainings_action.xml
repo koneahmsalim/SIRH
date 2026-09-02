@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="action_villa_nova_my_trainings" model="ir.actions.client">
+        <field name="name">Mes formations</field>
+        <field name="tag">villa_nova_elearning.my_trainings</field>
+    </record>
+
+    <menuitem id="menu_villa_nova_my_trainings"
+              name="Mes formations"
+              parent="website_slides.website_slides_menu_root"
+              action="action_villa_nova_my_trainings"
+              sequence="1"/>
+
+</odoo>

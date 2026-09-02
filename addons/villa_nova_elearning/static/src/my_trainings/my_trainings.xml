@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="villa_nova_elearning.MyTrainings">
+        <div class="vn-trainings">
+            <div class="vn-trainings-header">
+                <h1>Mes formations</h1>
+                <div t-if="!state.loading" class="vn-trainings-summary">
+                    <span t-if="summary.ongoing" class="vn-badge vn-badge-warning" t-esc="summary.ongoing + ' en cours'"/>
+                    <span t-if="summary.joined" class="vn-badge vn-badge-neutral" t-esc="summary.joined + ' à commencer'"/>
+                    <span t-if="summary.completed" class="vn-badge vn-badge-success" t-esc="summary.completed + ' terminées'"/>
+                </div>
+            </div>
+
+            <div t-if="state.loading" class="vn-trainings-grid">
+                <t t-foreach="[1,2,3,4]" t-as="i" t-key="i">
+                    <span class="vn-skeleton" style="height: 220px; border-radius: var(--vn-radius-lg);"/>
+                </t>
+            </div>
+
+            <div t-elif="!state.trainings.length" class="vn-empty-state">
+                <p>Aucune formation pour l'instant.</p>
+            </div>
+
+            <div t-else="" class="vn-trainings-grid">
+                <t t-foreach="state.trainings" t-as="training" t-key="training.channel_id">
+                    <div class="vn-card vn-card-interactive vn-training-card"
+                         t-on-click="() => this.openCourse(training)" role="button">
+                        <div class="vn-training-cover" t-attf-style="background-image: url({{courseImageUrl(training.channel_id)}})"/>
+                        <div class="vn-training-body">
+                            <div class="vn-training-head">
+                                <span class="vn-training-name" t-esc="training.name"/>
+                                <span class="vn-badge" t-att-class="STATUS_BADGE_CLASS[training.member_status]" t-esc="STATUS_LABELS[training.member_status]"/>
+                            </div>
+                            <div class="vn-training-progress">
+                                <div class="vn-training-progress-track">
+                                    <div class="vn-training-progress-bar" t-att-style="'width:' + training.completion + '%'"/>
+                                </div>
+                                <span class="vn-training-progress-value" t-esc="training.completion + '%'"/>
+                            </div>
+                            <div class="vn-training-meta">
+                                <span t-esc="training.completed_slides + ' / ' + training.total_slides + ' leçons'"/>
+                            </div>
+                        </div>
+                    </div>
+                </t>
+            </div>
+        </div>
+    </t>
+
+</templates>
