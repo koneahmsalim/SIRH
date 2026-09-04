@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="villa_nova_itsm.Dashboard">
+        <div class="vn-itsm-dashboard">
+            <h1>Tableau de bord ITSM</h1>
+
+            <div t-if="state.loading" class="vn-itsm-dashboard-kpis">
+                <t t-foreach="[1,2,3,4,5,6]" t-as="i" t-key="i">
+                    <span class="vn-skeleton" style="height: 90px; border-radius: var(--vn-radius-lg);"/>
+                </t>
+            </div>
+
+            <div t-else="" class="vn-itsm-dashboard-kpis">
+                <div class="vn-card vn-kpi-card vn-card-interactive" t-on-click="() => this.openOpenTickets()">
+                    <span class="vn-kpi-value" t-esc="state.counts.open"/>
+                    <span class="vn-kpi-label">Tickets ouverts</span>
+                </div>
+                <div class="vn-card vn-kpi-card vn-card-interactive" t-on-click="() => this.openMyTickets()">
+                    <span class="vn-kpi-value" t-esc="state.counts.assigned_to_me"/>
+                    <span class="vn-kpi-label">Assignés à moi</span>
+                </div>
+                <div class="vn-card vn-kpi-card vn-card-interactive" t-on-click="() => this.openUnassignedTickets()">
+                    <span class="vn-kpi-value" t-esc="state.counts.unassigned"/>
+                    <span class="vn-kpi-label">Non assignés</span>
+                </div>
+                <div class="vn-card vn-kpi-card vn-card-interactive" t-on-click="() => this.openCriticalTickets()">
+                    <span class="vn-kpi-value" t-esc="state.counts.critical"/>
+                    <span class="vn-kpi-label">Critiques</span>
+                </div>
+                <div class="vn-card vn-kpi-card vn-card-interactive vn-kpi-warning" t-on-click="() => this.openSlaAtRisk()">
+                    <span class="vn-kpi-value" t-esc="state.counts.sla_at_risk"/>
+                    <span class="vn-kpi-label">SLA à risque</span>
+                </div>
+                <div class="vn-card vn-kpi-card vn-card-interactive vn-kpi-danger" t-on-click="() => this.openSlaBreached()">
+                    <span class="vn-kpi-value" t-esc="state.counts.sla_breached"/>
+                    <span class="vn-kpi-label">SLA dépassé</span>
+                </div>
+            </div>
+
+            <div t-if="!state.loading" class="vn-card vn-itsm-dashboard-list">
+                <h2>Mes tickets prioritaires</h2>
+                <div t-if="!state.myTickets.length" class="vn-empty-state">
+                    <p>Aucun ticket assigné pour l'instant.</p>
+                </div>
+                <div t-foreach="state.myTickets" t-as="ticket" t-key="ticket.id"
+                     class="vn-itsm-dashboard-row" t-on-click="() => this.openTicket(ticket.id)" role="button">
+                    <span class="vn-itsm-dashboard-row-ref" t-esc="ticket.name"/>
+                    <span class="vn-itsm-dashboard-row-subject" t-esc="ticket.subject"/>
+                    <span class="vn-badge" t-att-class="PRIORITY_BADGE[ticket.priority]" t-esc="PRIORITY_LABELS[ticket.priority]"/>
+                    <span class="vn-itsm-dashboard-row-state" t-esc="STATE_LABELS[ticket.state]"/>
+                    <span t-if="ticket.sla_resolution_status === 'breached'" class="vn-badge vn-badge-danger">SLA dépassé</span>
+                    <span t-elif="ticket.sla_resolution_status === 'at_risk'" class="vn-badge vn-badge-warning">SLA à risque</span>
+                </div>
+            </div>
+        </div>
+    </t>
+
+</templates>

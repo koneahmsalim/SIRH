@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+
+        <!-- Manager : voit tout. -->
+        <record id="itsm_ticket_rule_manager" model="ir.rule">
+            <field name="name">Tickets ITSM : administrateur, accès total</field>
+            <field name="model_id" ref="model_itsm_ticket"/>
+            <field name="domain_force">[(1, '=', 1)]</field>
+            <field name="groups" eval="[(4, ref('group_itsm_manager'))]"/>
+        </record>
+
+        <!-- Agent : tickets de son equipe (assigne, membre, ou responsable),
+             pour permettre l'entraide au sein d'une equipe sans exposer les
+             tickets des autres equipes. -->
+        <record id="itsm_ticket_rule_agent" model="ir.rule">
+            <field name="name">Tickets ITSM : agent, tickets de son équipe</field>
+            <field name="model_id" ref="model_itsm_ticket"/>
+            <field name="domain_force">
+                ['|', '|',
+                 ('user_id', '=', user.id),
+                 ('team_id.member_ids', 'in', [user.id]),
+                 ('team_id.leader_id', '=', user.id)]
+            </field>
+            <field name="groups" eval="[(4, ref('group_itsm_agent'))]"/>
+        </record>
+
+        <!-- Tout utilisateur interne : voit au moins les tickets qu'il a
+             lui-meme soumis (demandeur ou employe concerne), meme s'il
+             n'est pas agent - regle de groupe distincte, elle s'OR avec la
+             regle agent ci-dessus plutot que la remplacer. -->
+        <record id="itsm_ticket_rule_requester" model="ir.rule">
+            <field name="name">Tickets ITSM : demandeur, ses propres tickets</field>
+            <field name="model_id" ref="model_itsm_ticket"/>
+            <field name="domain_force">
+                ['|', ('partner_id', '=', user.partner_id.id), ('employee_id.user_id', '=', user.id)]
+            </field>
+            <field name="groups" eval="[(4, ref('group_itsm_user'))]"/>
+        </record>
+
+        <!-- Portail : uniquement ses propres demandes ou celles ou il a ete
+             ajoute a la conversation (ex. demande faite en son nom). -->
+        <record id="itsm_ticket_rule_portal" model="ir.rule">
+            <field name="name">Tickets ITSM : portail, ses propres demandes</field>
+            <field name="model_id" ref="model_itsm_ticket"/>
+            <field name="domain_force">
+                ['|', ('partner_id', '=', user.partner_id.id), ('message_partner_ids', 'in', [user.partner_id.id])]
+            </field>
+            <field name="groups" eval="[(4, ref('base.group_portal'))]"/>
+        </record>
+
+    </data>
+</odoo>

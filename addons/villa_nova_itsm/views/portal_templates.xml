@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <template id="portal_my_home_itsm" name="Portail : entrée Tickets" inherit_id="portal.portal_my_home">
+        <xpath expr="//div[hasclass('o_portal_docs')]" position="inside">
+            <t t-call="portal.portal_docs_entry">
+                <t t-set="title">Mes tickets</t>
+                <t t-set="url" t-value="'/my/tickets'"/>
+                <t t-set="count" t-value="ticket_count"/>
+            </t>
+        </xpath>
+    </template>
+
+    <template id="portal_my_tickets" name="Portail : mes tickets">
+        <t t-call="portal.portal_layout">
+            <t t-set="breadcrumbs_searchbar" t-value="True"/>
+            <t t-call="portal.portal_searchbar">
+                <t t-set="title">Mes tickets</t>
+            </t>
+            <div class="mb-3">
+                <a href="/my/tickets/new" class="btn btn-primary">Nouvelle demande</a>
+            </div>
+            <t t-if="not tickets">
+                <p class="text-muted">Aucun ticket pour l'instant.</p>
+            </t>
+            <t t-else="">
+                <table class="table table-hover o_portal_my_doc_table">
+                    <thead>
+                        <tr class="active">
+                            <th>Référence</th>
+                            <th>Sujet</th>
+                            <th>Statut</th>
+                            <th>Priorité</th>
+                            <th>Créé le</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr t-foreach="tickets" t-as="ticket">
+                            <td><a t-attf-href="/my/tickets/#{ticket.id}" t-esc="ticket.name"/></td>
+                            <td t-esc="ticket.subject"/>
+                            <td><span class="badge text-bg-secondary" t-esc="dict(ticket._fields['state'].selection).get(ticket.state)"/></td>
+                            <td t-esc="dict(ticket._fields['priority'].selection).get(ticket.priority)"/>
+                            <td><span t-field="ticket.create_date" t-options="{'widget': 'date'}"/></td>
+                        </tr>
+                    </tbody>
+                </table>
+                <t t-call="portal.pager"/>
+            </t>
+        </t>
+    </template>
+
+    <template id="portal_ticket_new" name="Portail : nouvelle demande">
+        <t t-call="portal.portal_layout">
+            <div class="container py-4" style="max-width: 640px;">
+                <h1>Nouvelle demande</h1>
+                <div t-if="error" class="alert alert-danger" t-esc="error"/>
+                <form action="/my/tickets/new" method="post">
+                    <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                    <div class="mb-3">
+                        <label class="form-label" for="pf_type">Type de demande</label>
+                        <select class="form-select" id="pf_type" name="ticket_type">
+                            <option value="incident">Incident (quelque chose ne fonctionne pas)</option>
+                            <option value="service_request" selected="selected">Demande de service</option>
+                            <option value="question">Question</option>
+                            <option value="complaint">Réclamation</option>
+                        </select>
+                    </div>
+                    <div class="mb-3" t-if="services">
+                        <label class="form-label" for="pf_service">Service concerné</label>
+                        <select class="form-select" id="pf_service" name="service_id">
+                            <option value="">—</option>
+                            <option t-foreach="services" t-as="service" t-att-value="service.id" t-esc="service.name"/>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label" for="pf_subject">Sujet *</label>
+                        <input type="text" class="form-control" id="pf_subject" name="subject" required="required" maxlength="200"
+                               t-att-value="values and values.get('subject')"/>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label" for="pf_description">Description</label>
+                        <textarea class="form-control" id="pf_description" name="description" rows="5"><t t-esc="values and values.get('description')"/></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Envoyer</button>
+                </form>
+            </div>
+        </t>
+    </template>
+
+    <template id="portal_ticket_detail" name="Portail : détail d'un ticket">
+        <t t-call="portal.portal_layout">
+            <t t-set="breadcrumbs_searchbar" t-value="False"/>
+            <div class="container py-4">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h1 class="mb-0">
+                        <span t-esc="ticket.name"/> — <span t-esc="ticket.subject"/>
+                    </h1>
+                    <span class="badge text-bg-secondary" t-esc="dict(ticket._fields['state'].selection).get(ticket.state)"/>
+                </div>
+                <p t-field="ticket.description"/>
+
+                <div t-if="ticket.state in ('resolved', 'closed') and not ticket.satisfaction_rating" class="card p-3 mb-4">
+                    <p class="mb-2">Ce ticket est résolu. Êtes-vous satisfait ?</p>
+                    <form t-attf-action="/my/tickets/#{ticket.id}/rate" method="post" class="d-flex gap-2">
+                        <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                        <button name="rating" value="great" class="btn btn-outline-success">😀 Satisfait</button>
+                        <button name="rating" value="okay" class="btn btn-outline-warning">😐 Moyen</button>
+                        <button name="rating" value="bad" class="btn btn-outline-danger">☹️ Insatisfait</button>
+                    </form>
+                </div>
+
+                <h4>Conversation</h4>
+                <div class="mb-3">
+                    <t t-foreach="ticket.message_ids.filtered(lambda m: m.message_type != 'notification').sorted('date')" t-as="message">
+                        <div class="border-bottom py-2">
+                            <div class="text-muted small">
+                                <span t-esc="message.author_id.name or 'Système'"/> · <span t-field="message.date" t-options="{'widget': 'datetime'}"/>
+                            </div>
+                            <div t-raw="message.body"/>
+                        </div>
+                    </t>
+                </div>
+
+                <form t-attf-action="/my/tickets/#{ticket.id}/message" method="post">
+                    <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                    <div class="mb-2">
+                        <textarea class="form-control" name="message" rows="3" placeholder="Ajouter un commentaire…"/>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Envoyer</button>
+                </form>
+            </div>
+        </t>
+    </template>
+
+</odoo>

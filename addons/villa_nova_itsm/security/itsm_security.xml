@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+
+        <record id="module_category_itsm" model="ir.module.category">
+            <field name="name">ITSM</field>
+            <field name="sequence">15</field>
+        </record>
+
+        <!-- Tout employe interne peut ouvrir/suivre ses propres demandes -
+             implique par base.group_user, jamais retire manuellement pour
+             que ce ne soit pas une case a cocher oubliee a l'onboarding. -->
+        <record id="group_itsm_user" model="res.groups">
+            <field name="name">Utilisateur ITSM</field>
+            <field name="category_id" ref="module_category_itsm"/>
+            <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
+            <field name="users" eval="[(4, ref('base.user_admin'))]"/>
+        </record>
+
+        <record id="group_itsm_agent" model="res.groups">
+            <field name="name">Agent ITSM</field>
+            <field name="category_id" ref="module_category_itsm"/>
+            <field name="implied_ids" eval="[(4, ref('group_itsm_user'))]"/>
+        </record>
+
+        <record id="group_itsm_team_leader" model="res.groups">
+            <field name="name">Responsable d'équipe ITSM</field>
+            <field name="category_id" ref="module_category_itsm"/>
+            <field name="implied_ids" eval="[(4, ref('group_itsm_agent'))]"/>
+        </record>
+
+        <record id="group_itsm_manager" model="res.groups">
+            <field name="name">Administrateur ITSM</field>
+            <field name="category_id" ref="module_category_itsm"/>
+            <field name="implied_ids" eval="[(4, ref('group_itsm_team_leader'))]"/>
+            <field name="users" eval="[(4, ref('base.user_admin'))]"/>
+        </record>
+
+    </data>
+</odoo>

@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="itsm_ticket_template_view_list" model="ir.ui.view">
+        <field name="name">itsm.ticket.template.view.list</field>
+        <field name="model">itsm.ticket.template</field>
+        <field name="arch" type="xml">
+            <list string="Modèles de ticket">
+                <field name="name"/>
+                <field name="ticket_type"/>
+                <field name="category_id"/>
+                <field name="team_id"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="itsm_ticket_template_view_form" model="ir.ui.view">
+        <field name="name">itsm.ticket.template.view.form</field>
+        <field name="model">itsm.ticket.template</field>
+        <field name="arch" type="xml">
+            <form string="Modèle de ticket">
+                <header>
+                    <button name="action_create_ticket" string="Créer un ticket depuis ce modèle" type="object" class="btn-primary"/>
+                </header>
+                <sheet>
+                    <group>
+                        <field name="name"/>
+                        <field name="ticket_type"/>
+                        <field name="subject"/>
+                        <field name="category_id"/>
+                        <field name="service_id"/>
+                        <field name="team_id"/>
+                        <field name="impact"/>
+                        <field name="urgency"/>
+                        <field name="tag_ids" widget="many2many_tags"/>
+                    </group>
+                    <field name="description"/>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="itsm_ticket_template_action" model="ir.actions.act_window">
+        <field name="name">Modèles de ticket</field>
+        <field name="res_model">itsm.ticket.template</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+</odoo>

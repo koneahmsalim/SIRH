@@ -1,0 +1,261 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="itsm_ticket_view_search" model="ir.ui.view">
+        <field name="name">itsm.ticket.view.search</field>
+        <field name="model">itsm.ticket</field>
+        <field name="arch" type="xml">
+            <search string="Tickets ITSM">
+                <field name="name" string="Ticket" filter_domain="['|', ('name', 'ilike', self), ('subject', 'ilike', self)]"/>
+                <field name="partner_id"/>
+                <field name="employee_id"/>
+                <field name="user_id"/>
+                <field name="team_id"/>
+                <field name="category_id"/>
+                <field name="tag_ids"/>
+                <separator/>
+                <filter string="Mes tickets" name="my_tickets" domain="[('user_id', '=', uid)]"/>
+                <filter string="Non assignés" name="unassigned" domain="[('user_id', '=', False)]"/>
+                <filter string="Mes demandes" name="my_requests"
+                        domain="['|', ('partner_id.user_ids', 'in', uid), ('employee_id.user_id', '=', uid)]"/>
+                <separator/>
+                <filter string="Ouverts" name="open" domain="[('state', 'not in', ['resolved', 'closed', 'cancelled'])]"/>
+                <filter string="Résolus" name="resolved" domain="[('state', '=', 'resolved')]"/>
+                <filter string="Clôturés" name="closed" domain="[('state', '=', 'closed')]"/>
+                <separator/>
+                <filter string="Critiques" name="critical" domain="[('priority', '=', 'critical')]"/>
+                <filter string="Incidents majeurs" name="major" domain="[('is_major_incident', '=', True)]"/>
+                <filter string="SLA à risque" name="sla_at_risk"
+                        domain="['|', ('sla_response_status', '=', 'at_risk'), ('sla_resolution_status', '=', 'at_risk')]"/>
+                <filter string="SLA dépassé" name="sla_breached"
+                        domain="['|', ('sla_response_status', '=', 'breached'), ('sla_resolution_status', '=', 'breached')]"/>
+                <separator/>
+                <filter string="Créés ce mois" name="this_month"
+                        domain="[('create_date', '&gt;=', context_today().strftime('%Y-%m-01'))]"/>
+                <group expand="0" string="Regrouper par">
+                    <filter string="Statut" name="groupby_state" context="{'group_by': 'state'}"/>
+                    <filter string="Priorité" name="groupby_priority" context="{'group_by': 'priority'}"/>
+                    <filter string="Équipe" name="groupby_team" context="{'group_by': 'team_id'}"/>
+                    <filter string="Agent" name="groupby_agent" context="{'group_by': 'user_id'}"/>
+                    <filter string="Catégorie" name="groupby_category" context="{'group_by': 'category_id'}"/>
+                    <filter string="Type" name="groupby_type" context="{'group_by': 'ticket_type'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="itsm_ticket_view_list" model="ir.ui.view">
+        <field name="name">itsm.ticket.view.list</field>
+        <field name="model">itsm.ticket</field>
+        <field name="arch" type="xml">
+            <list string="Tickets" decoration-danger="sla_resolution_status == 'breached' or sla_response_status == 'breached'"
+                  decoration-warning="sla_resolution_status == 'at_risk' or sla_response_status == 'at_risk'"
+                  sample="1">
+                <field name="name"/>
+                <field name="subject"/>
+                <field name="ticket_type" optional="hide"/>
+                <field name="partner_id" optional="show"/>
+                <field name="employee_id" optional="hide"/>
+                <field name="team_id"/>
+                <field name="user_id" widget="many2one_avatar_user"/>
+                <field name="category_id" optional="hide"/>
+                <field name="priority" widget="badge"
+                       decoration-danger="priority == 'critical'"
+                       decoration-warning="priority == 'high'"
+                       decoration-info="priority == 'medium'"
+                       decoration-muted="priority == 'low'"/>
+                <field name="state" widget="badge"
+                       decoration-info="state in ('new','assigned')"
+                       decoration-warning="state in ('in_progress','pending')"
+                       decoration-success="state in ('resolved','closed')"
+                       decoration-muted="state == 'cancelled'"/>
+                <field name="sla_resolution_deadline" optional="show"/>
+                <field name="create_date" optional="show"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="itsm_ticket_view_kanban" model="ir.ui.view">
+        <field name="name">itsm.ticket.view.kanban</field>
+        <field name="model">itsm.ticket</field>
+        <field name="arch" type="xml">
+            <kanban default_group_by="state" class="o_kanban_small_column vn-itsm-kanban" sample="1">
+                <field name="name"/>
+                <field name="subject"/>
+                <field name="priority"/>
+                <field name="state"/>
+                <field name="user_id"/>
+                <field name="team_id"/>
+                <field name="partner_id"/>
+                <field name="sla_response_status"/>
+                <field name="sla_resolution_status"/>
+                <field name="sla_resolution_deadline"/>
+                <field name="is_major_incident"/>
+                <field name="kanban_color"/>
+                <progressbar field="priority" colors='{"critical": "danger", "high": "warning", "medium": "info", "low": "muted"}'/>
+                <templates>
+                    <t t-name="card">
+                        <div t-attf-class="vn-itsm-card vn-itsm-card-#{record.priority.raw_value}">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <field name="name" class="fw-bold"/>
+                                <span t-if="record.is_major_incident.raw_value" class="badge text-bg-danger">Majeur</span>
+                            </div>
+                            <div class="vn-itsm-card-subject" t-esc="record.subject.value"/>
+                            <div class="d-flex justify-content-between align-items-center mt-2">
+                                <field name="user_id" widget="many2one_avatar_user"/>
+                                <span t-if="record.sla_resolution_status.raw_value == 'breached'" class="badge text-bg-danger">SLA dépassé</span>
+                                <span t-elif="record.sla_resolution_status.raw_value == 'at_risk'" class="badge text-bg-warning">SLA à risque</span>
+                            </div>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <record id="itsm_ticket_view_form" model="ir.ui.view">
+        <field name="name">itsm.ticket.view.form</field>
+        <field name="model">itsm.ticket</field>
+        <field name="arch" type="xml">
+            <form string="Ticket" class="vn-itsm-form">
+                <header>
+                    <button name="action_assign_to_me" string="M'assigner" type="object" class="btn-secondary"
+                            invisible="user_id != False"/>
+                    <button name="action_start_progress" string="Démarrer" type="object" class="btn-primary"
+                            invisible="state not in ('new','assigned')"/>
+                    <button name="action_set_pending" string="Mettre en attente" type="object"
+                            invisible="state not in ('assigned','in_progress')"/>
+                    <button name="action_resolve" string="Résoudre" type="object" class="btn-primary"
+                            invisible="state in ('resolved','closed','cancelled')"/>
+                    <button name="action_close" string="Clôturer" type="object"
+                            invisible="state != 'resolved'"/>
+                    <button name="action_reopen" string="Rouvrir" type="object"
+                            invisible="state not in ('resolved','closed')"/>
+                    <button name="action_cancel" string="Annuler" type="object"
+                            invisible="state in ('cancelled','closed')"/>
+                    <button name="action_merge" string="Fusionner…" type="object"
+                            invisible="state in ('cancelled',)"/>
+                    <field name="state" widget="statusbar" statusbar_visible="new,assigned,in_progress,resolved,closed"/>
+                </header>
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_open_attachments" type="object" class="oe_stat_button" icon="fa-paperclip">
+                            <field name="attachment_count" widget="statinfo" string="Pièces jointes"/>
+                        </button>
+                        <button name="action_view_children" type="object" class="oe_stat_button" icon="fa-sitemap"
+                                invisible="child_ticket_count == 0">
+                            <field name="child_ticket_count" widget="statinfo" string="Enfants"/>
+                        </button>
+                    </div>
+                    <widget name="web_ribbon" title="Incident majeur" bg_color="text-bg-danger" invisible="not is_major_incident"/>
+                    <widget name="web_ribbon" title="Annulé" bg_color="text-bg-secondary" invisible="state != 'cancelled'"/>
+                    <div class="vn-itsm-header">
+                        <h1>
+                            <field name="name" readonly="1" class="vn-itsm-ref"/>
+                            <field name="subject" placeholder="Sujet du ticket" class="vn-itsm-subject"/>
+                        </h1>
+                        <div class="vn-itsm-header-pills">
+                            <field name="priority" widget="badge"
+                                   decoration-danger="priority == 'critical'"
+                                   decoration-warning="priority == 'high'"
+                                   decoration-info="priority == 'medium'"
+                                   decoration-muted="priority == 'low'"/>
+                            <field name="sla_resolution_status" widget="badge" string="SLA"
+                                   decoration-danger="sla_resolution_status == 'breached'"
+                                   decoration-warning="sla_resolution_status == 'at_risk'"
+                                   decoration-success="sla_resolution_status in ('met','on_track')"
+                                   invisible="not sla_resolution_status"/>
+                        </div>
+                    </div>
+                    <group>
+                        <group string="Demande">
+                            <field name="ticket_type"/>
+                            <field name="source"/>
+                            <field name="partner_id"/>
+                            <field name="employee_id"/>
+                            <field name="is_major_incident"/>
+                        </group>
+                        <group string="Traitement">
+                            <field name="team_id"/>
+                            <field name="user_id"/>
+                            <field name="category_id"/>
+                            <field name="service_id"/>
+                            <field name="tag_ids" widget="many2many_tags" options="{'color_field': 'color'}"/>
+                        </group>
+                    </group>
+                    <group>
+                        <group string="Priorisation">
+                            <field name="impact"/>
+                            <field name="urgency"/>
+                            <field name="priority"/>
+                        </group>
+                        <group string="SLA">
+                            <field name="sla_policy_id"/>
+                            <field name="sla_first_response_deadline"/>
+                            <field name="first_responded_at"/>
+                            <field name="sla_resolution_deadline"/>
+                            <field name="resolved_date"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Description" name="description">
+                            <field name="description" placeholder="Décrivez le problème ou la demande…"/>
+                        </page>
+                        <page string="Résolution" name="resolution" invisible="not close_notes">
+                            <field name="close_notes"/>
+                        </page>
+                        <page string="Relations" name="relations">
+                            <group>
+                                <field name="parent_ticket_id"/>
+                                <field name="linked_ticket_ids" widget="many2many_tags" context="{'active_test': False}"/>
+                                <field name="merged_into_id" readonly="1" invisible="not merged_into_id"/>
+                            </group>
+                            <field name="child_ticket_ids" invisible="not child_ticket_ids">
+                                <list>
+                                    <field name="name"/>
+                                    <field name="subject"/>
+                                    <field name="state"/>
+                                    <field name="priority"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Temps passé" name="time">
+                            <field name="time_line_ids">
+                                <list editable="bottom">
+                                    <field name="date"/>
+                                    <field name="user_id"/>
+                                    <field name="duration"/>
+                                    <field name="description"/>
+                                </list>
+                            </field>
+                            <group class="oe_subtotal_footer">
+                                <field name="total_time_spent" string="Total (h)"/>
+                            </group>
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <record id="itsm_ticket_action" model="ir.actions.act_window">
+        <field name="name">Tickets</field>
+        <field name="res_model">itsm.ticket</field>
+        <field name="view_mode">kanban,list,form</field>
+        <field name="context">{'search_default_open': 1}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">Aucun ticket pour l'instant</p>
+            <p>Créez un ticket pour suivre un incident, une demande de service, une question ou une réclamation.</p>
+        </field>
+    </record>
+
+    <record id="itsm_ticket_action_my" model="ir.actions.act_window">
+        <field name="name">Mes tickets</field>
+        <field name="res_model">itsm.ticket</field>
+        <field name="view_mode">kanban,list,form</field>
+        <field name="domain">[('user_id', '=', uid)]</field>
+        <field name="context">{'search_default_open': 1}</field>
+    </record>
+
+</odoo>

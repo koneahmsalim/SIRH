@@ -1,0 +1,57 @@
+.vn-itsm-dashboard {
+    padding: var(--vn-space-6);
+    max-width: 1200px;
+    margin: 0 auto;
+
+    h1 {
+        margin: 0 0 var(--vn-space-5);
+        font-size: 1.5rem;
+    }
+
+    &-kpis {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+        gap: var(--vn-space-4);
+        margin-bottom: var(--vn-space-6);
+    }
+
+    &-list {
+        h2 {
+            margin: 0 0 var(--vn-space-3);
+            font-size: 1.1rem;
+        }
+    }
+
+    &-row {
+        display: grid;
+        grid-template-columns: 110px 1fr auto auto auto;
+        align-items: center;
+        gap: var(--vn-space-3);
+        padding: var(--vn-space-2) var(--vn-space-1);
+        border-radius: var(--vn-radius-sm);
+        cursor: pointer;
+
+        &:hover {
+            background-color: var(--vn-mist, rgba(0, 0, 0, 0.03));
+        }
+
+        &-ref {
+            font-weight: 600;
+            font-variant-numeric: tabular-nums;
+        }
+
+        &-subject {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        &-state {
+            color: var(--vn-slate, #5b6266);
+            font-size: 0.85rem;
+        }
+    }
+}
+
+.vn-kpi-warning .vn-kpi-value { color: var(--vn-warning, #f0ad4e); }
+.vn-kpi-danger .vn-kpi-value { color: var(--vn-danger, #d9534f); }

@@ -1,0 +1,53 @@
+.vn-itsm-card {
+    padding: var(--vn-space-3);
+    border-left: 4px solid var(--vn-slate-light, #ccc);
+    border-radius: var(--vn-radius-sm);
+
+    &-subject {
+        font-size: 0.85rem;
+        color: var(--vn-slate, #5b6266);
+        overflow: hidden;
+        text-overflow: ellipsis;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        margin-top: var(--vn-space-1);
+    }
+
+    &-critical { border-left-color: var(--vn-danger, #d9534f); }
+    &-high { border-left-color: var(--vn-warning, #f0ad4e); }
+    &-medium { border-left-color: var(--vn-info, #5bc0de); }
+    &-low { border-left-color: var(--vn-slate-light, #ccc); }
+}
+
+.vn-itsm-form {
+    .vn-itsm-header {
+        margin-bottom: var(--vn-space-4);
+
+        h1 {
+            display: flex;
+            align-items: baseline;
+            gap: var(--vn-space-3);
+            flex-wrap: wrap;
+        }
+
+        .vn-itsm-ref {
+            font-size: 1rem;
+            color: var(--vn-slate, #5b6266);
+            font-variant-numeric: tabular-nums;
+            width: auto;
+        }
+
+        .vn-itsm-subject input {
+            font-size: 1.4rem;
+            font-weight: 600;
+            border: none;
+        }
+    }
+
+    .vn-itsm-header-pills {
+        display: flex;
+        gap: var(--vn-space-2);
+        margin-top: var(--vn-space-2);
+    }
+}

@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+
+        <record id="mail_template_ticket_created" model="mail.template">
+            <field name="name">ITSM : accusé de réception</field>
+            <field name="model_id" ref="model_itsm_ticket"/>
+            <field name="subject">Votre demande {{ object.name }} a été enregistrée</field>
+            <field name="email_to">{{ object.partner_id.email or object.employee_id.work_email }}</field>
+            <field name="auto_delete" eval="True"/>
+            <field name="body_html" type="html">
+<div style="font-family: sans-serif;">
+    <p>Bonjour {{ object.partner_id.name or object.employee_id.name or '' }},</p>
+    <p>Votre demande <strong>{{ object.name }}</strong> — « {{ object.subject }} » a bien été enregistrée.</p>
+    <p>Nous reviendrons vers vous dès que possible.</p>
+    <p>— Support IT</p>
+</div>
+            </field>
+        </record>
+
+        <record id="mail_template_ticket_assigned" model="mail.template">
+            <field name="name">ITSM : ticket assigné</field>
+            <field name="model_id" ref="model_itsm_ticket"/>
+            <field name="subject">Ticket {{ object.name }} vous a été assigné</field>
+            <field name="email_to">{{ object.user_id.email }}</field>
+            <field name="auto_delete" eval="True"/>
+            <field name="body_html" type="html">
+<div style="font-family: sans-serif;">
+    <p>Bonjour {{ object.user_id.name or '' }},</p>
+    <p>Le ticket <strong>{{ object.name }}</strong> — « {{ object.subject }} » (priorité {{ object.priority }}) vous a été assigné.</p>
+</div>
+            </field>
+        </record>
+
+        <record id="mail_template_sla_breach_warning" model="mail.template">
+            <field name="name">ITSM : SLA à risque / dépassé</field>
+            <field name="model_id" ref="model_itsm_ticket"/>
+            <field name="subject">SLA à risque sur {{ object.name }}</field>
+            <field name="email_to">{{ object.user_id.email }}</field>
+            <field name="auto_delete" eval="True"/>
+            <field name="body_html" type="html">
+<div style="font-family: sans-serif;">
+    <p>Le ticket <strong>{{ object.name }}</strong> — « {{ object.subject }} » approche ou dépasse son échéance SLA.</p>
+</div>
+            </field>
+        </record>
+
+    </data>
+</odoo>

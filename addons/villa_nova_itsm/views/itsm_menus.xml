@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="itsm_dashboard_action" model="ir.actions.client">
+        <field name="name">Tableau de bord</field>
+        <field name="tag">villa_nova_itsm.dashboard</field>
+    </record>
+
+    <menuitem id="itsm_menu_root" name="ITSM" sequence="20"
+              groups="villa_nova_itsm.group_itsm_user"/>
+
+    <menuitem id="itsm_menu_dashboard" name="Tableau de bord" parent="itsm_menu_root"
+              action="itsm_dashboard_action" sequence="1"/>
+
+    <menuitem id="itsm_menu_tickets_root" name="Tickets" parent="itsm_menu_root" sequence="2"/>
+    <menuitem id="itsm_menu_tickets_all" name="Tous les tickets" parent="itsm_menu_tickets_root"
+              action="itsm_ticket_action" sequence="1"/>
+    <menuitem id="itsm_menu_tickets_my" name="Mes tickets" parent="itsm_menu_tickets_root"
+              action="itsm_ticket_action_my" sequence="2"/>
+
+    <menuitem id="itsm_menu_teams" name="Équipes" parent="itsm_menu_root"
+              action="itsm_team_action" sequence="3" groups="villa_nova_itsm.group_itsm_team_leader"/>
+
+    <menuitem id="itsm_menu_config_root" name="Configuration" parent="itsm_menu_root" sequence="10"
+              groups="villa_nova_itsm.group_itsm_manager"/>
+    <menuitem id="itsm_menu_config_categories" name="Catégories" parent="itsm_menu_config_root"
+              action="itsm_category_action" sequence="1"/>
+    <menuitem id="itsm_menu_config_services" name="Services" parent="itsm_menu_config_root"
+              action="itsm_service_action" sequence="2"/>
+    <menuitem id="itsm_menu_config_sla" name="Politiques SLA" parent="itsm_menu_config_root"
+              action="itsm_sla_policy_action" sequence="3"/>
+    <menuitem id="itsm_menu_config_tags" name="Étiquettes" parent="itsm_menu_config_root"
+              action="itsm_tag_action" sequence="4"/>
+    <menuitem id="itsm_menu_config_templates" name="Modèles de ticket" parent="itsm_menu_config_root"
+              action="itsm_ticket_template_action" sequence="5"/>
+    <menuitem id="itsm_menu_config_canned" name="Réponses prédéfinies" parent="itsm_menu_config_root"
+              action="itsm_canned_response_action" sequence="6"/>
+
+</odoo>

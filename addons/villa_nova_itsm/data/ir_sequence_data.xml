@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+
+        <record id="seq_itsm_ticket_incident" model="ir.sequence">
+            <field name="name">ITSM - Incidents</field>
+            <field name="code">itsm.ticket.incident</field>
+            <field name="prefix">INC-%(year)s-</field>
+            <field name="padding">5</field>
+            <field name="company_id" eval="False"/>
+        </record>
+
+        <record id="seq_itsm_ticket_service_request" model="ir.sequence">
+            <field name="name">ITSM - Demandes de service</field>
+            <field name="code">itsm.ticket.service_request</field>
+            <field name="prefix">SR-%(year)s-</field>
+            <field name="padding">5</field>
+            <field name="company_id" eval="False"/>
+        </record>
+
+        <record id="seq_itsm_ticket_question" model="ir.sequence">
+            <field name="name">ITSM - Questions</field>
+            <field name="code">itsm.ticket.question</field>
+            <field name="prefix">Q-%(year)s-</field>
+            <field name="padding">5</field>
+            <field name="company_id" eval="False"/>
+        </record>
+
+        <record id="seq_itsm_ticket_complaint" model="ir.sequence">
+            <field name="name">ITSM - Réclamations</field>
+            <field name="code">itsm.ticket.complaint</field>
+            <field name="prefix">CMP-%(year)s-</field>
+            <field name="padding">5</field>
+            <field name="company_id" eval="False"/>
+        </record>
+
+    </data>
+</odoo>

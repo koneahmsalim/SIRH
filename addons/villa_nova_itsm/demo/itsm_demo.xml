@@ -1,0 +1,177 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+
+        <!-- SLA (defini avant les equipes, qui le referencent) -->
+        <record id="demo_sla_standard" model="itsm.sla.policy">
+            <field name="name">SLA Standard</field>
+        </record>
+        <record id="demo_sla_standard_critical" model="itsm.sla.policy.line">
+            <field name="sla_policy_id" ref="demo_sla_standard"/>
+            <field name="priority">critical</field>
+            <field name="first_response_hours">1</field>
+            <field name="resolution_hours">4</field>
+        </record>
+        <record id="demo_sla_standard_high" model="itsm.sla.policy.line">
+            <field name="sla_policy_id" ref="demo_sla_standard"/>
+            <field name="priority">high</field>
+            <field name="first_response_hours">2</field>
+            <field name="resolution_hours">8</field>
+        </record>
+        <record id="demo_sla_standard_medium" model="itsm.sla.policy.line">
+            <field name="sla_policy_id" ref="demo_sla_standard"/>
+            <field name="priority">medium</field>
+            <field name="first_response_hours">4</field>
+            <field name="resolution_hours">24</field>
+        </record>
+        <record id="demo_sla_standard_low" model="itsm.sla.policy.line">
+            <field name="sla_policy_id" ref="demo_sla_standard"/>
+            <field name="priority">low</field>
+            <field name="first_response_hours">8</field>
+            <field name="resolution_hours">72</field>
+        </record>
+
+        <!-- Equipes -->
+        <record id="demo_team_n1" model="itsm.team">
+            <field name="name">Support IT N1</field>
+            <field name="leader_id" ref="base.user_admin"/>
+            <field name="default_sla_policy_id" ref="demo_sla_standard"/>
+        </record>
+        <record id="demo_team_n2" model="itsm.team">
+            <field name="name">Support IT N2</field>
+            <field name="leader_id" ref="base.user_admin"/>
+        </record>
+        <record id="demo_team_infra" model="itsm.team">
+            <field name="name">Infrastructure</field>
+            <field name="leader_id" ref="base.user_admin"/>
+            <field name="default_sla_policy_id" ref="demo_sla_standard"/>
+        </record>
+
+        <!-- Categories -->
+        <record id="demo_cat_materiel" model="itsm.category">
+            <field name="name">Matériel</field>
+        </record>
+        <record id="demo_cat_ordinateur" model="itsm.category">
+            <field name="name">Ordinateur portable</field>
+            <field name="parent_id" ref="demo_cat_materiel"/>
+        </record>
+        <record id="demo_cat_imprimante" model="itsm.category">
+            <field name="name">Imprimante</field>
+            <field name="parent_id" ref="demo_cat_materiel"/>
+        </record>
+        <record id="demo_cat_logiciel" model="itsm.category">
+            <field name="name">Logiciel</field>
+        </record>
+        <record id="demo_cat_reseau" model="itsm.category">
+            <field name="name">Réseau</field>
+            <field name="default_team_id" ref="demo_team_infra"/>
+        </record>
+        <record id="demo_cat_acces" model="itsm.category">
+            <field name="name">Accès et comptes</field>
+        </record>
+
+        <!-- Services -->
+        <record id="demo_service_new_laptop" model="itsm.service">
+            <field name="name">Nouvel ordinateur portable</field>
+            <field name="category_id" ref="demo_cat_ordinateur"/>
+            <field name="owner_team_id" ref="demo_team_n1"/>
+            <field name="icon">fa-laptop</field>
+        </record>
+        <record id="demo_service_vpn" model="itsm.service">
+            <field name="name">Accès VPN</field>
+            <field name="category_id" ref="demo_cat_reseau"/>
+            <field name="owner_team_id" ref="demo_team_infra"/>
+            <field name="icon">fa-lock</field>
+        </record>
+        <record id="demo_service_new_account" model="itsm.service">
+            <field name="name">Création de compte utilisateur</field>
+            <field name="category_id" ref="demo_cat_acces"/>
+            <field name="owner_team_id" ref="demo_team_n1"/>
+            <field name="icon">fa-user-plus</field>
+        </record>
+        <record id="demo_service_password_reset" model="itsm.service">
+            <field name="name">Réinitialisation de mot de passe</field>
+            <field name="category_id" ref="demo_cat_acces"/>
+            <field name="owner_team_id" ref="demo_team_n1"/>
+            <field name="icon">fa-key</field>
+        </record>
+
+        <!-- Tickets de demonstration -->
+        <record id="demo_ticket_1" model="itsm.ticket">
+            <field name="ticket_type">incident</field>
+            <field name="subject">Impossible de se connecter au VPN</field>
+            <field name="description">&lt;p&gt;Le VPN se déconnecte toutes les 5 minutes depuis ce matin.&lt;/p&gt;</field>
+            <field name="partner_id" ref="base.res_partner_2"/>
+            <field name="team_id" ref="demo_team_infra"/>
+            <field name="category_id" ref="demo_cat_reseau"/>
+            <field name="impact">high</field>
+            <field name="urgency">high</field>
+            <field name="state">new</field>
+        </record>
+
+        <record id="demo_ticket_2" model="itsm.ticket">
+            <field name="ticket_type">incident</field>
+            <field name="subject">Serveur de fichiers inaccessible</field>
+            <field name="description">&lt;p&gt;Personne ne peut accéder au serveur de fichiers partagé depuis 09h00.&lt;/p&gt;</field>
+            <field name="partner_id" ref="base.res_partner_3"/>
+            <field name="team_id" ref="demo_team_infra"/>
+            <field name="user_id" ref="base.user_admin"/>
+            <field name="category_id" ref="demo_cat_reseau"/>
+            <field name="impact">high</field>
+            <field name="urgency">high</field>
+            <field name="is_major_incident">True</field>
+            <field name="state">assigned</field>
+        </record>
+
+        <record id="demo_ticket_3" model="itsm.ticket">
+            <field name="ticket_type">service_request</field>
+            <field name="subject">Demande d'un nouvel ordinateur portable</field>
+            <field name="partner_id" ref="base.res_partner_4"/>
+            <field name="team_id" ref="demo_team_n1"/>
+            <field name="service_id" ref="demo_service_new_laptop"/>
+            <field name="category_id" ref="demo_cat_ordinateur"/>
+            <field name="impact">low</field>
+            <field name="urgency">low</field>
+            <field name="state">new</field>
+        </record>
+
+        <record id="demo_ticket_4" model="itsm.ticket">
+            <field name="ticket_type">service_request</field>
+            <field name="subject">Création de compte pour nouvel employé</field>
+            <field name="partner_id" ref="base.res_partner_12"/>
+            <field name="team_id" ref="demo_team_n1"/>
+            <field name="user_id" ref="base.user_admin"/>
+            <field name="service_id" ref="demo_service_new_account"/>
+            <field name="category_id" ref="demo_cat_acces"/>
+            <field name="impact">medium</field>
+            <field name="urgency">medium</field>
+            <field name="state">in_progress</field>
+        </record>
+
+        <record id="demo_ticket_5" model="itsm.ticket">
+            <field name="ticket_type">question</field>
+            <field name="subject">Comment installer l'imprimante réseau ?</field>
+            <field name="partner_id" ref="base.res_partner_2"/>
+            <field name="team_id" ref="demo_team_n1"/>
+            <field name="category_id" ref="demo_cat_imprimante"/>
+            <field name="impact">low</field>
+            <field name="urgency">low</field>
+            <field name="state">resolved</field>
+            <field name="close_notes">&lt;p&gt;Pilote installé à distance, testé et fonctionnel.&lt;/p&gt;</field>
+        </record>
+
+        <record id="demo_ticket_6" model="itsm.ticket">
+            <field name="ticket_type">complaint</field>
+            <field name="subject">Lenteur générale du réseau depuis 2 jours</field>
+            <field name="partner_id" ref="base.res_partner_3"/>
+            <field name="team_id" ref="demo_team_infra"/>
+            <field name="user_id" ref="base.user_admin"/>
+            <field name="category_id" ref="demo_cat_reseau"/>
+            <field name="impact">medium</field>
+            <field name="urgency">high</field>
+            <field name="state">pending</field>
+            <field name="pending_reason">En attente de disponibilité du prestataire réseau</field>
+        </record>
+
+    </data>
+</odoo>
