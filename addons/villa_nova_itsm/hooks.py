@@ -44,5 +44,41 @@ def seed_automation_rules(env):
     _create_notify_critical_rule(env)
 
 
+# Employes dont le poste correspond reellement a un role IT (departement
+# Technologie + support IT en Administration) - rattaches aux equipes ITSM
+# de demo pour permettre une demonstration et des tests de permissions
+# multi-agents realistes (les equipes de demo Phase 1 n'avaient qu'un
+# responsable, aucun membre).
+TEAM_AGENT_LOGINS = {
+    'villa_nova_itsm.demo_team_n1': [
+        'badou@infinity-africa.com',
+        'abdoulaye.meite@infinity-africa.com',
+    ],
+    'villa_nova_itsm.demo_team_n2': [
+        'mederic.gbagba@infinity-africa.com',
+        'fadel.koloma@infinity-africa.com',
+    ],
+    'villa_nova_itsm.demo_team_infra': [
+        'elishama.brou@infinity-africa.com',
+    ],
+}
+
+
+def _seed_demo_team_members(env):
+    agent_group = env.ref('villa_nova_itsm.group_itsm_agent', raise_if_not_found=False)
+    if not agent_group:
+        return
+    for team_xmlid, logins in TEAM_AGENT_LOGINS.items():
+        team = env.ref(team_xmlid, raise_if_not_found=False)
+        if not team:
+            continue
+        users = env['res.users'].search([('login', 'in', logins)])
+        if not users:
+            continue
+        users.write({'groups_id': [(4, agent_group.id)]})
+        team.write({'member_ids': [(4, user.id) for user in users]})
+
+
 def post_init(env):
     seed_automation_rules(env)
+    _seed_demo_team_members(env)
