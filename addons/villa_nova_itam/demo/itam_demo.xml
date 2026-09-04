@@ -1,0 +1,172 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+
+        <!-- Categories d'actifs -->
+        <record id="demo_cat_laptop" model="maintenance.equipment.category">
+            <field name="name">Ordinateurs portables</field>
+        </record>
+        <record id="demo_cat_desktop" model="maintenance.equipment.category">
+            <field name="name">Ordinateurs de bureau</field>
+        </record>
+        <record id="demo_cat_server" model="maintenance.equipment.category">
+            <field name="name">Serveurs</field>
+        </record>
+        <record id="demo_cat_printer" model="maintenance.equipment.category">
+            <field name="name">Imprimantes</field>
+        </record>
+        <record id="demo_cat_network" model="maintenance.equipment.category">
+            <field name="name">Équipement réseau</field>
+        </record>
+        <record id="demo_cat_mobile" model="maintenance.equipment.category">
+            <field name="name">Mobiles</field>
+        </record>
+
+        <!-- Actifs materiels -->
+        <record id="demo_asset_laptop_elishama" model="maintenance.equipment">
+            <field name="name">MacBook Pro 14"</field>
+            <field name="category_id" ref="demo_cat_laptop"/>
+            <field name="asset_status">assigned</field>
+            <field name="model">MacBook Pro 14" M3</field>
+            <field name="purchase_date" eval="(DateTime.today() - relativedelta(months=8)).strftime('%Y-%m-%d')"/>
+            <field name="warranty_date" eval="(DateTime.today() + relativedelta(months=4)).strftime('%Y-%m-%d')"/>
+            <field name="cost">2400.0</field>
+        </record>
+        <record id="demo_asset_laptop_abdoulaye" model="maintenance.equipment">
+            <field name="name">MacBook Pro 14"</field>
+            <field name="category_id" ref="demo_cat_laptop"/>
+            <field name="asset_status">assigned</field>
+            <field name="model">MacBook Pro 14" M2</field>
+            <field name="purchase_date" eval="(DateTime.today() - relativedelta(years=1, months=10)).strftime('%Y-%m-%d')"/>
+            <field name="warranty_date" eval="(DateTime.today() + relativedelta(days=30)).strftime('%Y-%m-%d')"/>
+            <field name="cost">2200.0</field>
+        </record>
+        <record id="demo_asset_laptop_dell" model="maintenance.equipment">
+            <field name="name">Dell Latitude 5420</field>
+            <field name="category_id" ref="demo_cat_laptop"/>
+            <field name="asset_status">assigned</field>
+            <field name="model">Latitude 5420</field>
+            <field name="purchase_date" eval="(DateTime.today() - relativedelta(months=5)).strftime('%Y-%m-%d')"/>
+            <field name="warranty_date" eval="(DateTime.today() + relativedelta(years=2)).strftime('%Y-%m-%d')"/>
+            <field name="cost">1350.0</field>
+        </record>
+        <record id="demo_asset_desktop_hr" model="maintenance.equipment">
+            <field name="name">Dell OptiPlex 7090</field>
+            <field name="category_id" ref="demo_cat_desktop"/>
+            <field name="asset_status">assigned</field>
+            <field name="model">OptiPlex 7090</field>
+            <field name="purchase_date" eval="(DateTime.today() - relativedelta(years=3, months=6)).strftime('%Y-%m-%d')"/>
+            <field name="warranty_date" eval="(DateTime.today() - relativedelta(months=6)).strftime('%Y-%m-%d')"/>
+            <field name="cost">900.0</field>
+        </record>
+        <record id="demo_asset_printer" model="maintenance.equipment">
+            <field name="name">HP LaserJet Pro M404</field>
+            <field name="category_id" ref="demo_cat_printer"/>
+            <field name="asset_status">assigned</field>
+            <field name="location">Bureau - Rez-de-chaussée</field>
+            <field name="purchase_date" eval="(DateTime.today() - relativedelta(years=1)).strftime('%Y-%m-%d')"/>
+            <field name="warranty_date" eval="(DateTime.today() + relativedelta(months=11)).strftime('%Y-%m-%d')"/>
+            <field name="cost">320.0</field>
+        </record>
+        <record id="demo_asset_server" model="maintenance.equipment">
+            <field name="name">Serveur de fichiers - Dell PowerEdge R440</field>
+            <field name="category_id" ref="demo_cat_server"/>
+            <field name="asset_status">assigned</field>
+            <field name="location">Salle serveur</field>
+            <field name="purchase_date" eval="(DateTime.today() - relativedelta(years=2)).strftime('%Y-%m-%d')"/>
+            <field name="warranty_date" eval="(DateTime.today() + relativedelta(years=1)).strftime('%Y-%m-%d')"/>
+            <field name="cost">4500.0</field>
+        </record>
+        <record id="demo_asset_switch" model="maintenance.equipment">
+            <field name="name">Switch Cisco Catalyst 2960</field>
+            <field name="category_id" ref="demo_cat_network"/>
+            <field name="asset_status">assigned</field>
+            <field name="location">Salle serveur</field>
+            <field name="purchase_date" eval="(DateTime.today() - relativedelta(years=1, months=2)).strftime('%Y-%m-%d')"/>
+            <field name="warranty_date" eval="(DateTime.today() + relativedelta(years=2)).strftime('%Y-%m-%d')"/>
+            <field name="cost">1100.0</field>
+        </record>
+        <record id="demo_asset_mobile" model="maintenance.equipment">
+            <field name="name">iPhone 13</field>
+            <field name="category_id" ref="demo_cat_mobile"/>
+            <field name="asset_status">assigned</field>
+            <field name="model">iPhone 13 128 Go</field>
+            <field name="purchase_date" eval="(DateTime.today() - relativedelta(months=14)).strftime('%Y-%m-%d')"/>
+            <field name="warranty_date" eval="(DateTime.today() - relativedelta(months=2)).strftime('%Y-%m-%d')"/>
+            <field name="cost">750.0</field>
+        </record>
+        <record id="demo_asset_laptop_spare" model="maintenance.equipment">
+            <field name="name">ThinkPad T14 (rechange)</field>
+            <field name="category_id" ref="demo_cat_laptop"/>
+            <field name="asset_status">in_stock</field>
+            <field name="model">ThinkPad T14</field>
+            <field name="purchase_date" eval="(DateTime.today() - relativedelta(months=3)).strftime('%Y-%m-%d')"/>
+            <field name="warranty_date" eval="(DateTime.today() + relativedelta(years=2, months=9)).strftime('%Y-%m-%d')"/>
+            <field name="cost">1100.0</field>
+        </record>
+        <record id="demo_asset_laptop_retired" model="maintenance.equipment">
+            <field name="name">Dell Latitude 5410 (ancien)</field>
+            <field name="category_id" ref="demo_cat_laptop"/>
+            <field name="asset_status">retired</field>
+            <field name="model">Latitude 5410</field>
+            <field name="purchase_date" eval="(DateTime.today() - relativedelta(years=5)).strftime('%Y-%m-%d')"/>
+            <field name="warranty_date" eval="(DateTime.today() - relativedelta(years=2)).strftime('%Y-%m-%d')"/>
+            <field name="cost">1050.0</field>
+        </record>
+
+        <!-- Licences logicielles -->
+        <record id="demo_license_m365" model="itam.software.license">
+            <field name="name">Microsoft 365 E3</field>
+            <field name="license_type">subscription</field>
+            <field name="seats_total">50</field>
+            <field name="cost">18000.0</field>
+            <field name="purchase_date" eval="(DateTime.today() - relativedelta(months=4)).strftime('%Y-%m-%d')"/>
+            <field name="expiration_date" eval="(DateTime.today() + relativedelta(months=8)).strftime('%Y-%m-%d')"/>
+        </record>
+        <record id="demo_license_adobe" model="itam.software.license">
+            <field name="name">Adobe Creative Cloud</field>
+            <field name="license_type">subscription</field>
+            <field name="seats_total">3</field>
+            <field name="cost">2400.0</field>
+            <field name="purchase_date" eval="(DateTime.today() - relativedelta(months=2)).strftime('%Y-%m-%d')"/>
+            <field name="expiration_date" eval="(DateTime.today() + relativedelta(days=45)).strftime('%Y-%m-%d')"/>
+        </record>
+        <record id="demo_license_antivirus" model="itam.software.license">
+            <field name="name">Antivirus Endpoint Protection</field>
+            <field name="license_type">per_device</field>
+            <field name="seats_total">60</field>
+            <field name="cost">3600.0</field>
+            <field name="purchase_date" eval="(DateTime.today() - relativedelta(years=1)).strftime('%Y-%m-%d')"/>
+            <field name="expiration_date" eval="(DateTime.today() + relativedelta(months=1)).strftime('%Y-%m-%d')"/>
+        </record>
+        <record id="demo_license_github" model="itam.software.license">
+            <field name="name">GitHub Enterprise</field>
+            <field name="license_type">per_seat</field>
+            <field name="seats_total">5</field>
+            <field name="cost">1050.0</field>
+            <field name="purchase_date" eval="(DateTime.today() - relativedelta(months=6)).strftime('%Y-%m-%d')"/>
+        </record>
+
+        <!-- Attributions vers des employes reels : voir hooks.py
+             (_seed_demo_software_assignments) - ces employes n'ont pas d'ID
+             externe exploitable en XML statique (crees via l'UI/import RH),
+             meme logique que le rattrapage des membres d'equipe ITSM.
+             Adobe y est volontairement sur-alloue (3 sieges, 4 attributions)
+             pour demontrer le badge de non-conformite. -->
+        <record id="demo_assignment_antivirus_server" model="itam.software.assignment">
+            <field name="license_id" ref="demo_license_antivirus"/>
+            <field name="equipment_id" ref="demo_asset_server"/>
+        </record>
+        <record id="demo_assignment_antivirus_switch" model="itam.software.assignment">
+            <field name="license_id" ref="demo_license_antivirus"/>
+            <field name="equipment_id" ref="demo_asset_switch"/>
+        </record>
+
+        <!-- Rattache un ticket existant du Service Desk (Phase 1) a un actif -
+             illustre l'interconnexion entre modules plutot que des silos. -->
+        <record id="villa_nova_itsm.demo_ticket_1" model="itsm.ticket">
+            <field name="equipment_id" ref="demo_asset_laptop_dell"/>
+        </record>
+
+    </data>
+</odoo>

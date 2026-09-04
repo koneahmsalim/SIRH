@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="itsm_ticket_view_form_itam" model="ir.ui.view">
+        <field name="name">itsm.ticket.form.itam</field>
+        <field name="model">itsm.ticket</field>
+        <field name="inherit_id" ref="villa_nova_itsm.itsm_ticket_view_form"/>
+        <field name="arch" type="xml">
+            <field name="service_id" position="after">
+                <field name="equipment_id" context="{'default_employee_id': employee_id}"/>
+            </field>
+        </field>
+    </record>
+
+    <record id="itsm_ticket_view_search_itam" model="ir.ui.view">
+        <field name="name">itsm.ticket.search.itam</field>
+        <field name="model">itsm.ticket</field>
+        <field name="inherit_id" ref="villa_nova_itsm.itsm_ticket_view_search"/>
+        <field name="arch" type="xml">
+            <field name="category_id" position="after">
+                <field name="equipment_id"/>
+            </field>
+        </field>
+    </record>
+</odoo>

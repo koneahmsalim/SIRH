@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Depend explicitement de hr_maintenance : ce module natif a deja
+         transforme la zone "Proprietaire" du formulaire/liste/kanban en
+         equipment_assign_to + employee_id + department_id - on s'appuie
+         dessus plutot que de dupliquer un champ employe. -->
+    <record id="itam_equipment_view_form" model="ir.ui.view">
+        <field name="name">maintenance.equipment.form.itam</field>
+        <field name="model">maintenance.equipment</field>
+        <field name="inherit_id" ref="maintenance.hr_equipment_view_form"/>
+        <field name="arch" type="xml">
+            <div class="oe_button_box" name="button_box" position="inside">
+                <button type="object" name="action_view_tickets" class="oe_stat_button" icon="fa-ticket">
+                    <field string="Tickets" name="ticket_count" widget="statinfo"/>
+                </button>
+            </div>
+            <div class="oe_title" position="inside">
+                <field name="asset_tag" readonly="1" class="text-muted"/>
+            </div>
+            <field name="company_id" position="after">
+                <field name="asset_status" widget="badge"
+                       decoration-success="asset_status == 'assigned'"
+                       decoration-info="asset_status == 'in_stock'"
+                       decoration-warning="asset_status == 'in_repair'"
+                       decoration-danger="asset_status in ('retired', 'disposed')"/>
+            </field>
+            <field name="effective_date" position="after">
+                <field name="purchase_date"/>
+                <field name="invoice_reference"/>
+            </field>
+            <field name="warranty_date" position="after">
+                <field name="warranty_status" widget="badge"
+                       decoration-success="warranty_status == 'valid'"
+                       decoration-warning="warranty_status == 'expiring_soon'"
+                       decoration-danger="warranty_status == 'expired'"
+                       decoration-muted="warranty_status == 'none'"/>
+            </field>
+        </field>
+    </record>
+
+    <record id="itam_equipment_view_tree" model="ir.ui.view">
+        <field name="name">maintenance.equipment.list.itam</field>
+        <field name="model">maintenance.equipment</field>
+        <field name="inherit_id" ref="maintenance.hr_equipment_view_tree"/>
+        <field name="arch" type="xml">
+            <field name="name" position="after">
+                <field name="asset_tag"/>
+            </field>
+            <field name="category_id" position="after">
+                <field name="asset_status" widget="badge"
+                       decoration-success="asset_status == 'assigned'"
+                       decoration-info="asset_status == 'in_stock'"
+                       decoration-warning="asset_status == 'in_repair'"
+                       decoration-danger="asset_status in ('retired', 'disposed')"/>
+            </field>
+        </field>
+    </record>
+
+    <record id="itam_equipment_view_kanban" model="ir.ui.view">
+        <field name="name">maintenance.equipment.kanban.itam</field>
+        <field name="model">maintenance.equipment</field>
+        <field name="inherit_id" ref="maintenance.hr_equipment_view_kanban"/>
+        <field name="arch" type="xml">
+            <field name="name" position="after">
+                <field name="asset_tag" invisible="1"/>
+                <field name="asset_status" invisible="1"/>
+                <div t-if="record.asset_tag.raw_value" class="text-muted small">
+                    <field name="asset_tag"/>
+                </div>
+                <span t-attf-class="badge me-1 {{
+                    record.asset_status.raw_value == 'assigned' and 'text-bg-success' or
+                    record.asset_status.raw_value == 'in_repair' and 'text-bg-warning' or
+                    record.asset_status.raw_value in ('retired', 'disposed') and 'text-bg-danger' or
+                    'text-bg-info' }}">
+                    <field name="asset_status"/>
+                </span>
+            </field>
+        </field>
+    </record>
+
+    <record id="itam_equipment_view_search" model="ir.ui.view">
+        <field name="name">maintenance.equipment.search.itam</field>
+        <field name="model">maintenance.equipment</field>
+        <field name="inherit_id" ref="maintenance.hr_equipment_view_search"/>
+        <field name="arch" type="xml">
+            <filter name="under_maintenance" position="after">
+                <filter string="Garantie expirée" name="warranty_expired"
+                        domain="[('warranty_status', '=', 'expired')]"/>
+                <filter string="Garantie bientôt expirée" name="warranty_expiring_soon"
+                        domain="[('warranty_status', '=', 'expiring_soon')]"/>
+            </filter>
+            <filter name="owner" position="after">
+                <filter string="Statut de l'actif" name="group_status" context="{'group_by': 'asset_status'}"/>
+            </filter>
+        </field>
+    </record>
+
+    <record id="itam_equipment_action" model="ir.actions.act_window">
+        <field name="name">Actifs matériels</field>
+        <field name="res_model">maintenance.equipment</field>
+        <field name="view_mode">kanban,list,form</field>
+        <field name="context">{'search_default_group_status': 1}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">Ajouter un actif</p>
+            <p>Ordinateurs, serveurs, imprimantes, équipement réseau… suivez leur cycle de vie,
+               leur garantie et rattachez-les aux tickets du Service Desk.</p>
+        </field>
+    </record>
+</odoo>

@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="itam_software_license_view_form" model="ir.ui.view">
+        <field name="name">itam.software.license.form</field>
+        <field name="model">itam.software.license</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <widget name="web_ribbon" title="Sur-allocation" bg_color="text-bg-danger"
+                            invisible="not is_over_allocated"/>
+                    <div class="oe_title">
+                        <label for="name"/>
+                        <h1><field name="name" placeholder="ex. Microsoft 365 E3"/></h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="vendor_id"/>
+                            <field name="license_type"/>
+                            <field name="license_key"/>
+                        </group>
+                        <group>
+                            <field name="seats_total"/>
+                            <field name="seats_used"/>
+                            <field name="seats_available"/>
+                        </group>
+                    </group>
+                    <group>
+                        <group>
+                            <field name="cost"/>
+                            <field name="purchase_date"/>
+                        </group>
+                        <group>
+                            <field name="expiration_date"/>
+                            <field name="renewal_status" widget="badge"
+                                   decoration-success="renewal_status == 'valid'"
+                                   decoration-warning="renewal_status == 'expiring_soon'"
+                                   decoration-danger="renewal_status == 'expired'"
+                                   decoration-muted="renewal_status == 'none'"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Attributions" name="assignments">
+                            <field name="assignment_ids">
+                                <list editable="bottom">
+                                    <field name="employee_id"/>
+                                    <field name="equipment_id"/>
+                                    <field name="assign_date"/>
+                                    <field name="active" widget="boolean_toggle"/>
+                                    <field name="unassign_date" readonly="active"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Notes" name="notes">
+                            <field name="notes"/>
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <record id="itam_software_license_view_tree" model="ir.ui.view">
+        <field name="name">itam.software.license.list</field>
+        <field name="model">itam.software.license</field>
+        <field name="arch" type="xml">
+            <list decoration-danger="is_over_allocated" decoration-warning="renewal_status == 'expiring_soon'">
+                <field name="name"/>
+                <field name="vendor_id"/>
+                <field name="license_type"/>
+                <field name="seats_used"/>
+                <field name="seats_total"/>
+                <field name="renewal_status" widget="badge"
+                       decoration-success="renewal_status == 'valid'"
+                       decoration-warning="renewal_status == 'expiring_soon'"
+                       decoration-danger="renewal_status == 'expired'"
+                       decoration-muted="renewal_status == 'none'"/>
+                <field name="is_over_allocated" invisible="1"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="itam_software_license_view_search" model="ir.ui.view">
+        <field name="name">itam.software.license.search</field>
+        <field name="model">itam.software.license</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name"/>
+                <field name="vendor_id"/>
+                <filter string="Sur-allocation" name="over_allocated" domain="[('is_over_allocated', '=', True)]"/>
+                <filter string="Expire bientôt" name="expiring_soon" domain="[('renewal_status', '=', 'expiring_soon')]"/>
+                <filter string="Expirée" name="expired" domain="[('renewal_status', '=', 'expired')]"/>
+                <group expand="0" string="Regrouper par">
+                    <filter string="Éditeur" name="group_vendor" context="{'group_by': 'vendor_id'}"/>
+                    <filter string="Type de licence" name="group_type" context="{'group_by': 'license_type'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="itam_software_license_action" model="ir.actions.act_window">
+        <field name="name">Licences logicielles</field>
+        <field name="res_model">itam.software.license</field>
+        <field name="view_mode">list,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">Ajouter une licence logicielle</p>
+            <p>Suivez les sièges achetés/utilisés et les dates de renouvellement pour rester conforme.</p>
+        </field>
+    </record>
+</odoo>

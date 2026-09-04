@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <menuitem id="itam_menu_root" name="Actifs IT" sequence="21" groups="base.group_user"/>
+
+    <menuitem id="itam_menu_assets" name="Actifs matériels" parent="itam_menu_root"
+              action="itam_equipment_action" sequence="1"/>
+
+    <menuitem id="itam_menu_software" name="Licences logicielles" parent="itam_menu_root"
+              action="itam_software_license_action" sequence="2"/>
+
+    <menuitem id="itam_menu_config_root" name="Configuration" parent="itam_menu_root" sequence="10"
+              groups="villa_nova_itam.group_itam_manager"/>
+
+    <menuitem id="itam_menu_config_categories" name="Catégories d'actifs" parent="itam_menu_config_root"
+              action="maintenance.hr_equipment_category_action" sequence="1"/>
+</odoo>
