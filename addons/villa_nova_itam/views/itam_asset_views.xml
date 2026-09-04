@@ -70,7 +70,7 @@
                 <span t-attf-class="badge me-1 {{
                     record.asset_status.raw_value == 'assigned' and 'text-bg-success' or
                     record.asset_status.raw_value == 'in_repair' and 'text-bg-warning' or
-                    record.asset_status.raw_value in ('retired', 'disposed') and 'text-bg-danger' or
+                    (record.asset_status.raw_value == 'retired' or record.asset_status.raw_value == 'disposed') and 'text-bg-danger' or
                     'text-bg-info' }}">
                     <field name="asset_status"/>
                 </span>
