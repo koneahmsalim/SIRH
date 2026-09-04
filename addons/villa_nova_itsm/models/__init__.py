@@ -4,6 +4,7 @@ from . import itsm_sla_policy
 from . import itsm_service
 from . import itsm_tag
 from . import itsm_ticket
+from . import itsm_approval
 from . import itsm_ticket_time
 from . import itsm_ticket_wizard
 from . import itsm_ticket_template

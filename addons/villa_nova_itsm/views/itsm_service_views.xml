@@ -25,6 +25,7 @@
                         <field name="category_id"/>
                         <field name="owner_team_id"/>
                         <field name="default_sla_policy_id"/>
+                        <field name="requires_approval"/>
                         <field name="icon"/>
                     </group>
                     <field name="description"/>

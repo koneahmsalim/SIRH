@@ -135,6 +135,8 @@
                             invisible="state in ('cancelled','closed')"/>
                     <button name="action_merge" string="Fusionner…" type="object"
                             invisible="state in ('cancelled',)"/>
+                    <button name="action_request_approval" string="Demander l'approbation…" type="object" class="btn-secondary"
+                            invisible="approval_state != 'to_request'"/>
                     <field name="state" widget="statusbar" statusbar_visible="new,assigned,in_progress,resolved,closed"/>
                 </header>
                 <sheet>
@@ -165,6 +167,12 @@
                                    decoration-warning="sla_resolution_status == 'at_risk'"
                                    decoration-success="sla_resolution_status in ('met','on_track')"
                                    invisible="not sla_resolution_status"/>
+                            <field name="approval_state" widget="badge" string="Approbation"
+                                   decoration-info="approval_state == 'to_request'"
+                                   decoration-warning="approval_state == 'pending'"
+                                   decoration-success="approval_state == 'approved'"
+                                   decoration-danger="approval_state == 'refused'"
+                                   invisible="approval_state in (False, 'none')"/>
                         </div>
                     </div>
                     <group>
@@ -180,6 +188,7 @@
                             <field name="user_id"/>
                             <field name="category_id"/>
                             <field name="service_id"/>
+                            <field name="requires_approval"/>
                             <field name="tag_ids" widget="many2many_tags" options="{'color_field': 'color'}"/>
                         </group>
                     </group>
@@ -195,6 +204,7 @@
                             <field name="first_responded_at"/>
                             <field name="sla_resolution_deadline"/>
                             <field name="resolved_date"/>
+                            <field name="sla_paused_hours" invisible="not sla_paused_hours"/>
                         </group>
                     </group>
                     <notebook>
@@ -231,6 +241,18 @@
                             <group class="oe_subtotal_footer">
                                 <field name="total_time_spent" string="Total (h)"/>
                             </group>
+                        </page>
+                        <page string="Approbation" name="approval" invisible="not requires_approval">
+                            <field name="approval_ids" readonly="1">
+                                <list decoration-warning="state == 'pending'" decoration-success="state == 'approved'" decoration-danger="state == 'refused'">
+                                    <field name="requested_by"/>
+                                    <field name="approver_id"/>
+                                    <field name="request_date"/>
+                                    <field name="decision_date"/>
+                                    <field name="state" widget="badge"/>
+                                    <field name="comment"/>
+                                </list>
+                            </field>
                         </page>
                     </notebook>
                 </sheet>

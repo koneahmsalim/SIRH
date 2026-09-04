@@ -13,11 +13,12 @@
     'category': 'Services/Helpdesk',
     'author': 'Villa Nova',
     'license': 'LGPL-3',
-    'depends': ['mail', 'portal', 'resource', 'hr', 'villa_nova_theme'],
+    'depends': ['mail', 'portal', 'resource', 'hr', 'base_automation', 'villa_nova_theme'],
     'data': [
         'security/itsm_security.xml',
         'security/ir.model.access.csv',
         'security/itsm_security_rules.xml',
+        'security/automation_rules_security.xml',
         'data/ir_sequence_data.xml',
         'data/mail_template_data.xml',
         'data/itsm_cron_data.xml',
@@ -29,8 +30,10 @@
         'views/itsm_tag_views.xml',
         'views/itsm_ticket_template_views.xml',
         'views/itsm_canned_response_views.xml',
+        'views/itsm_approval_views.xml',
         'views/portal_templates.xml',
         'views/itsm_menus.xml',
+        'views/automation_rules_view.xml',
     ],
     'demo': [
         'demo/itsm_demo.xml',
@@ -45,4 +48,5 @@
     },
     'installable': True,
     'application': True,
+    'post_init_hook': 'post_init',
 }

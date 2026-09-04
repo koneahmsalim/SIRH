@@ -45,5 +45,34 @@
             </field>
         </record>
 
+        <record id="mail_template_sla_escalation" model="mail.template">
+            <field name="name">ITSM : escalade SLA dépassé (responsable d'équipe)</field>
+            <field name="model_id" ref="model_itsm_ticket"/>
+            <field name="subject">Escalade : SLA dépassé sur {{ object.name }}</field>
+            <field name="email_to">{{ object.team_id.leader_id.email }}</field>
+            <field name="auto_delete" eval="True"/>
+            <field name="body_html" type="html">
+<div style="font-family: sans-serif;">
+    <p>Bonjour {{ object.team_id.leader_id.name or '' }},</p>
+    <p>Le ticket <strong>{{ object.name }}</strong> — « {{ object.subject }} » a dépassé son échéance de résolution.</p>
+    <p>Agent assigné : {{ object.user_id.name or "non assigné" }}</p>
+</div>
+            </field>
+        </record>
+
+        <record id="mail_template_approval_request" model="mail.template">
+            <field name="name">ITSM : demande d'approbation</field>
+            <field name="model_id" ref="model_itsm_ticket"/>
+            <field name="subject">Approbation demandée : {{ object.name }}</field>
+            <field name="email_to">{{ object.team_id.leader_id.email }}</field>
+            <field name="auto_delete" eval="True"/>
+            <field name="body_html" type="html">
+<div style="font-family: sans-serif;">
+    <p>Bonjour {{ object.team_id.leader_id.name or '' }},</p>
+    <p>Le ticket <strong>{{ object.name }}</strong> — « {{ object.subject }} » nécessite votre approbation avant de pouvoir être traité.</p>
+</div>
+            </field>
+        </record>
+
     </data>
 </odoo>

@@ -17,6 +17,11 @@ class ItsmService(models.Model):
     owner_team_id = fields.Many2one('itsm.team', string="Équipe propriétaire")
     default_sla_policy_id = fields.Many2one('itsm.sla.policy', string="SLA par défaut")
     icon = fields.Char(help="Classe d'icône (ex. fa-laptop) affichée dans le catalogue.")
+    requires_approval = fields.Boolean(
+        string="Nécessite une approbation",
+        help="Toute demande sur ce service doit être approuvée avant de pouvoir être résolue "
+             "(ex. matériel coûteux, accès sensible).",
+    )
     ticket_count = fields.Integer(compute='_compute_ticket_count')
 
     def _compute_ticket_count(self):

@@ -24,6 +24,14 @@ access_itsm_sla_policy_line_manager,itsm.sla.policy.line.manager,model_itsm_sla_
 access_itsm_ticket_template_agent,itsm.ticket.template.agent,model_itsm_ticket_template,group_itsm_agent,1,0,0,0
 access_itsm_ticket_template_manager,itsm.ticket.template.manager,model_itsm_ticket_template,group_itsm_manager,1,1,1,1
 access_itsm_canned_response_agent,itsm.canned.response.agent,model_itsm_canned_response,group_itsm_agent,1,0,0,0
+access_itsm_approval_user,itsm.approval.user,model_itsm_approval,group_itsm_user,1,0,0,0
+access_itsm_approval_agent,itsm.approval.agent,model_itsm_approval,group_itsm_agent,1,1,1,0
+access_itsm_approval_manager,itsm.approval.manager,model_itsm_approval,group_itsm_manager,1,1,1,1
+access_base_automation_itsm_manager,base.automation.itsm.manager,base_automation.model_base_automation,group_itsm_manager,1,1,1,0
+access_ir_actions_server_itsm_manager,ir.actions.server.itsm.manager,base.model_ir_actions_server,group_itsm_manager,1,0,0,0
+access_ir_model_fields_itsm_manager,ir.model.fields.itsm.manager,base.model_ir_model_fields,group_itsm_manager,1,0,0,0
+access_ir_model_fields_selection_itsm_manager,ir.model.fields.selection.itsm.manager,base.model_ir_model_fields_selection,group_itsm_manager,1,0,0,0
+access_ir_model_itsm_manager,ir.model.itsm.manager,base.model_ir_model,group_itsm_manager,1,0,0,0
 access_itsm_canned_response_manager,itsm.canned.response.manager,model_itsm_canned_response,group_itsm_manager,1,1,1,1
 access_itsm_ticket_resolve_wizard,itsm.ticket.resolve.wizard,model_itsm_ticket_resolve_wizard,group_itsm_agent,1,1,1,1
 access_itsm_ticket_pending_wizard,itsm.ticket.pending.wizard,model_itsm_ticket_pending_wizard,group_itsm_agent,1,1,1,1

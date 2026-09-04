@@ -157,6 +157,11 @@ class ItsmTicket(models.Model):
     first_responded_at = fields.Datetime(string="Première réponse le", copy=False)
     sla_response_status = fields.Selection(SLA_STATUS_SELECTION, compute='_compute_sla_status', store=True, string="SLA réponse")
     sla_resolution_status = fields.Selection(SLA_STATUS_SELECTION, compute='_compute_sla_status', store=True, string="SLA résolution")
+    # Pause SLA : le temps passe "En attente" (cote client/tiers, pas de la
+    # faute de l'agent) ne doit pas consommer le SLA - accumule a la sortie
+    # de chaque pause, ajoute aux echeances au lieu de les laisser courir.
+    sla_pause_started_at = fields.Datetime(copy=False)
+    sla_paused_hours = fields.Float(string="Heures SLA en pause", copy=False, default=0.0)
 
     resolved_date = fields.Datetime(string="Date de résolution", copy=False)
     closed_date = fields.Datetime(string="Date de clôture", copy=False)
@@ -173,7 +178,20 @@ class ItsmTicket(models.Model):
     time_line_ids = fields.One2many('itsm.ticket.time', 'ticket_id', string="Temps passé")
     total_time_spent = fields.Float(compute='_compute_total_time_spent', string="Temps total (h)")
 
-    attachment_count = fields.Integer(compute='_compute_attachment_count')
+    # --- Approbation -----------------------------------------------------
+    requires_approval = fields.Boolean(
+        string="Nécessite une approbation", compute='_compute_requires_approval',
+        store=True, readonly=False,
+        help="Repris automatiquement du service demandé, modifiable manuellement au cas par cas.",
+    )
+    approval_ids = fields.One2many('itsm.approval', 'ticket_id', string="Approbations")
+    approval_state = fields.Selection(
+        [('none', "Non requise"), ('to_request', "À demander"), ('pending', "En attente"),
+         ('approved', "Approuvée"), ('refused', "Refusée")],
+        string="Statut d'approbation", compute='_compute_approval_state', store=True,
+    )
+
+    attachment_count = fields.Integer(string="Nombre de pièces jointes", compute='_compute_attachment_count')
 
     kanban_color = fields.Integer(compute='_compute_kanban_color')
 
@@ -205,7 +223,7 @@ class ItsmTicket(models.Model):
                 or False
             )
 
-    @api.depends('sla_policy_id', 'priority', 'create_date', 'team_id')
+    @api.depends('sla_policy_id', 'priority', 'create_date', 'team_id', 'sla_paused_hours')
     def _compute_sla_deadlines(self):
         for ticket in self:
             line = ticket.sla_policy_id._get_line(ticket.priority) if ticket.sla_policy_id else False
@@ -215,8 +233,16 @@ class ItsmTicket(models.Model):
                 continue
             calendar = ticket.sla_policy_id.calendar_id or ticket.team_id.calendar_id or ticket.company_id.resource_calendar_id
             start = ticket.create_date or fields.Datetime.now()
-            ticket.sla_first_response_deadline = ticket._sla_add_hours(calendar, start, line.first_response_hours)
-            ticket.sla_resolution_deadline = ticket._sla_add_hours(calendar, start, line.resolution_hours)
+            response_deadline = ticket._sla_add_hours(calendar, start, line.first_response_hours)
+            resolution_deadline = ticket._sla_add_hours(calendar, start, line.resolution_hours)
+            # Le temps passe en pause (statut "En attente") est rajoute aux
+            # deux echeances : un ticket qui attend une reponse du
+            # demandeur ne doit pas "perdre" son SLA pendant ce temps mort.
+            if ticket.sla_paused_hours:
+                response_deadline = ticket._sla_add_hours(calendar, response_deadline, ticket.sla_paused_hours)
+                resolution_deadline = ticket._sla_add_hours(calendar, resolution_deadline, ticket.sla_paused_hours)
+            ticket.sla_first_response_deadline = response_deadline
+            ticket.sla_resolution_deadline = resolution_deadline
 
     def _sla_add_hours(self, calendar, start, hours):
         """Ajoute N heures ouvrees a `start` selon le calendrier de travail
@@ -235,14 +261,18 @@ class ItsmTicket(models.Model):
             return start_dt + timedelta(hours=hours)
 
     @api.depends('sla_first_response_deadline', 'sla_resolution_deadline', 'first_responded_at',
-                 'resolved_date', 'state', 'create_date')
+                 'resolved_date', 'state', 'create_date', 'sla_pause_started_at')
     def _compute_sla_status(self):
         now = fields.Datetime.now()
         for ticket in self:
+            # Pendant une pause active, le SLA est fige a l'instant de la
+            # mise en attente : pas d'avancement vers "a risque"/"depasse"
+            # tant que le ticket reste en attente.
+            effective_now = ticket.sla_pause_started_at if (ticket.state == 'pending' and ticket.sla_pause_started_at) else now
             ticket.sla_response_status = ticket._sla_status_for(
-                ticket.sla_first_response_deadline, ticket.first_responded_at, now, ticket.create_date)
+                ticket.sla_first_response_deadline, ticket.first_responded_at, effective_now, ticket.create_date)
             ticket.sla_resolution_status = ticket._sla_status_for(
-                ticket.sla_resolution_deadline, ticket.resolved_date, now, ticket.create_date)
+                ticket.sla_resolution_deadline, ticket.resolved_date, effective_now, ticket.create_date)
 
     @api.model
     def _sla_status_for(self, deadline, done_at, now, create_date):
@@ -267,6 +297,20 @@ class ItsmTicket(models.Model):
     def _compute_total_time_spent(self):
         for ticket in self:
             ticket.total_time_spent = sum(ticket.time_line_ids.mapped('duration'))
+
+    @api.depends('service_id.requires_approval')
+    def _compute_requires_approval(self):
+        for ticket in self:
+            ticket.requires_approval = ticket.service_id.requires_approval
+
+    @api.depends('approval_ids.state', 'requires_approval')
+    def _compute_approval_state(self):
+        for ticket in self:
+            if not ticket.requires_approval:
+                ticket.approval_state = 'none'
+                continue
+            last = ticket.approval_ids.sorted('request_date', reverse=True)[:1]
+            ticket.approval_state = last.state if last else 'to_request'
 
     def _compute_attachment_count(self):
         for ticket in self:
@@ -315,11 +359,33 @@ class ItsmTicket(models.Model):
             for ticket in self:
                 self._check_state_transition(ticket.state, vals['state'])
         newly_assigned = self.filtered(lambda t: vals.get('user_id') and t.user_id.id != vals['user_id']) if 'user_id' in vals else self.browse()
+
+        # Snapshot avant ecriture : il faut savoir quels tickets ENTRENT ou
+        # SORTENT de "En attente" pour gerer la pause SLA - apres
+        # super().write(), ticket.state reflete deja la nouvelle valeur.
+        entering_pending = leaving_pending = self.browse()
+        if vals.get('state') == 'pending':
+            entering_pending = self.filtered(lambda t: t.state != 'pending')
+        elif 'state' in vals:
+            leaving_pending = self.filtered(lambda t: t.state == 'pending')
+
         res = super().write(vals)
+
         if vals.get('state') == 'resolved':
             self.filtered(lambda t: not t.resolved_date).write({'resolved_date': fields.Datetime.now()})
         if vals.get('state') == 'closed':
             self.filtered(lambda t: not t.closed_date).write({'closed_date': fields.Datetime.now()})
+
+        if entering_pending:
+            entering_pending.write({'sla_pause_started_at': fields.Datetime.now()})
+        for ticket in leaving_pending:
+            if ticket.sla_pause_started_at:
+                paused_hours = (fields.Datetime.now() - ticket.sla_pause_started_at).total_seconds() / 3600.0
+                ticket.write({
+                    'sla_paused_hours': ticket.sla_paused_hours + max(paused_hours, 0.0),
+                    'sla_pause_started_at': False,
+                })
+
         for ticket in newly_assigned:
             if ticket.user_id.email:
                 ticket._send_mail_safe('villa_nova_itsm.mail_template_ticket_assigned')
@@ -381,6 +447,12 @@ class ItsmTicket(models.Model):
         }
 
     def action_resolve(self):
+        blocked = self.filtered(lambda t: t.requires_approval and t.approval_state != 'approved')
+        if blocked:
+            raise UserError(_(
+                "Ce ticket nécessite une approbation avant de pouvoir être résolu : %s.",
+                ', '.join(blocked.mapped('name')),
+            ))
         return {
             'type': 'ir.actions.act_window',
             'name': _("Résoudre le ticket"),
@@ -389,6 +461,23 @@ class ItsmTicket(models.Model):
             'target': 'new',
             'context': {'default_ticket_ids': self.ids},
         }
+
+    def action_request_approval(self):
+        self.ensure_one()
+        if not self.requires_approval:
+            raise UserError(_("Ce ticket ne nécessite pas d'approbation."))
+        if self.approval_state == 'pending':
+            raise UserError(_("Une demande d'approbation est déjà en attente."))
+        approver = self.team_id.leader_id or self.service_id.owner_team_id.leader_id
+        if not approver:
+            raise UserError(_("Aucun responsable d'équipe à désigner comme approbateur."))
+        self.env['itsm.approval'].create({
+            'ticket_id': self.id,
+            'approver_id': approver.id,
+        })
+        self.message_post(body=_("Approbation demandée à %(approver)s.", approver=approver.name))
+        if approver.email:
+            self._send_mail_safe('villa_nova_itsm.mail_template_approval_request')
 
     def action_close(self):
         self.write({'state': 'closed'})
@@ -499,5 +588,54 @@ class ItsmTicket(models.Model):
             )
             if newly_at_risk_or_breached and ticket.user_id.email:
                 ticket._send_mail_safe('villa_nova_itsm.mail_template_sla_breach_warning')
+
+            newly_breached = ticket.sla_resolution_status == 'breached' and old_resolution != 'breached'
+            if newly_breached:
+                ticket._escalate_to_team_leader()
         self.env.flush_all()
         self.env.cr.commit()
+
+    def _escalate_to_team_leader(self):
+        """Escalade hierarchique : des qu'un ticket depasse son SLA de
+        resolution, le responsable de l'equipe est prevenu (email + activite
+        a faire) - pas seulement l'agent deja notifie plus tot pour le
+        risque. Une seule escalade par ticket (evite de spammer a chaque
+        passage du cron tant que le ticket reste ouvert et depasse)."""
+        self.ensure_one()
+        leader = self.team_id.leader_id
+        if not leader or leader == self.user_id:
+            return
+        already_escalated = self.activity_ids.filtered(
+            lambda a: a.user_id == leader and 'SLA dépassé' in (a.summary or ''))
+        if already_escalated:
+            return
+        if leader.email:
+            self._send_mail_safe('villa_nova_itsm.mail_template_sla_escalation')
+        self.activity_schedule(
+            'mail.mail_activity_data_todo',
+            user_id=leader.id,
+            summary="Escalade : SLA dépassé sur %s" % self.name,
+            note="Le ticket <b>%s</b> (%s) a dépassé son échéance de résolution. "
+                 "Agent assigné : %s." % (self.name, self.subject, self.user_id.name or "non assigné"),
+        )
+
+    def action_automation_notify_critical(self):
+        """Appelee par la regle d'automatisation native (base.automation,
+        declenchee quand priority passe a 'critical') - une activite plutot
+        qu'un email seul : reste visible tant que le responsable n'a pas
+        traite/marque comme fait, contrairement a un email qui se perd dans
+        la boite de reception."""
+        for ticket in self:
+            leader = ticket.team_id.leader_id
+            if not leader:
+                continue
+            already_notified = ticket.activity_ids.filtered(
+                lambda a: a.user_id == leader and 'Ticket critique' in (a.summary or ''))
+            if already_notified:
+                continue
+            ticket.activity_schedule(
+                'mail.mail_activity_data_todo',
+                user_id=leader.id,
+                summary="Ticket critique : %s" % ticket.name,
+                note="Le ticket <b>%s</b> (%s) est passé en priorité critique." % (ticket.name, ticket.subject),
+            )

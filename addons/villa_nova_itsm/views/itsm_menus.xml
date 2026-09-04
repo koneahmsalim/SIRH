@@ -18,8 +18,11 @@
     <menuitem id="itsm_menu_tickets_my" name="Mes tickets" parent="itsm_menu_tickets_root"
               action="itsm_ticket_action_my" sequence="2"/>
 
+    <menuitem id="itsm_menu_approvals_my" name="Mes approbations" parent="itsm_menu_root"
+              action="itsm_approval_action_my" sequence="3"/>
+
     <menuitem id="itsm_menu_teams" name="Équipes" parent="itsm_menu_root"
-              action="itsm_team_action" sequence="3" groups="villa_nova_itsm.group_itsm_team_leader"/>
+              action="itsm_team_action" sequence="4" groups="villa_nova_itsm.group_itsm_team_leader"/>
 
     <menuitem id="itsm_menu_config_root" name="Configuration" parent="itsm_menu_root" sequence="10"
               groups="villa_nova_itsm.group_itsm_manager"/>
