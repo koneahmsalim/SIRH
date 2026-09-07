@@ -6,6 +6,18 @@ from odoo.addons.villa_nova_itsm.controllers.portal import ItsmPortal
 
 class ItsmKnowledgePortal(ItsmPortal):
 
+    @http.route(['/selfservice'], type='http', auth='user', website=True)
+    def portal_selfservice_home(self, **kw):
+        values = self._prepare_portal_layout_values()
+        values.update({
+            'page_name': 'selfservice',
+            'ticket_count': request.env['itsm.ticket'].sudo().search_count(self._itsm_ticket_domain()),
+            'article_count': request.env['itsm.kb.article'].sudo().search_count(
+                [('state', '=', 'published'), ('is_public', '=', True)]),
+            'service_count': request.env['itsm.service'].sudo().search_count([]),
+        })
+        return request.render('villa_nova_knowledge.portal_selfservice_home', values)
+
     @http.route(['/my/knowledge', '/my/knowledge/page/<int:page>'], type='http', auth='user', website=True)
     def portal_knowledge(self, page=1, search=None, category_id=None, **kw):
         Article = request.env['itsm.kb.article'].sudo()
