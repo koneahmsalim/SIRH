@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="itam_equipment_view_form_endpoint" model="ir.ui.view">
+        <field name="name">maintenance.equipment.form.itam.endpoint</field>
+        <field name="model">maintenance.equipment</field>
+        <field name="inherit_id" ref="villa_nova_itam.itam_equipment_view_form"/>
+        <field name="arch" type="xml">
+            <notebook position="inside">
+                <page string="Sécurité &amp; Endpoint" name="endpoint">
+                    <group>
+                        <group string="Identification réseau">
+                            <field name="hostname"/>
+                            <field name="ip_address"/>
+                            <field name="os_name"/>
+                            <field name="os_version"/>
+                            <field name="last_seen"/>
+                            <field name="endpoint_status" widget="badge"
+                                   decoration-success="endpoint_status == 'online'"
+                                   decoration-warning="endpoint_status == 'stale'"
+                                   decoration-danger="endpoint_status == 'offline'"
+                                   decoration-muted="endpoint_status == 'unknown'"/>
+                        </group>
+                        <group string="Posture de sécurité">
+                            <field name="av_status" widget="badge"
+                                   decoration-success="av_status == 'protected'"
+                                   decoration-danger="av_status == 'at_risk'"
+                                   decoration-muted="av_status == 'unknown'"/>
+                            <field name="patch_status" widget="badge"
+                                   decoration-success="patch_status == 'up_to_date'"
+                                   decoration-warning="patch_status == 'pending'"
+                                   decoration-danger="patch_status == 'overdue'"
+                                   decoration-muted="patch_status == 'unknown'"/>
+                            <field name="encryption_enabled"/>
+                            <field name="last_security_scan"/>
+                            <field name="compliance_status" widget="badge"
+                                   decoration-success="compliance_status == 'compliant'"
+                                   decoration-danger="compliance_status == 'non_compliant'"
+                                   decoration-muted="compliance_status == 'unknown'"/>
+                        </group>
+                    </group>
+                </page>
+            </notebook>
+        </field>
+    </record>
+
+    <record id="itam_equipment_view_tree_endpoint" model="ir.ui.view">
+        <field name="name">maintenance.equipment.list.itam.endpoint</field>
+        <field name="model">maintenance.equipment</field>
+        <field name="inherit_id" ref="villa_nova_itam.itam_equipment_view_tree"/>
+        <field name="arch" type="xml">
+            <field name="asset_status" position="after">
+                <field name="compliance_status" widget="badge" optional="show"
+                       decoration-success="compliance_status == 'compliant'"
+                       decoration-danger="compliance_status == 'non_compliant'"
+                       decoration-muted="compliance_status == 'unknown'"/>
+                <field name="endpoint_status" widget="badge" optional="hide"
+                       decoration-success="endpoint_status == 'online'"
+                       decoration-warning="endpoint_status == 'stale'"
+                       decoration-danger="endpoint_status == 'offline'"
+                       decoration-muted="endpoint_status == 'unknown'"/>
+            </field>
+        </field>
+    </record>
+
+    <record id="itam_equipment_view_search_endpoint" model="ir.ui.view">
+        <field name="name">maintenance.equipment.search.itam.endpoint</field>
+        <field name="model">maintenance.equipment</field>
+        <field name="inherit_id" ref="villa_nova_itam.itam_equipment_view_search"/>
+        <field name="arch" type="xml">
+            <filter name="group_status" position="after">
+                <filter string="Non conformes" name="non_compliant"
+                        domain="[('compliance_status', '=', 'non_compliant')]"/>
+                <filter string="Hors ligne" name="offline_endpoints"
+                        domain="[('endpoint_status', '=', 'offline')]"/>
+                <filter string="Statut de conformité" name="group_compliance"
+                        context="{'group_by': 'compliance_status'}"/>
+            </filter>
+        </field>
+    </record>
+
+    <record id="itam_discovery_log_view_tree" model="ir.ui.view">
+        <field name="name">itam.discovery.log.list</field>
+        <field name="model">itam.discovery.log</field>
+        <field name="arch" type="xml">
+            <list decoration-danger="result == 'error'" decoration-success="result == 'created'" create="false">
+                <field name="create_date"/>
+                <field name="hostname"/>
+                <field name="equipment_id"/>
+                <field name="source_ip"/>
+                <field name="result" widget="badge"
+                       decoration-success="result in ('created', 'updated')"
+                       decoration-danger="result == 'error'"/>
+                <field name="error_message"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="itam_discovery_log_view_form" model="ir.ui.view">
+        <field name="name">itam.discovery.log.form</field>
+        <field name="model">itam.discovery.log</field>
+        <field name="arch" type="xml">
+            <form create="false" edit="false">
+                <sheet>
+                    <group>
+                        <field name="equipment_id"/>
+                        <field name="hostname"/>
+                        <field name="source_ip"/>
+                        <field name="result"/>
+                        <field name="error_message"/>
+                    </group>
+                    <field name="raw_payload" widget="text"/>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="itam_discovery_log_action" model="ir.actions.act_window">
+        <field name="name">Journal de découverte</field>
+        <field name="res_model">itam.discovery.log</field>
+        <field name="view_mode">list,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">Aucun rapport de découverte pour l'instant</p>
+            <p>Chaque appel au point d'entrée /itam/discovery/report par un agent externe est journalisé ici.</p>
+        </field>
+    </record>
+</odoo>

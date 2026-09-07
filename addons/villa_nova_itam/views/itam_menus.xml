@@ -20,4 +20,8 @@
     <menuitem id="itam_menu_config_categories" name="Catégories d'actifs"
               parent="villa_nova_itsm.itsm_menu_config_root"
               action="maintenance.hr_equipment_category_action" sequence="8"/>
+
+    <menuitem id="itam_menu_discovery_log" name="Journal de découverte" parent="itsm_menu_assets_root"
+              action="itam_discovery_log_action" sequence="4"
+              groups="villa_nova_itam.group_itam_manager"/>
 </odoo>

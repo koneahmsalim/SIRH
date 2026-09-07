@@ -3,3 +3,5 @@ access_itam_software_license_user,itam.software.license.user,model_itam_software
 access_itam_software_license_manager,itam.software.license.manager,model_itam_software_license,group_itam_manager,1,1,1,1
 access_itam_software_assignment_user,itam.software.assignment.user,model_itam_software_assignment,base.group_user,1,0,0,0
 access_itam_software_assignment_manager,itam.software.assignment.manager,model_itam_software_assignment,group_itam_manager,1,1,1,1
+access_itam_discovery_log_user,itam.discovery.log.user,model_itam_discovery_log,base.group_user,1,0,0,0
+access_itam_discovery_log_manager,itam.discovery.log.manager,model_itam_discovery_log,group_itam_manager,1,1,1,0

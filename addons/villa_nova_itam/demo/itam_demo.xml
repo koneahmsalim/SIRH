@@ -31,6 +31,15 @@
             <field name="purchase_date" eval="(DateTime.today() - relativedelta(months=8)).strftime('%Y-%m-%d')"/>
             <field name="warranty_date" eval="(DateTime.today() + relativedelta(months=4)).strftime('%Y-%m-%d')"/>
             <field name="cost">2400.0</field>
+            <field name="hostname">LAP-ELISHAMA</field>
+            <field name="ip_address">10.10.4.21</field>
+            <field name="os_name">macOS</field>
+            <field name="os_version">14.5 Sonoma</field>
+            <field name="last_seen" eval="(DateTime.now() - relativedelta(hours=2)).strftime('%Y-%m-%d %H:%M:%S')"/>
+            <field name="av_status">protected</field>
+            <field name="patch_status">up_to_date</field>
+            <field name="encryption_enabled">True</field>
+            <field name="last_security_scan" eval="(DateTime.now() - relativedelta(days=1)).strftime('%Y-%m-%d %H:%M:%S')"/>
         </record>
         <record id="demo_asset_laptop_abdoulaye" model="maintenance.equipment">
             <field name="name">MacBook Pro 14"</field>
@@ -40,6 +49,15 @@
             <field name="purchase_date" eval="(DateTime.today() - relativedelta(years=1, months=10)).strftime('%Y-%m-%d')"/>
             <field name="warranty_date" eval="(DateTime.today() + relativedelta(days=30)).strftime('%Y-%m-%d')"/>
             <field name="cost">2200.0</field>
+            <field name="hostname">LAP-ABDOULAYE</field>
+            <field name="ip_address">10.10.4.35</field>
+            <field name="os_name">macOS</field>
+            <field name="os_version">13.6 Ventura</field>
+            <field name="last_seen" eval="(DateTime.now() - relativedelta(hours=18)).strftime('%Y-%m-%d %H:%M:%S')"/>
+            <field name="av_status">protected</field>
+            <field name="patch_status">overdue</field>
+            <field name="encryption_enabled">True</field>
+            <field name="last_security_scan" eval="(DateTime.now() - relativedelta(days=20)).strftime('%Y-%m-%d %H:%M:%S')"/>
         </record>
         <record id="demo_asset_laptop_dell" model="maintenance.equipment">
             <field name="name">Dell Latitude 5420</field>
@@ -49,6 +67,15 @@
             <field name="purchase_date" eval="(DateTime.today() - relativedelta(months=5)).strftime('%Y-%m-%d')"/>
             <field name="warranty_date" eval="(DateTime.today() + relativedelta(years=2)).strftime('%Y-%m-%d')"/>
             <field name="cost">1350.0</field>
+            <field name="hostname">LAP-CISSE</field>
+            <field name="ip_address">10.10.2.14</field>
+            <field name="os_name">Windows</field>
+            <field name="os_version">11 Pro 23H2</field>
+            <field name="last_seen" eval="(DateTime.now() - relativedelta(days=5)).strftime('%Y-%m-%d %H:%M:%S')"/>
+            <field name="av_status">at_risk</field>
+            <field name="patch_status">pending</field>
+            <field name="encryption_enabled">False</field>
+            <field name="last_security_scan" eval="(DateTime.now() - relativedelta(days=5)).strftime('%Y-%m-%d %H:%M:%S')"/>
         </record>
         <record id="demo_asset_desktop_hr" model="maintenance.equipment">
             <field name="name">Dell OptiPlex 7090</field>
@@ -166,6 +193,24 @@
              illustre l'interconnexion entre modules plutot que des silos. -->
         <record id="villa_nova_itsm.demo_ticket_1" model="itsm.ticket">
             <field name="equipment_id" ref="demo_asset_laptop_dell"/>
+        </record>
+
+        <!-- Illustre le journal de decouverte avec des entrees plausibles -
+             en usage reel, ces lignes sont creees par _itam_discovery_upsert
+             a chaque appel du point d'entree /itam/discovery/report. -->
+        <record id="demo_discovery_log_1" model="itam.discovery.log">
+            <field name="equipment_id" ref="demo_asset_laptop_elishama"/>
+            <field name="hostname">LAP-ELISHAMA</field>
+            <field name="source_ip">10.10.4.21</field>
+            <field name="result">updated</field>
+            <field name="raw_payload">{"hostname": "LAP-ELISHAMA", "os_name": "macOS", "av_status": "protected", "patch_status": "up_to_date"}</field>
+        </record>
+        <record id="demo_discovery_log_2" model="itam.discovery.log">
+            <field name="equipment_id" ref="demo_asset_laptop_dell"/>
+            <field name="hostname">LAP-CISSE</field>
+            <field name="source_ip">10.10.2.14</field>
+            <field name="result">updated</field>
+            <field name="raw_payload">{"hostname": "LAP-CISSE", "os_name": "Windows", "av_status": "at_risk", "patch_status": "pending"}</field>
         </record>
 
     </data>

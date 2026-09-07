@@ -2,12 +2,31 @@
 <odoo>
     <data noupdate="1">
 
+        <!-- Compte technique dedie a l'agent de decouverte externe (script,
+             RMM, MDM...) - jamais de connexion interactive, authentifie
+             uniquement par cle API scopee "itam_discovery" (voir
+             controllers/discovery.py). Droits minimaux (gestionnaire ITAM)
+             plutot que reutiliser un compte administrateur. -->
+        <record id="user_itam_discovery_agent" model="res.users">
+            <field name="name">Agent de découverte ITAM</field>
+            <field name="login">itam.discovery.agent</field>
+            <field name="active">True</field>
+            <!-- groups_id doit etre fourni explicitement : sans cela, le
+                 defaut du champ (res.users._default_groups) copie TOUT le
+                 profil du "Template User" (base.default_user), qui dans ce
+                 SIRH cumule des droits Administrateur sur de nombreux
+                 modules RH - bien trop pour un compte technique de service.
+                 On part du minimum (base.group_user) et group_itam_manager
+                 (accorde ci-dessous) ajoute seulement ce qui est necessaire. -->
+            <field name="groups_id" eval="[(6, 0, [ref('base.group_user')])]"/>
+        </record>
+
         <record id="group_itam_manager" model="res.groups">
             <field name="name">Gestionnaire d'actifs ITAM</field>
             <field name="category_id" ref="villa_nova_itsm.module_category_itsm"/>
             <field name="implied_ids" eval="[(4, ref('maintenance.group_equipment_manager')),
                                               (4, ref('villa_nova_itsm.group_itsm_agent'))]"/>
-            <field name="users" eval="[(4, ref('base.user_admin'))]"/>
+            <field name="users" eval="[(4, ref('base.user_admin')), (4, ref('user_itam_discovery_agent'))]"/>
         </record>
 
     </data>

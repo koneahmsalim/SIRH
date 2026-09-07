@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="equipment_category_discovered" model="maintenance.equipment.category">
+        <field name="name">Découverts automatiquement</field>
+    </record>
+
+    <record id="cron_itam_refresh_endpoint_status" model="ir.cron">
+        <field name="name">ITAM : rafraîchir le statut des endpoints</field>
+        <field name="model_id" ref="model_maintenance_equipment"/>
+        <field name="state">code</field>
+        <field name="code">model._cron_refresh_endpoint_status()</field>
+        <field name="interval_number">1</field>
+        <field name="interval_type">hours</field>
+        <field name="active" eval="True"/>
+    </record>
+</odoo>
