@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="endpoint_enrollment_key_reveal_view_form" model="ir.ui.view">
+        <field name="name">itsm.endpoint.enrollment.key.reveal.form</field>
+        <field name="model">itsm.endpoint.enrollment.key.reveal</field>
+        <field name="arch" type="xml">
+            <form string="Jeton d'enrôlement">
+                <div class="alert alert-warning" role="alert">
+                    Ce jeton ne sera plus jamais affiché après la fermeture de cette fenêtre.
+                    Copiez-le maintenant dans la configuration de l'agent (installateur MSI/GPO).
+                </div>
+                <group>
+                    <field name="key_id" readonly="1"/>
+                    <field name="token" readonly="1"/>
+                </group>
+                <footer>
+                    <button string="Fermer" class="btn-primary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+</odoo>

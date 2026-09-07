@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="itam_software_installed_view_list" model="ir.ui.view">
+        <field name="name">itam.software.installed.list</field>
+        <field name="model">itam.software.installed</field>
+        <field name="arch" type="xml">
+            <list create="false">
+                <field name="equipment_id"/>
+                <field name="name"/>
+                <field name="version"/>
+                <field name="publisher"/>
+                <field name="install_date"/>
+                <field name="source"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="itam_hardware_disk_view_list" model="ir.ui.view">
+        <field name="name">itam.hardware.disk.list</field>
+        <field name="model">itam.hardware.disk</field>
+        <field name="arch" type="xml">
+            <list create="false">
+                <field name="equipment_id"/>
+                <field name="name"/>
+                <field name="model"/>
+                <field name="media_type"/>
+                <field name="size_gb"/>
+                <field name="serial_no"/>
+            </list>
+        </field>
+    </record>
+</odoo>

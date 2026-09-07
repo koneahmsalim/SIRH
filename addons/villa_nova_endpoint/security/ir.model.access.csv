@@ -1,0 +1,12 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_itsm_endpoint_enrollment_key_user,itsm.endpoint.enrollment.key.user,model_itsm_endpoint_enrollment_key,base.group_user,1,0,0,0
+access_itsm_endpoint_enrollment_key_manager,itsm.endpoint.enrollment.key.manager,model_itsm_endpoint_enrollment_key,villa_nova_itam.group_itam_manager,1,1,1,0
+access_itsm_endpoint_agent_user,itsm.endpoint.agent.user,model_itsm_endpoint_agent,base.group_user,1,0,0,0
+access_itsm_endpoint_agent_manager,itsm.endpoint.agent.manager,model_itsm_endpoint_agent,villa_nova_itam.group_itam_manager,1,1,0,0
+access_itam_hardware_disk_user,itam.hardware.disk.user,model_itam_hardware_disk,base.group_user,1,0,0,0
+access_itam_hardware_disk_manager,itam.hardware.disk.manager,model_itam_hardware_disk,villa_nova_itam.group_itam_manager,1,1,0,0
+access_itam_network_interface_user,itam.network.interface.user,model_itam_network_interface,base.group_user,1,0,0,0
+access_itam_network_interface_manager,itam.network.interface.manager,model_itam_network_interface,villa_nova_itam.group_itam_manager,1,1,0,0
+access_itam_software_installed_user,itam.software.installed.user,model_itam_software_installed,base.group_user,1,0,0,0
+access_itam_software_installed_manager,itam.software.installed.manager,model_itam_software_installed,villa_nova_itam.group_itam_manager,1,1,0,0
+access_itsm_endpoint_enrollment_key_reveal,itsm.endpoint.enrollment.key.reveal,model_itsm_endpoint_enrollment_key_reveal,villa_nova_itam.group_itam_manager,1,1,1,1

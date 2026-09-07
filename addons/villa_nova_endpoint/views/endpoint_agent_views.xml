@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="endpoint_agent_view_list" model="ir.ui.view">
+        <field name="name">itsm.endpoint.agent.list</field>
+        <field name="model">itsm.endpoint.agent</field>
+        <field name="arch" type="xml">
+            <list decoration-danger="state=='revoked'" decoration-success="checkin_status=='online'">
+                <field name="equipment_id"/>
+                <field name="agent_uuid"/>
+                <field name="platform"/>
+                <field name="agent_version"/>
+                <field name="enrolled_date"/>
+                <field name="last_checkin"/>
+                <field name="checkin_count"/>
+                <field name="checkin_status" widget="badge"
+                       decoration-success="checkin_status == 'online'"
+                       decoration-warning="checkin_status == 'stale'"
+                       decoration-danger="checkin_status == 'offline'"/>
+                <field name="state" widget="badge" decoration-danger="state == 'revoked'"
+                       decoration-success="state == 'enrolled'"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="endpoint_agent_view_form" model="ir.ui.view">
+        <field name="name">itsm.endpoint.agent.form</field>
+        <field name="model">itsm.endpoint.agent</field>
+        <field name="arch" type="xml">
+            <form string="Agent endpoint">
+                <header>
+                    <button name="action_revoke" type="object" string="Révoquer" invisible="state == 'revoked'"
+                            confirm="L'agent ne pourra plus faire de check-in ni transmettre d'inventaire. Continuer ?"/>
+                    <field name="state" widget="statusbar" readonly="1"/>
+                </header>
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="equipment_id"/>
+                            <field name="agent_uuid" readonly="1"/>
+                            <field name="platform"/>
+                            <field name="agent_version"/>
+                            <field name="enrollment_key_id"/>
+                        </group>
+                        <group>
+                            <field name="enrolled_date" readonly="1"/>
+                            <field name="revoked_date" readonly="1" invisible="not revoked_date"/>
+                            <field name="last_checkin" readonly="1"/>
+                            <field name="checkin_count" readonly="1"/>
+                            <field name="checkin_status" widget="badge"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="endpoint_agent_view_search" model="ir.ui.view">
+        <field name="name">itsm.endpoint.agent.search</field>
+        <field name="model">itsm.endpoint.agent</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="equipment_id"/>
+                <field name="agent_uuid"/>
+                <field name="enrollment_key_id"/>
+                <filter name="enrolled" string="Enrôlés" domain="[('state', '=', 'enrolled')]"/>
+                <filter name="revoked" string="Révoqués" domain="[('state', '=', 'revoked')]"/>
+                <separator/>
+                <filter name="offline" string="Hors ligne" domain="[('checkin_status', '=', 'offline')]"/>
+                <group expand="0" string="Regrouper par">
+                    <filter name="group_state" string="Statut" context="{'group_by': 'state'}"/>
+                    <filter name="group_checkin" string="Connectivité" context="{'group_by': 'checkin_status'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_endpoint_agent" model="ir.actions.act_window">
+        <field name="name">Agents endpoint</field>
+        <field name="res_model">itsm.endpoint.agent</field>
+        <field name="view_mode">list,form</field>
+        <field name="context">{'search_default_enrolled': 1}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smile">
+                Aucun agent enrôlé pour l'instant - un agent apparaît ici automatiquement
+                dès son premier enrôlement, jamais créé manuellement.
+            </p>
+        </field>
+    </record>
+</odoo>

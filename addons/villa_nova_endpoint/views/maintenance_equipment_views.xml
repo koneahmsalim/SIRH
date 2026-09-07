@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Chaine sur la vue la plus specifique deja posee par la Phase 5 ITAM
+         (meme convention de chainage que le module villa_nova_itam
+         lui-meme : itam_endpoint_views.xml chaine sur itam_asset_views.xml
+         plutot que de repartir de la vue native a chaque fois). -->
+    <record id="maintenance_equipment_view_form_endpoint_agent" model="ir.ui.view">
+        <field name="name">maintenance.equipment.form.endpoint.agent</field>
+        <field name="model">maintenance.equipment</field>
+        <field name="inherit_id" ref="villa_nova_itam.itam_equipment_view_form_endpoint"/>
+        <field name="arch" type="xml">
+            <div class="oe_button_box" name="button_box" position="inside">
+                <button name="action_view_installed_software" type="object"
+                        class="oe_stat_button" icon="fa-list-alt"
+                        invisible="not endpoint_agent_id">
+                    <field name="installed_software_count" widget="statinfo" string="Logiciels"/>
+                </button>
+                <button name="action_view_disks" type="object"
+                        class="oe_stat_button" icon="fa-hdd-o"
+                        invisible="not endpoint_agent_id">
+                    <field name="disk_count" widget="statinfo" string="Disques"/>
+                </button>
+            </div>
+            <notebook position="inside">
+                <page string="Agent RMM" name="endpoint_agent">
+                    <group>
+                        <group string="Identité de l'agent">
+                            <field name="endpoint_agent_id" readonly="1"/>
+                            <field name="endpoint_agent_state" widget="badge"
+                                   decoration-success="endpoint_agent_state == 'enrolled'"
+                                   decoration-danger="endpoint_agent_state == 'revoked'"/>
+                            <field name="logged_in_user" readonly="1"/>
+                        </group>
+                        <group string="Matériel">
+                            <field name="cpu_model" readonly="1"/>
+                            <field name="cpu_cores" readonly="1"/>
+                            <field name="cpu_logical_processors" readonly="1"/>
+                            <field name="ram_gb" readonly="1"/>
+                            <field name="motherboard" readonly="1"/>
+                            <field name="bios_version" readonly="1"/>
+                            <field name="gpu_model" readonly="1"/>
+                            <field name="battery_present" readonly="1"/>
+                            <field name="battery_health_percent" readonly="1"
+                                   invisible="not battery_present"/>
+                            <field name="monitor_count" readonly="1"/>
+                        </group>
+                    </group>
+                    <group string="Interfaces réseau">
+                        <field name="network_interface_ids" readonly="1" nolabel="1">
+                            <list create="false">
+                                <field name="name"/>
+                                <field name="mac_address"/>
+                                <field name="ip_address"/>
+                                <field name="gateway"/>
+                                <field name="dns_servers"/>
+                                <field name="dhcp_enabled"/>
+                                <field name="is_primary"/>
+                            </list>
+                        </field>
+                    </group>
+                </page>
+            </notebook>
+        </field>
+    </record>
+</odoo>
