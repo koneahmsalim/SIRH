@@ -1,4 +1,5 @@
-from odoo import api, fields, models
+from odoo import _, api, fields, models
+from odoo.exceptions import UserError
 
 
 class MaintenanceEquipmentEndpoint(models.Model):
@@ -46,6 +47,12 @@ class MaintenanceEquipmentEndpoint(models.Model):
     installed_software_count = fields.Integer(string="Nombre de logiciels", compute='_compute_endpoint_counts')
     remote_command_ids = fields.One2many('itsm.remote.command', 'equipment_id', string="Commandes à distance")
     remote_command_count = fields.Integer(string="Nombre de commandes", compute='_compute_endpoint_counts')
+
+    # Controle a distance (Phase 8) : Odoo ne stocke QUE l'identifiant du
+    # poste cote MeshCentral (agent separe, installe independamment du
+    # notre) et genere un lien - jamais de partage d'ecran/prise de main
+    # reimplemente ici (voir res_config_settings.py pour le gabarit d'URL).
+    mesh_device_id = fields.Char(string="Identifiant MeshCentral")
 
     @api.depends('disk_ids', 'installed_software_ids', 'remote_command_ids')
     def _compute_endpoint_counts(self):
@@ -164,4 +171,23 @@ class MaintenanceEquipmentEndpoint(models.Model):
             'view_mode': 'list,form',
             'domain': [('equipment_id', '=', self.id)],
             'context': {'default_equipment_id': self.id},
+        }
+
+    def action_open_remote_control(self):
+        self.ensure_one()
+        if not self.mesh_device_id:
+            raise UserError(_(
+                "Aucun identifiant MeshCentral renseigné pour cet actif - installez l'agent "
+                "MeshCentral sur le poste puis reportez son identifiant ici."))
+        template = self.env['ir.config_parameter'].sudo().get_param(
+            'villa_nova_endpoint.meshcentral_url_template')
+        if not template:
+            raise UserError(_(
+                "Aucun serveur MeshCentral configuré - renseignez le modèle d'URL dans "
+                "Paramètres généraux > Endpoint Management."))
+        url = template.replace('{node_id}', self.mesh_device_id)
+        return {
+            'type': 'ir.actions.act_url',
+            'url': url,
+            'target': 'new',
         }

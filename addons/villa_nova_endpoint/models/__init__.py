@@ -9,3 +9,4 @@ from . import remote_command
 from . import approval_remote_command
 from . import discovery_scan
 from . import discovery_device
+from . import res_config_settings

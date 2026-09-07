@@ -25,6 +25,14 @@
                         invisible="not endpoint_agent_id">
                     <field name="remote_command_count" widget="statinfo" string="Commandes"/>
                 </button>
+                <button name="action_open_remote_control" type="object"
+                        class="oe_stat_button" icon="fa-desktop"
+                        invisible="not mesh_device_id">
+                    <div class="o_stat_info">
+                        <span class="o_stat_text">Contrôle à</span>
+                        <span class="o_stat_text">distance</span>
+                    </div>
+                </button>
             </div>
             <notebook position="inside">
                 <page string="Agent RMM" name="endpoint_agent">
@@ -35,6 +43,7 @@
                                    decoration-success="endpoint_agent_state == 'enrolled'"
                                    decoration-danger="endpoint_agent_state == 'revoked'"/>
                             <field name="logged_in_user" readonly="1"/>
+                            <field name="mesh_device_id"/>
                         </group>
                         <group string="Matériel">
                             <field name="cpu_model" readonly="1"/>
