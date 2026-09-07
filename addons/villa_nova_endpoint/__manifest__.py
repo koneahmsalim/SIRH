@@ -20,15 +20,17 @@
         "et 7-8 (Agent MVP, Console de gestion, Actions a distance, "
         "Decouverte reseau, Gestion de scripts, Controle a distance via "
         "MeshCentral auto-heberge - Odoo stocke juste l'identifiant du poste "
-        "et genere le lien, aucune prise de main reimplementee ici) de la "
-        "plateforme Endpoint Management/RMM construite phase par phase, "
-        "apres les 12 phases ITSM. Phase 6 (Active Directory) explicitement "
-        "en attente."
+        "et genere le lien, aucune prise de main reimplementee ici) et 9 "
+        "(triage de risque du parc : detection d'OS en fin de support + "
+        "signaux de conformite deja remontes - PAS un scanner de "
+        "vulnerabilites CVE, perimetre hors de portee) de la plateforme "
+        "Endpoint Management/RMM construite phase par phase, apres les 12 "
+        "phases ITSM. Phase 6 (Active Directory) explicitement en attente."
     ),
 
     'icon': '/villa_nova_endpoint/static/description/icon.png',
 
-    'version': '18.0.1.5.0',
+    'version': '18.0.1.6.0',
     'category': 'Services/Helpdesk',
     'author': 'Villa Nova',
     'license': 'LGPL-3',
@@ -43,6 +45,7 @@
         'views/approved_script_views.xml',
         'views/remote_command_views.xml',
         'views/discovery_scan_views.xml',
+        'views/security_risk_views.xml',
         'views/maintenance_equipment_views.xml',
         'views/res_config_settings_views.xml',
         'views/endpoint_menus.xml',

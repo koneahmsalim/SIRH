@@ -45,6 +45,14 @@
                             <field name="logged_in_user" readonly="1"/>
                             <field name="mesh_device_id"/>
                         </group>
+                        <group string="Risque sécurité">
+                            <field name="security_risk_level" widget="badge"
+                                   decoration-danger="security_risk_level in ('critical', 'high')"
+                                   decoration-warning="security_risk_level == 'medium'"
+                                   decoration-success="security_risk_level == 'low'"
+                                   decoration-muted="security_risk_level == 'unknown'"/>
+                            <field name="is_eol_os" readonly="1" invisible="not is_eol_os"/>
+                        </group>
                         <group string="Matériel">
                             <field name="cpu_model" readonly="1"/>
                             <field name="cpu_cores" readonly="1"/>

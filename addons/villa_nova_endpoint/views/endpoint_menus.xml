@@ -28,6 +28,11 @@
               action="action_discovery_scan" sequence="8"
               groups="villa_nova_itam.group_itam_manager"/>
 
+    <menuitem id="endpoint_menu_security_risk" name="Analyse de risque du parc"
+              parent="villa_nova_itam.itsm_menu_assets_root"
+              action="action_security_risk" sequence="9"
+              groups="villa_nova_itam.group_itam_manager"/>
+
     <menuitem id="endpoint_menu_enrollment_keys" name="Clés d'enrôlement d'agents"
               parent="villa_nova_itsm.itsm_menu_config_root"
               action="action_endpoint_enrollment_key" sequence="10"

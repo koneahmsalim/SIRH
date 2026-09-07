@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="security_risk_view_list" model="ir.ui.view">
+        <field name="name">maintenance.equipment.security.risk.list</field>
+        <field name="model">maintenance.equipment</field>
+        <field name="arch" type="xml">
+            <list create="false" decoration-danger="security_risk_level in ('critical', 'high')"
+                  decoration-warning="security_risk_level == 'medium'">
+                <field name="name"/>
+                <field name="hostname"/>
+                <field name="os_name"/>
+                <field name="patch_status"/>
+                <field name="av_status"/>
+                <field name="encryption_enabled"/>
+                <field name="is_eol_os"/>
+                <field name="security_risk_level" widget="badge"
+                       decoration-danger="security_risk_level in ('critical', 'high')"
+                       decoration-warning="security_risk_level == 'medium'"
+                       decoration-success="security_risk_level == 'low'"
+                       decoration-muted="security_risk_level == 'unknown'"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="security_risk_view_graph" model="ir.ui.view">
+        <field name="name">maintenance.equipment.security.risk.graph</field>
+        <field name="model">maintenance.equipment</field>
+        <field name="arch" type="xml">
+            <graph string="Risque du parc" type="bar">
+                <field name="security_risk_level"/>
+                <field name="id" type="measure" string="Nombre de postes"/>
+            </graph>
+        </field>
+    </record>
+
+    <record id="security_risk_view_search" model="ir.ui.view">
+        <field name="name">maintenance.equipment.security.risk.search</field>
+        <field name="model">maintenance.equipment</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name"/>
+                <field name="hostname"/>
+                <field name="os_name"/>
+                <filter name="critical_high" string="Critique/Élevé"
+                        domain="[('security_risk_level', 'in', ('critical', 'high'))]"/>
+                <filter name="eol" string="OS en fin de support" domain="[('is_eol_os', '=', True)]"/>
+                <group expand="0" string="Regrouper par">
+                    <filter name="group_risk" string="Niveau de risque" context="{'group_by': 'security_risk_level'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_security_risk" model="ir.actions.act_window">
+        <field name="name">Analyse de risque du parc</field>
+        <field name="res_model">maintenance.equipment</field>
+        <field name="view_mode">list,graph,form</field>
+        <field name="domain">[('endpoint_agent_id', '!=', False)]</field>
+        <field name="context">{'search_default_critical_high': 0}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smile">
+                Aucun poste avec agent endpoint pour l'instant.
+            </p>
+            <p>
+                Triage basé sur les données déjà remontées par l'agent (OS en fin de support,
+                mises à jour, antivirus, chiffrement) - PAS un scan de vulnérabilités CVE.
+                À utiliser pour prioriser, pas comme preuve d'absence de faille.
+            </p>
+        </field>
+    </record>
+</odoo>
