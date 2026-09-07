@@ -1,16 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <menuitem id="itam_menu_root" name="Actifs IT" sequence="21" groups="base.group_user"/>
+    <!-- Pas de nouvelle app / nouveau menu racine : ITAM s'integre dans
+         l'app ITSM existante (comme ServiceDesk Plus - Tickets/Actifs/
+         Contrats/Configuration dans un seul espace, pas d'aller-retour
+         entre applications pour un agent). Meme logique pour les demandes
+         de maintenance materielle natives, rattachees ici plutot que
+         laissees uniquement dans l'app Maintenance separee. -->
+    <menuitem id="itsm_menu_assets_root" name="Actifs" parent="villa_nova_itsm.itsm_menu_root" sequence="5"/>
 
-    <menuitem id="itam_menu_assets" name="Actifs matériels" parent="itam_menu_root"
+    <menuitem id="itam_menu_assets" name="Actifs matériels" parent="itsm_menu_assets_root"
               action="itam_equipment_action" sequence="1"/>
 
-    <menuitem id="itam_menu_software" name="Licences logicielles" parent="itam_menu_root"
+    <menuitem id="itam_menu_software" name="Licences logicielles" parent="itsm_menu_assets_root"
               action="itam_software_license_action" sequence="2"/>
 
-    <menuitem id="itam_menu_config_root" name="Configuration" parent="itam_menu_root" sequence="10"
-              groups="villa_nova_itam.group_itam_manager"/>
+    <menuitem id="itam_menu_maintenance_requests" name="Demandes de maintenance" parent="itsm_menu_assets_root"
+              action="maintenance.hr_equipment_request_action" sequence="3"/>
 
-    <menuitem id="itam_menu_config_categories" name="Catégories d'actifs" parent="itam_menu_config_root"
-              action="maintenance.hr_equipment_category_action" sequence="1"/>
+    <menuitem id="itam_menu_config_categories" name="Catégories d'actifs"
+              parent="villa_nova_itsm.itsm_menu_config_root"
+              action="maintenance.hr_equipment_category_action" sequence="8"/>
 </odoo>

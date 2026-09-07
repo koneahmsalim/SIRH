@@ -4,8 +4,10 @@
         "Gestion des actifs informatiques natif Odoo Community : materiel "
         "(construit sur le module Maintenance natif - categories, garantie, "
         "cycle de vie, cout) et logiciels (licences, sieges, conformite), "
-        "relies aux tickets du Service Desk. Phase 4 de la plateforme ITSM "
-        "complete construite phase par phase."
+        "relies aux tickets du Service Desk. Integre dans l'app ITSM (pas "
+        "d'application separee) pour un espace de travail unifie façon "
+        "ServiceDesk Plus. Phase 4 de la plateforme ITSM complete construite "
+        "phase par phase."
     ),
     'version': '18.0.1.0.0',
     'category': 'Services/Helpdesk',
@@ -25,6 +27,6 @@
         'demo/itam_demo.xml',
     ],
     'installable': True,
-    'application': True,
+    'application': False,
     'post_init_hook': 'post_init',
 }
