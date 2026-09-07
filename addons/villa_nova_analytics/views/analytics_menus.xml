@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="analytics_dashboard_action" model="ir.actions.client">
+        <field name="name">Analytique</field>
+        <field name="tag">villa_nova_analytics.dashboard</field>
+    </record>
+
+    <menuitem id="analytics_menu_dashboard" name="Analytique" parent="villa_nova_itsm.itsm_menu_root"
+              action="analytics_dashboard_action" sequence="8"
+              groups="villa_nova_itsm.group_itsm_team_leader"/>
+</odoo>

@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="villa_nova_analytics.Dashboard">
+        <div class="vn-analytics-dashboard">
+            <h1>Analytique</h1>
+
+            <div t-if="state.loading" class="vn-analytics-kpis">
+                <t t-foreach="[1,2,3,4]" t-as="i" t-key="i">
+                    <span class="vn-skeleton" style="height: 90px; border-radius: var(--vn-radius-lg);"/>
+                </t>
+            </div>
+
+            <t t-if="!state.loading">
+                <div class="vn-analytics-kpis">
+                    <div class="vn-card vn-kpi-card">
+                        <span class="vn-kpi-value">
+                            <t t-if="state.data.sla_compliance !== null" t-esc="state.data.sla_compliance"/>
+                            <t t-if="state.data.sla_compliance !== null">%</t>
+                            <t t-if="state.data.sla_compliance === null">—</t>
+                        </span>
+                        <span class="vn-kpi-label">Conformité SLA (30j)</span>
+                    </div>
+                    <div class="vn-card vn-kpi-card vn-card-interactive" t-on-click="() => this.openEquipment()">
+                        <span class="vn-kpi-value">
+                            <t t-if="state.data.itam_compliance !== null" t-esc="state.data.itam_compliance"/>
+                            <t t-if="state.data.itam_compliance !== null">%</t>
+                            <t t-if="state.data.itam_compliance === null">—</t>
+                        </span>
+                        <span class="vn-kpi-label">Conformité des actifs</span>
+                    </div>
+                    <div class="vn-card vn-kpi-card vn-card-interactive" t-on-click="() => this.openChanges()">
+                        <span class="vn-kpi-value">
+                            <t t-if="state.data.change_success_rate !== null" t-esc="state.data.change_success_rate"/>
+                            <t t-if="state.data.change_success_rate !== null">%</t>
+                            <t t-if="state.data.change_success_rate === null">—</t>
+                        </span>
+                        <span class="vn-kpi-label">Succès des changements</span>
+                    </div>
+                    <div class="vn-card vn-kpi-card vn-card-interactive vn-kpi-warning"
+                         t-on-click="() => this.openOverAllocatedLicenses()">
+                        <span class="vn-kpi-value" t-esc="state.data.over_allocated_licenses"/>
+                        <span class="vn-kpi-label">Licences sur-allouées</span>
+                    </div>
+                </div>
+
+                <div class="vn-card vn-analytics-panel">
+                    <h2>Tendance des tickets (14 derniers jours)</h2>
+                    <div class="vn-analytics-trend">
+                        <svg t-attf-viewBox="0 0 #{CHART_W} #{CHART_H}" preserveAspectRatio="none"
+                             class="vn-analytics-trend-svg" role="img" aria-label="Tickets créés et résolus par jour">
+                            <polyline t-att-points="trendLines.created" class="vn-trend-line vn-trend-created"/>
+                            <polyline t-att-points="trendLines.resolved" class="vn-trend-line vn-trend-resolved"/>
+                        </svg>
+                        <div class="vn-analytics-trend-axis">
+                            <span t-esc="trendFirstLastLabels.first"/>
+                            <span t-esc="trendFirstLastLabels.last"/>
+                        </div>
+                    </div>
+                    <div class="vn-analytics-legend">
+                        <span class="vn-analytics-legend-item">
+                            <span class="vn-analytics-legend-swatch vn-trend-created"/> Créés
+                        </span>
+                        <span class="vn-analytics-legend-item">
+                            <span class="vn-analytics-legend-swatch vn-trend-resolved"/> Résolus
+                        </span>
+                    </div>
+                </div>
+
+                <div class="vn-analytics-row">
+                    <div class="vn-card vn-analytics-panel">
+                        <h2>Temps de résolution moyen par priorité</h2>
+                        <div t-foreach="PRIORITY_ORDER" t-as="priority" t-key="priority" class="vn-analytics-bar-row">
+                            <span class="vn-analytics-bar-label" t-esc="PRIORITY_LABELS[priority]"/>
+                            <div class="vn-analytics-bar-track">
+                                <div class="vn-analytics-bar-fill vn-analytics-bar-primary"
+                                     t-attf-style="width: #{barWidthPct(state.data.resolution_by_priority[priority], maxResolutionHours)}%"/>
+                            </div>
+                            <span class="vn-analytics-bar-value" t-esc="state.data.resolution_by_priority[priority] + ' h'"/>
+                        </div>
+                    </div>
+
+                    <div class="vn-card vn-analytics-panel">
+                        <h2>Top 5 catégories (30j)</h2>
+                        <div t-if="!state.data.top_categories.length" class="vn-empty-state">
+                            <p>Aucun ticket sur la période.</p>
+                        </div>
+                        <div t-foreach="state.data.top_categories" t-as="category" t-key="category.name"
+                             class="vn-analytics-bar-row vn-analytics-bar-row-clickable"
+                             t-on-click="() => this.openTicketsByCategory(category.name)">
+                            <span class="vn-analytics-bar-label" t-esc="category.name"/>
+                            <div class="vn-analytics-bar-track">
+                                <div class="vn-analytics-bar-fill vn-analytics-bar-primary"
+                                     t-attf-style="width: #{barWidthPct(category.count, maxCategoryCount)}%"/>
+                            </div>
+                            <span class="vn-analytics-bar-value" t-esc="category.count"/>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="vn-card vn-analytics-panel">
+                    <h2>Satisfaction client</h2>
+                    <div t-if="!csatTotal" class="vn-empty-state">
+                        <p>Aucune évaluation pour l'instant.</p>
+                    </div>
+                    <t t-if="csatTotal">
+                        <div class="vn-analytics-csat-bar">
+                            <div class="vn-analytics-csat-segment vn-csat-good"
+                                 t-attf-style="width: #{csatPct(state.data.csat.great)}%"/>
+                            <div class="vn-analytics-csat-segment vn-csat-warning"
+                                 t-attf-style="width: #{csatPct(state.data.csat.okay)}%"/>
+                            <div class="vn-analytics-csat-segment vn-csat-critical"
+                                 t-attf-style="width: #{csatPct(state.data.csat.bad)}%"/>
+                        </div>
+                        <div class="vn-analytics-legend">
+                            <span class="vn-analytics-legend-item">
+                                <span class="vn-analytics-legend-swatch vn-csat-good"/>
+                                😀 Satisfait (<t t-esc="state.data.csat.great"/>)
+                            </span>
+                            <span class="vn-analytics-legend-item">
+                                <span class="vn-analytics-legend-swatch vn-csat-warning"/>
+                                😐 Moyen (<t t-esc="state.data.csat.okay"/>)
+                            </span>
+                            <span class="vn-analytics-legend-item">
+                                <span class="vn-analytics-legend-swatch vn-csat-critical"/>
+                                ☹️ Insatisfait (<t t-esc="state.data.csat.bad"/>)
+                            </span>
+                        </div>
+                    </t>
+                </div>
+            </t>
+        </div>
+    </t>
+
+</templates>

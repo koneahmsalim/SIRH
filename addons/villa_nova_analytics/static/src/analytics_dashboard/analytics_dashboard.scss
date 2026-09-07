@@ -1,0 +1,171 @@
+// Palette validee (dataviz skill) : crimson (marque, deja categorical
+// slot valide contre le bleu de reference) + bleu de reference comme
+// 2e serie + palette de statut fixe (jamais reutilisee comme identite
+// de serie) pour la satisfaction client.
+$vn-analytics-created: #DC143C;
+$vn-analytics-resolved: #2a78d6;
+$vn-analytics-status-good: #0ca30c;
+$vn-analytics-status-warning: #fab219;
+$vn-analytics-status-critical: #d03b3b;
+
+.vn-analytics-dashboard {
+    padding: var(--vn-space-6);
+    max-width: 1100px;
+
+    h1 {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--vn-graphite);
+        margin-bottom: var(--vn-space-5);
+    }
+
+    h2 {
+        font-size: 1rem;
+        font-weight: 600;
+        color: var(--vn-graphite);
+        margin-bottom: var(--vn-space-4);
+    }
+}
+
+.vn-analytics-kpis {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: var(--vn-space-4);
+    margin-bottom: var(--vn-space-6);
+}
+
+.vn-analytics-panel {
+    margin-bottom: var(--vn-space-6);
+}
+
+.vn-analytics-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--vn-space-6);
+
+    @media (max-width: 900px) {
+        grid-template-columns: 1fr;
+    }
+
+    .vn-analytics-panel {
+        margin-bottom: 0;
+    }
+}
+
+// Tendance (graphique en ligne, 2 series)
+.vn-analytics-trend-svg {
+    width: 100%;
+    height: 140px;
+    display: block;
+}
+
+.vn-trend-line {
+    fill: none;
+    stroke-width: 2;
+    stroke-linejoin: round;
+    stroke-linecap: round;
+}
+
+.vn-trend-created { stroke: $vn-analytics-created; }
+.vn-trend-resolved { stroke: $vn-analytics-resolved; }
+
+.vn-analytics-trend-axis {
+    display: flex;
+    justify-content: space-between;
+    color: var(--vn-slate);
+    font-size: 0.75rem;
+    margin-top: var(--vn-space-1);
+}
+
+.vn-analytics-legend {
+    display: flex;
+    gap: var(--vn-space-5);
+    margin-top: var(--vn-space-3);
+    flex-wrap: wrap;
+}
+
+.vn-analytics-legend-item {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--vn-space-2);
+    font-size: 0.8125rem;
+    color: var(--vn-graphite);
+}
+
+.vn-analytics-legend-swatch {
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    border-radius: 2px;
+
+    &.vn-trend-created { background-color: $vn-analytics-created; }
+    &.vn-trend-resolved { background-color: $vn-analytics-resolved; }
+    &.vn-csat-good { background-color: $vn-analytics-status-good; }
+    &.vn-csat-warning { background-color: $vn-analytics-status-warning; }
+    &.vn-csat-critical { background-color: $vn-analytics-status-critical; }
+}
+
+// Barres horizontales (magnitude simple, une seule teinte)
+.vn-analytics-bar-row {
+    display: grid;
+    grid-template-columns: 110px 1fr 56px;
+    align-items: center;
+    gap: var(--vn-space-3);
+    padding: var(--vn-space-1) 0;
+
+    &.vn-analytics-bar-row-clickable {
+        cursor: pointer;
+        border-radius: var(--vn-radius-sm);
+
+        &:hover {
+            background-color: rgba($vn-analytics-created, 0.06);
+        }
+    }
+}
+
+.vn-analytics-bar-label {
+    font-size: 0.8125rem;
+    color: var(--vn-graphite);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.vn-analytics-bar-track {
+    background-color: rgba(0, 0, 0, 0.06);
+    border-radius: var(--vn-radius-full);
+    height: 8px;
+    overflow: hidden;
+}
+
+.vn-analytics-bar-fill {
+    height: 100%;
+    border-radius: var(--vn-radius-full);
+    transition: width 0.3s ease;
+}
+
+.vn-analytics-bar-primary { background-color: $vn-analytics-created; }
+
+.vn-analytics-bar-value {
+    font-size: 0.8125rem;
+    font-variant-numeric: tabular-nums;
+    color: var(--vn-slate);
+    text-align: right;
+}
+
+// Satisfaction client (barre segmentee, couleurs de statut)
+.vn-analytics-csat-bar {
+    display: flex;
+    height: 14px;
+    border-radius: var(--vn-radius-full);
+    overflow: hidden;
+    background-color: rgba(0, 0, 0, 0.06);
+}
+
+.vn-analytics-csat-segment {
+    height: 100%;
+
+    &.vn-csat-good { background-color: $vn-analytics-status-good; }
+    &.vn-csat-warning { background-color: $vn-analytics-status-warning; }
+    &.vn-csat-critical { background-color: $vn-analytics-status-critical; }
+}

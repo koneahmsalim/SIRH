@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="itsm_ticket_view_pivot" model="ir.ui.view">
+        <field name="name">itsm.ticket.pivot</field>
+        <field name="model">itsm.ticket</field>
+        <field name="arch" type="xml">
+            <pivot>
+                <field name="category_id" type="row"/>
+                <field name="state" type="col"/>
+                <field name="total_time_spent" type="measure"/>
+            </pivot>
+        </field>
+    </record>
+
+    <record id="itsm_ticket_view_graph" model="ir.ui.view">
+        <field name="name">itsm.ticket.graph</field>
+        <field name="model">itsm.ticket</field>
+        <field name="arch" type="xml">
+            <graph type="bar" stacked="1">
+                <field name="create_date" interval="week"/>
+                <field name="state"/>
+            </graph>
+        </field>
+    </record>
+
+    <!-- Ajoute pivot/graphique a l'action existante (Phase 1) sans la
+         reconstruire - simple mise a jour du view_mode. -->
+    <record id="villa_nova_itsm.itsm_ticket_action" model="ir.actions.act_window">
+        <field name="view_mode">kanban,list,form,pivot,graph</field>
+    </record>
+</odoo>
