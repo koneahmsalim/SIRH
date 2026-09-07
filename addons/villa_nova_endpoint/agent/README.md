@@ -36,10 +36,29 @@ villa-nova-endpoint-agent.exe -run               REM boucle de check-in au premi
 villa-nova-endpoint-agent.exe -uninstall-service  REM retire le service Windows
 ```
 
-## Limites connues de cette phase (Phase 2 - Agent MVP)
+## Actions à distance (Phase 4)
 
-- **Pas d'exécution de commandes à distance.** Le contrat de check-in réserve un champ `commands` (toujours vide dans cette phase) pour une future phase "Actions à distance" du projet, mais aucune exécution n'est implémentée ici - contrainte explicite du projet contre l'exécution arbitraire non contrôlée.
+À chaque check-in, le serveur peut renvoyer des commandes en attente (`commands: [...]`) pour ce poste - catalogue FERME, jamais de code arbitraire :
+
+| `command_type` | Effet | Sensible (approbation requise) |
+|---|---|---|
+| `restart` / `shutdown` | `shutdown.exe /r` ou `/s`, délai de 5s | Oui |
+| `logoff` | Déconnecte la session active via `WTSLogoffSession` | Oui |
+| `lock` | Verrouille la session active (`LockWorkStation`, exécuté dans le contexte de l'utilisateur connecté) | Non |
+| `notify_user` | Affiche un message via `msg.exe` dans la session active | Non |
+| `service_status` / `service_restart` | Interroge/redémarre un service Windows nommé (Service Control Manager) | `service_restart` uniquement |
+| `collect_logs` | Erreurs/avertissements des journaux Application+Système des dernières 24h (WMI `Win32_NTLogEvent`) | Non |
+| `refresh_inventory` | Sans effet propre : l'inventaire envoyé dans la requête de check-in qui a rapporté la commande est déjà frais | Non |
+
+`lock`/`logoff`/`notify_user` agissent DANS la session de l'utilisateur actuellement connecté depuis le service LocalSystem (WTSQueryUserToken + CreateProcessAsUser) - si personne n'est connecté (poste à l'écran de verrouillage sans session, ou éteint), la commande échoue proprement avec une erreur explicite plutôt que d'agir sur une session arbitraire.
+
+Chaque commande est rapportée en deux temps à `/endpoint/agent/command_result` : `running` avant exécution, puis `completed`/`failed` avec la sortie. Pour `restart`/`shutdown`/`logoff`, le second rapport peut ne jamais partir si le processus est tué avant - la commande reste alors visible côté SIRH en statut "En cours d'exécution" indéfiniment. C'est une limite connue et acceptée (même comportement que les outils RMM établis), pas un bug à corriger dans l'immédiat.
+
+## Limites connues
+
 - **Détection des écrans (`monitor_count`)** dépend de la classe WMI `WmiMonitorID` (`root\wmi`), connue pour être peu fiable selon le pilote graphique installé - peut renvoyer 0 sur une machine réelle qui a bien un écran branché. À vérifier en priorité lors du premier test sur un poste Windows réel.
 - **Classification SSD/HDD** des disques est une heuristique par mots-clés (WMI n'expose pas cette information de façon fiable) - `media_type` peut rester `unknown` sur du matériel dont le modèle ne contient aucun indice.
 - **Windows uniquement.** Linux/macOS sont hors périmètre de cette phase (le brief projet les prévoit "plus tard").
-- **Non testé sur une vraie machine Windows** depuis cet environnement de développement (pas de poste Windows disponible ici) - seule la compilation croisée a été vérifiée (`go build`/`go vet` réussissent pour GOOS=windows). Un premier test réel sur un poste Windows (idéalement une VM jetable) est nécessaire avant tout déploiement, en particulier pour confirmer le comportement du service Windows, DPAPI, et la détection des écrans/de la batterie.
+- **Non testé sur une vraie machine Windows** depuis cet environnement de développement (pas de poste Windows disponible ici) - seule la compilation croisée a été vérifiée (`go build`/`go vet` réussissent pour GOOS=windows, y compris tout le code d'interaction de session WTS/jetons de la Phase 4). Un premier test réel sur un poste Windows (idéalement une VM jetable) est nécessaire avant tout déploiement, en particulier pour confirmer :
+  - le comportement du service Windows, DPAPI, et la détection des écrans/de la batterie (Phase 2) ;
+  - **`lock`/`logoff`/`notify_user`** en particulier : la logique WTS/jetons/CreateProcessAsUser est écrite à partir de la documentation Win32 officielle et compile correctement, mais n'a jamais tourné sur un Windows réel - c'est le point le plus susceptible de révéler un problème (privilège manquant, session non trouvée, etc.) au premier essai.
