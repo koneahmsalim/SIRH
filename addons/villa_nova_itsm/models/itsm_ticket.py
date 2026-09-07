@@ -197,6 +197,12 @@ class ItsmTicket(models.Model):
 
     attachment_count = fields.Integer(string="Nombre de pièces jointes", compute='_compute_attachment_count')
 
+    # Plus haut niveau de la matrice d'escalade de l'equipe deja notifie pour
+    # LE dépassement SLA courant - remis a 0 des que le ticket sort de l'etat
+    # "depasse" (resolu, ou echeance repoussee) pour qu'un futur depassement
+    # reparte du niveau 1, voir _cron_refresh_sla_status.
+    escalation_level_reached = fields.Integer(string="Niveau d'escalade atteint", default=0, copy=False)
+
     kanban_color = fields.Integer(compute='_compute_kanban_color')
 
     # ------------------------------------------------------------------
@@ -277,6 +283,16 @@ class ItsmTicket(models.Model):
                 ticket.sla_first_response_deadline, ticket.first_responded_at, effective_now, ticket.create_date)
             ticket.sla_resolution_status = ticket._sla_status_for(
                 ticket.sla_resolution_deadline, ticket.resolved_date, effective_now, ticket.create_date)
+            # Reinitialise ICI (dans le compute, pas dans le cron qui
+            # l'appelle) : un changement qui fait sortir le ticket de l'etat
+            # "depasse" (echeance repoussee, politique/priorite changee...)
+            # peut deja avoir ete applique - donc deja recalcule - AVANT que
+            # le cron ne tourne, auquel cas un diff avant/apres cote cron ne
+            # verrait jamais la transition. Colocaliser la remise a zero ici
+            # garantit qu'elle est jamais manquee, quelle que soit la cause
+            # du changement de statut.
+            if ticket.sla_resolution_status != 'breached' and ticket.escalation_level_reached:
+                ticket.escalation_level_reached = 0
 
     @api.model
     def _sla_status_for(self, deadline, done_at, now, create_date):
@@ -593,11 +609,52 @@ class ItsmTicket(models.Model):
             if newly_at_risk_or_breached and ticket.user_id.email:
                 ticket._send_mail_safe('villa_nova_itsm.mail_template_sla_breach_warning')
 
-            newly_breached = ticket.sla_resolution_status == 'breached' and old_resolution != 'breached'
-            if newly_breached:
-                ticket._escalate_to_team_leader()
+            if ticket.sla_resolution_status == 'breached':
+                ticket._escalate_on_breach()
         self.env.flush_all()
         self.env.cr.commit()
+
+    def _escalate_on_breach(self):
+        """Point d'entree unique appele par le cron pour un ticket dont le
+        SLA de resolution est actuellement depasse - matrice a plusieurs
+        niveaux si l'equipe en a configure une, sinon repli sur l'ancien
+        comportement a un seul niveau (responsable d'equipe)."""
+        self.ensure_one()
+        if self.team_id.escalation_level_ids:
+            self._escalate_by_level()
+        else:
+            self._escalate_to_team_leader()
+
+    def _escalate_by_level(self):
+        """Determine le niveau le plus eleve dont le delai est ecoule et,
+        s'il est strictement superieur au dernier niveau deja notifie,
+        previent son destinataire - un ticket neglige longtemps saute
+        directement au niveau approprie plutot que de notifier en rafale
+        tous les niveaux intermediaires deja depasses."""
+        self.ensure_one()
+        if not self.sla_resolution_deadline:
+            return
+        hours_since_breach = (fields.Datetime.now() - self.sla_resolution_deadline).total_seconds() / 3600.0
+        if hours_since_breach < 0:
+            return
+        due_levels = self.team_id.escalation_level_ids.filtered(lambda l: l.delay_hours <= hours_since_breach)
+        if not due_levels:
+            return
+        target_level = max(due_levels, key=lambda l: l.level)
+        if target_level.level <= self.escalation_level_reached:
+            return
+        self.write({'escalation_level_reached': target_level.level})
+        if target_level.notify_user_id.email:
+            self._send_mail_safe('villa_nova_itsm.mail_template_sla_escalation')
+        self.activity_schedule(
+            'mail.mail_activity_data_todo',
+            user_id=target_level.notify_user_id.id,
+            summary="Escalade niveau %d : SLA dépassé sur %s" % (target_level.level, self.name),
+            note="Le ticket <b>%s</b> (%s) a dépassé son échéance de résolution depuis plus de "
+                 "%.0fh (niveau d'escalade %d). Agent assigné : %s." % (
+                     self.name, self.subject, target_level.delay_hours, target_level.level,
+                     self.user_id.name or "non assigné"),
+        )
 
     def _escalate_to_team_leader(self):
         """Escalade hierarchique : des qu'un ticket depasse son SLA de

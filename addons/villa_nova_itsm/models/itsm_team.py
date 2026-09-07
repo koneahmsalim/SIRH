@@ -27,6 +27,12 @@ class ItsmTeam(models.Model):
     color = fields.Integer(string="Couleur")
     description = fields.Text(string="Description")
 
+    escalation_level_ids = fields.One2many(
+        'itsm.escalation.level', 'team_id', string="Niveaux d'escalade",
+        help="Sans niveau configuré, l'escalade retombe sur le responsable d'équipe dès le "
+             "dépassement du SLA (comportement historique).",
+    )
+
     open_ticket_count = fields.Integer(compute='_compute_ticket_counts')
     member_count = fields.Integer(compute='_compute_member_count')
 

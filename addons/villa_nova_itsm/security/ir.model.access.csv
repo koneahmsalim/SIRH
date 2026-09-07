@@ -37,3 +37,6 @@ access_itsm_ticket_resolve_wizard,itsm.ticket.resolve.wizard,model_itsm_ticket_r
 access_itsm_ticket_pending_wizard,itsm.ticket.pending.wizard,model_itsm_ticket_pending_wizard,group_itsm_agent,1,1,1,1
 access_itsm_ticket_cancel_wizard,itsm.ticket.cancel.wizard,model_itsm_ticket_cancel_wizard,group_itsm_agent,1,1,1,1
 access_itsm_ticket_merge_wizard,itsm.ticket.merge.wizard,model_itsm_ticket_merge_wizard,group_itsm_agent,1,1,1,1
+access_itsm_escalation_level_user,itsm.escalation.level.user,model_itsm_escalation_level,group_itsm_user,1,0,0,0
+access_itsm_escalation_level_leader,itsm.escalation.level.leader,model_itsm_escalation_level,group_itsm_team_leader,1,1,0,0
+access_itsm_escalation_level_manager,itsm.escalation.level.manager,model_itsm_escalation_level,group_itsm_manager,1,1,1,1

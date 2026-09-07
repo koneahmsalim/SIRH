@@ -1,4 +1,5 @@
 from . import itsm_team
+from . import itsm_escalation
 from . import itsm_category
 from . import itsm_sla_policy
 from . import itsm_service
