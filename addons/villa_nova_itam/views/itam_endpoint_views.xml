@@ -83,14 +83,14 @@
         <field name="model">itam.discovery.log</field>
         <field name="arch" type="xml">
             <list decoration-danger="result == 'error'" decoration-success="result == 'created'" create="false">
-                <field name="create_date"/>
-                <field name="hostname"/>
-                <field name="equipment_id"/>
-                <field name="source_ip"/>
-                <field name="result" widget="badge"
+                <field name="create_date" string="Reçu le"/>
+                <field name="hostname" string="Poste signalé"/>
+                <field name="equipment_id" string="Actif concerné"/>
+                <field name="source_ip" string="IP de l'agent"/>
+                <field name="result" string="Résultat" widget="badge"
                        decoration-success="result in ('created', 'updated')"
                        decoration-danger="result == 'error'"/>
-                <field name="error_message"/>
+                <field name="error_message" string="Erreur"/>
             </list>
         </field>
     </record>
@@ -101,6 +101,12 @@
         <field name="arch" type="xml">
             <form create="false" edit="false">
                 <sheet>
+                    <div class="alert alert-info" role="alert">
+                        Cette ligne correspond à un appel automatique de l'API de découverte
+                        (<code>POST /itam/discovery/report</code>) par un agent externe (script,
+                        outil RMM/MDM...) qui a signalé ou mis à jour un poste. Ce n'est pas une
+                        action à faire manuellement - c'est le journal d'audit de ces appels.
+                    </div>
                     <group>
                         <field name="equipment_id"/>
                         <field name="hostname"/>
@@ -115,12 +121,13 @@
     </record>
 
     <record id="itam_discovery_log_action" model="ir.actions.act_window">
-        <field name="name">Journal de découverte</field>
+        <field name="name">Journal de découverte (agents externes)</field>
         <field name="res_model">itam.discovery.log</field>
         <field name="view_mode">list,form</field>
         <field name="help" type="html">
             <p class="o_view_nocontent_smiling_face">Aucun rapport de découverte pour l'instant</p>
-            <p>Chaque appel au point d'entrée /itam/discovery/report par un agent externe est journalisé ici.</p>
+            <p>Chaque appel au point d'entrée /itam/discovery/report par un agent externe
+               (script, outil RMM/MDM...) est journalisé ici, pour audit.</p>
         </field>
     </record>
 </odoo>

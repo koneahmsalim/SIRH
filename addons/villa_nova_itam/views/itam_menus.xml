@@ -21,7 +21,12 @@
               parent="villa_nova_itsm.itsm_menu_config_root"
               action="maintenance.hr_equipment_category_action" sequence="8"/>
 
-    <menuitem id="itam_menu_discovery_log" name="Journal de découverte" parent="itsm_menu_assets_root"
-              action="itam_discovery_log_action" sequence="4"
+    <!-- Journal technique (appels API d'agents externes) : range aux cotes
+         des "Regles d'automatisation" dans Configuration, pas dans le menu
+         de travail quotidien "Actifs" - un utilisateur qui tombe dessus
+         sans contexte ne pouvait pas deviner de quoi il s'agissait. -->
+    <menuitem id="itam_menu_discovery_log" name="Journal de découverte (agents externes)"
+              parent="villa_nova_itsm.itsm_menu_config_root"
+              action="itam_discovery_log_action" sequence="9"
               groups="villa_nova_itam.group_itam_manager"/>
 </odoo>
