@@ -21,6 +21,7 @@
         'security/automation_rules_security.xml',
         'data/ir_sequence_data.xml',
         'data/mail_template_data.xml',
+        'data/mail_alias_data.xml',
         'data/itsm_cron_data.xml',
         'views/itsm_ticket_views.xml',
         'views/itsm_team_views.xml',

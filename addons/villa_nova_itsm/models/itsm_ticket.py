@@ -562,6 +562,34 @@ class ItsmTicket(models.Model):
         return message
 
     @api.model
+    def message_new(self, msg_dict, custom_values=None):
+        """Email vers ticket - appele par message_process (fetchmail/alias
+        entrant, meme mecanisme natif Odoo que hr.applicant pour le
+        recrutement, deja utilise dans ce SIRH) quand un e-mail arrive sur
+        l'alias de ce modele et ne correspond a aucun thread existant.
+
+        name='Nouveau' est force explicitement : sans ça, l'implementation
+        de base de mail.thread.message_new remplit automatiquement le champ
+        _rec_name (name) avec le SUJET BRUT de l'e-mail des lors qu'il n'est
+        pas deja renseigne - ce qui court-circuiterait la numerotation par
+        sequence (create() ci-dessus ne (re)genere une reference que si
+        name vaut encore 'Nouveau' a ce stade)."""
+        values = dict(custom_values or {})
+        values.setdefault('name', 'Nouveau')
+        values.setdefault('subject', msg_dict.get('subject') or _("Ticket créé par e-mail"))
+        values.setdefault('description', msg_dict.get('body'))
+        values.setdefault('source', 'email')
+
+        partner_id = msg_dict.get('author_id')
+        if not partner_id and msg_dict.get('email_from'):
+            partners = self._mail_find_partner_from_emails([msg_dict['email_from']], force_create=True)
+            partner_id = partners[0].id if partners and partners[0] else False
+        if partner_id:
+            values.setdefault('partner_id', partner_id)
+
+        return super().message_new(msg_dict, values)
+
+    @api.model
     def get_villa_nova_itsm_dashboard(self):
         """Chiffres cles pour le tableau de bord agent - une seule methode,
         un seul appel RPC, pour ne pas multiplier les aller-retours reseau

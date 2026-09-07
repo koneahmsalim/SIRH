@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        <!-- Email vers ticket : un e-mail recu sur cet alias (ex.
+             support@<domaine configure>) cree automatiquement un ticket
+             via itsm.ticket.message_new() - meme mecanisme natif Odoo que
+             l'alias deja utilise pour le recrutement dans ce SIRH
+             (fetchmail.server "Gmail IMAP - Recrutement"), pas une
+             integration email inventee pour ce module. Brancher un vrai
+             releve IMAP dedie au support est une etape d'administration
+             separee (fetchmail.server pointant vers cet alias), pas
+             fabriquee ici. -->
+        <record id="mail_alias_ticket" model="mail.alias">
+            <field name="alias_name">support</field>
+            <field name="alias_model_id" ref="model_itsm_ticket"/>
+            <field name="alias_contact">everyone</field>
+        </record>
+    </data>
+</odoo>
