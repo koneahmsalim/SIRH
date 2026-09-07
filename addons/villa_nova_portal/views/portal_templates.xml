@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Formulaire de nouvelle demande : piece jointe + articles lies au
+         service selectionne (avant meme d'ouvrir un ticket). -->
+    <template id="portal_ticket_new_advanced" inherit_id="villa_nova_itsm.portal_ticket_new">
+        <xpath expr="//form[@action='/my/tickets/new']" position="attributes">
+            <attribute name="enctype">multipart/form-data</attribute>
+        </xpath>
+        <xpath expr="//div[hasclass('mb-3')][2]" position="after">
+            <div t-if="related_articles" class="alert alert-info mb-3">
+                <strong>Ceci pourrait déjà répondre à votre besoin :</strong>
+                <ul class="mb-0">
+                    <li t-foreach="related_articles" t-as="article">
+                        <a t-attf-href="/my/knowledge/#{article.id}" t-esc="article.name"/>
+                    </li>
+                </ul>
+            </div>
+        </xpath>
+        <xpath expr="//textarea[@name='description']/.." position="after">
+            <div class="mb-3">
+                <label class="form-label" for="pf_attachment">Pièce(s) jointe(s)</label>
+                <input type="file" class="form-control" id="pf_attachment" name="attachment" multiple="multiple"/>
+                <div class="form-text">5 fichiers maximum, 10 Mo chacun.</div>
+            </div>
+        </xpath>
+    </template>
+
+    <!-- Detail du ticket : statut SLA cote client + articles suggeres +
+         piece jointe sur les messages de suivi. -->
+    <template id="portal_ticket_detail_advanced" inherit_id="villa_nova_itsm.portal_ticket_detail">
+        <xpath expr="//p[@t-field='ticket.description']" position="after">
+            <div t-if="ticket.sla_resolution_deadline" class="card p-3 mb-3">
+                <div class="d-flex justify-content-between align-items-center">
+                    <span>
+                        Échéance de résolution :
+                        <span t-field="ticket.sla_resolution_deadline" t-options="{'widget': 'datetime'}"/>
+                    </span>
+                    <span t-attf-class="badge {{
+                        ticket.sla_resolution_status == 'breached' and 'text-bg-danger' or
+                        ticket.sla_resolution_status == 'at_risk' and 'text-bg-warning' or
+                        ticket.sla_resolution_status == 'met' and 'text-bg-success' or 'text-bg-secondary' }}">
+                        <t t-if="ticket.sla_resolution_status == 'breached'">SLA dépassé</t>
+                        <t t-elif="ticket.sla_resolution_status == 'at_risk'">SLA à risque</t>
+                        <t t-elif="ticket.sla_resolution_status == 'met'">Résolu dans les délais</t>
+                        <t t-else="">Dans les délais</t>
+                    </span>
+                </div>
+            </div>
+
+            <div t-if="suggested_articles" class="alert alert-info mb-3">
+                <strong>Articles qui pourraient vous aider :</strong>
+                <ul class="mb-0">
+                    <li t-foreach="suggested_articles" t-as="article">
+                        <a t-attf-href="/my/knowledge/#{article.id}" t-esc="article.name"/>
+                    </li>
+                </ul>
+            </div>
+        </xpath>
+        <xpath expr="//form[contains(@t-attf-action, '/message')]" position="attributes">
+            <attribute name="enctype">multipart/form-data</attribute>
+        </xpath>
+        <xpath expr="//textarea[@name='message']/.." position="after">
+            <div class="mb-2">
+                <input type="file" class="form-control" name="attachment" multiple="multiple"/>
+            </div>
+        </xpath>
+    </template>
+</odoo>
