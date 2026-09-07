@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="itam_purchase_request_view_list" model="ir.ui.view">
+        <field name="name">itam.purchase.request.list</field>
+        <field name="model">itam.purchase.request</field>
+        <field name="arch" type="xml">
+            <list decoration-danger="state == 'refused'" decoration-success="state == 'ordered'"
+                  decoration-muted="state == 'cancelled'">
+                <field name="name"/>
+                <field name="requested_by"/>
+                <field name="vendor_id"/>
+                <field name="total_estimated_cost" widget="monetary"/>
+                <field name="currency_id" invisible="1"/>
+                <field name="state" widget="badge"
+                       decoration-success="state == 'ordered'"
+                       decoration-danger="state == 'refused'"
+                       decoration-info="state in ('submitted', 'approved')"
+                       decoration-muted="state in ('draft', 'cancelled')"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="itam_purchase_request_view_form" model="ir.ui.view">
+        <field name="name">itam.purchase.request.form</field>
+        <field name="model">itam.purchase.request</field>
+        <field name="arch" type="xml">
+            <form string="Demande d'achat">
+                <header>
+                    <button name="action_submit" type="object" string="Soumettre" class="btn-primary"
+                            invisible="state != 'draft'"/>
+                    <button name="action_generate_po" type="object" string="Générer le bon de commande"
+                            class="btn-primary" invisible="state != 'approved'"
+                            confirm="Un bon de commande brouillon sera créé chez le fournisseur indiqué. Continuer ?"/>
+                    <button name="action_reset_draft" type="object" string="Remettre en brouillon"
+                            invisible="state != 'refused'"/>
+                    <button name="action_cancel" type="object" string="Annuler"
+                            invisible="state not in ('draft', 'submitted', 'approved')"/>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,submitted,approved,ordered"/>
+                </header>
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_generate_po" type="object" class="oe_stat_button" icon="fa-file-text-o"
+                                invisible="not purchase_order_id">
+                            <div class="o_stat_info">
+                                <span class="o_stat_text">Bon de</span>
+                                <span class="o_stat_text">commande</span>
+                            </div>
+                        </button>
+                    </div>
+                    <div class="oe_title"><h1><field name="name" readonly="1"/></h1></div>
+                    <group>
+                        <group>
+                            <field name="requested_by" readonly="1"/>
+                            <field name="request_date" readonly="1"/>
+                            <field name="vendor_id" readonly="state not in ('draft', 'refused')"/>
+                        </group>
+                        <group>
+                            <field name="total_estimated_cost" widget="monetary"/>
+                            <field name="currency_id" invisible="1"/>
+                            <field name="approval_id" readonly="1" invisible="not approval_id"/>
+                            <field name="purchase_order_id" readonly="1" invisible="not purchase_order_id"/>
+                        </group>
+                    </group>
+                    <group string="Justification">
+                        <field name="justification" nolabel="1"/>
+                    </group>
+                    <field name="line_ids" readonly="state not in ('draft', 'refused')">
+                        <list editable="bottom">
+                            <field name="product_id"/>
+                            <field name="description"/>
+                            <field name="quantity"/>
+                            <field name="estimated_unit_cost"/>
+                            <field name="subtotal" readonly="1" sum="Total"/>
+                        </list>
+                    </field>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <record id="itam_purchase_request_view_search" model="ir.ui.view">
+        <field name="name">itam.purchase.request.search</field>
+        <field name="model">itam.purchase.request</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name"/>
+                <field name="requested_by"/>
+                <field name="vendor_id"/>
+                <filter name="mine" string="Mes demandes" domain="[('requested_by', '=', uid)]"/>
+                <filter name="to_approve" string="À approuver" domain="[('state', '=', 'submitted')]"/>
+                <group expand="0" string="Regrouper par">
+                    <filter name="group_state" string="Statut" context="{'group_by': 'state'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_itam_purchase_request" model="ir.actions.act_window">
+        <field name="name">Demandes d'achat</field>
+        <field name="res_model">itam.purchase.request</field>
+        <field name="view_mode">list,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smile">
+                Créez une demande d'achat pour l'acquisition de matériel ou de licences -
+                une fois approuvée, elle génère directement un bon de commande.
+            </p>
+        </field>
+    </record>
+</odoo>

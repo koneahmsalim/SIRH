@@ -2,4 +2,8 @@
 <odoo>
     <menuitem id="contract_menu_contracts" name="Contrats" parent="villa_nova_itam.itsm_menu_assets_root"
               action="itsm_contract_action" sequence="6"/>
+
+    <menuitem id="contract_menu_purchase_requests" name="Demandes d'achat"
+              parent="villa_nova_itam.itsm_menu_assets_root"
+              action="action_itam_purchase_request" sequence="7"/>
 </odoo>

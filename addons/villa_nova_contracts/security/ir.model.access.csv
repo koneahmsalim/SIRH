@@ -1,3 +1,7 @@
 id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
 access_itsm_contract_user,itsm.contract.user,model_itsm_contract,base.group_user,1,0,0,0
 access_itsm_contract_manager,itsm.contract.manager,model_itsm_contract,villa_nova_itam.group_itam_manager,1,1,1,1
+access_itam_purchase_request_user,itam.purchase.request.user,model_itam_purchase_request,base.group_user,1,0,0,0
+access_itam_purchase_request_manager,itam.purchase.request.manager,model_itam_purchase_request,villa_nova_itam.group_itam_manager,1,1,1,0
+access_itam_purchase_request_line_user,itam.purchase.request.line.user,model_itam_purchase_request_line,base.group_user,1,0,0,0
+access_itam_purchase_request_line_manager,itam.purchase.request.line.manager,model_itam_purchase_request_line,villa_nova_itam.group_itam_manager,1,1,1,1
