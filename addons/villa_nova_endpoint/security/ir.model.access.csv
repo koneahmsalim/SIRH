@@ -18,3 +18,4 @@ access_itam_discovery_device_user,itam.discovery.device.user,model_itam_discover
 access_itam_discovery_device_manager,itam.discovery.device.manager,model_itam_discovery_device,villa_nova_itam.group_itam_manager,1,1,1,1
 access_itsm_approved_script_user,itsm.approved.script.user,model_itsm_approved_script,base.group_user,1,0,0,0
 access_itsm_approved_script_manager,itsm.approved.script.manager,model_itsm_approved_script,villa_nova_itam.group_itam_manager,1,1,1,1
+access_itsm_remote_command_wizard,itsm.remote.command.wizard,model_itsm_remote_command_wizard,villa_nova_itam.group_itam_manager,1,1,1,1

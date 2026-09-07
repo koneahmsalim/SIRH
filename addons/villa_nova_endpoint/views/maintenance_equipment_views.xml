@@ -36,6 +36,10 @@
             </div>
             <notebook position="inside">
                 <page string="Agent RMM" name="endpoint_agent">
+                    <button name="%(villa_nova_endpoint.action_remote_command_wizard)d" type="action"
+                            string="Envoyer une commande" class="btn-primary mb-2"
+                            invisible="not endpoint_agent_id"
+                            context="{'default_equipment_id': id}"/>
                     <group>
                         <group string="Identité de l'agent">
                             <field name="endpoint_agent_id" readonly="1"/>

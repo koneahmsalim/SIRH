@@ -15,12 +15,11 @@ COMMAND_TYPE_SELECTION = [
 ]
 
 # Actions perturbatrices pour l'utilisateur ou un service potentiellement en
-# production - passent par une approbation d'un second gestionnaire ITAM
-# avant transmission a l'agent (contrainte explicite du projet : "validation
-# des actions sensibles"). Le reste (verrouillage, notification, lecture
-# seule) ne perturbe personne et part directement. run_script est TOUJOURS
-# sensible, meme si le script est deja approuve en bibliotheque - executer
-# un script reste plus puissant que le reste du catalogue, aucune exception.
+# production - simple indicateur visuel (ruban "Sensible") pour attirer
+# l'attention avant l'envoi, PLUS de circuit d'approbation obligatoire par un
+# second gestionnaire : retire sur demande explicite de l'utilisateur (jugee
+# trop lourde pour son usage), qui reste seul responsable de la confirmation
+# affichee sur le bouton d'envoi.
 SENSITIVE_COMMAND_TYPES = ('restart', 'shutdown', 'logoff', 'service_restart', 'run_script')
 
 # Commandes necessitant un parametre texte (nom de service ou message) -
@@ -62,10 +61,12 @@ class ItsmRemoteCommand(models.Model):
     au moment de la soumission - editer le script en bibliotheque plus tard
     n'affecte jamais une commande deja soumise.
 
-    Etat pending_approval/approval_id reutilise le moteur d'approbation
-    existant (itsm.approval, deja utilise par le CAB des changements -
-    villa_nova_change) plutot que d'en construire un nouveau - meme
-    philosophie de reutilisation que le reste du projet."""
+    Une commande est automatiquement soumise (etat 'pending') des sa
+    creation - plus de circuit d'approbation par un second gestionnaire
+    (retire sur demande explicite de l'utilisateur). Les etats
+    pending_approval/refused et le champ approval_id restent dans le modele
+    UNIQUEMENT pour la compatibilite avec les commandes deja creees avant ce
+    changement - plus jamais atteints par une nouvelle commande."""
     _name = 'itsm.remote.command'
     _description = "Commande à distance (agent endpoint)"
     _inherit = ['mail.thread']
@@ -121,7 +122,14 @@ class ItsmRemoteCommand(models.Model):
         for vals in vals_list:
             if vals.get('name', 'Nouveau') == 'Nouveau':
                 vals['name'] = self.env['ir.sequence'].next_by_code('itsm.remote.command') or 'Nouveau'
-        return super().create(vals_list)
+        records = super().create(vals_list)
+        # Soumission immediate : valide (agent actif, parametre/script
+        # present) et passe directement a 'pending' - une commande invalide
+        # leve une erreur ICI, avant meme d'exister, plutot que de rester
+        # trainer en 'draft' a corriger plus tard.
+        for command in records:
+            command._submit_one()
+        return records
 
     def _check_state_transition(self, old_state, new_state):
         if old_state == new_state:
@@ -165,24 +173,7 @@ class ItsmRemoteCommand(models.Model):
                 'pinned_script_content': self.script_id.content,
             })
 
-        if not self.is_sensitive:
-            self.write({'state': 'pending'})
-            return
-
-        managers = self.env.ref('villa_nova_itam.group_itam_manager').users.filtered(
-            lambda u: u.id != self.requested_by.id and u.email)
-        if not managers:
-            raise UserError(_(
-                "Cette action est sensible et nécessite l'approbation d'un AUTRE gestionnaire ITAM, "
-                "mais aucun autre gestionnaire actif n'a été trouvé - impossible de garantir la "
-                "séparation des responsabilités."))
-        approval = self.env['itsm.approval'].create({
-            'remote_command_id': self.id,
-            'approver_id': managers[0].id,
-        })
-        self.write({'approval_id': approval.id, 'state': 'pending_approval'})
-        self.message_post(body=_(
-            "Approbation demandée à %(approver)s avant transmission à l'agent.", approver=managers[0].name))
+        self.write({'state': 'pending'})
 
     def action_cancel(self):
         self.write({'state': 'cancelled'})

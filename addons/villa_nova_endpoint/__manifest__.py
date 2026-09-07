@@ -10,9 +10,8 @@
         "Etend les actifs ITAM existants (maintenance.equipment) plutot que "
         "de dupliquer un modele parallele. Actions a distance limitees a un "
         "catalogue FERME de commandes predefinies (jamais d'execution "
-        "arbitraire), avec validation obligatoire par un second gestionnaire "
-        "ITAM pour les actions sensibles (reutilise le moteur d'approbation "
-        "existant) et audit complet par commande. Decouverte reseau (scan "
+        "arbitraire), envoi en un clic via un assistant depuis la fiche de "
+        "l'actif, et audit complet par commande. Decouverte reseau (scan "
         "ping sweep nmap a la demande, rapprochement best-effort avec les "
         "actifs deja connus). Bibliotheque de scripts approuves (empreinte "
         "SHA-256 figee a la soumission - executable uniquement via une "
@@ -46,10 +45,11 @@
         'views/remote_command_views.xml',
         'views/discovery_scan_views.xml',
         'views/security_risk_views.xml',
+        'wizard/endpoint_enrollment_key_reveal_views.xml',
+        'wizard/remote_command_wizard_views.xml',
         'views/maintenance_equipment_views.xml',
         'views/res_config_settings_views.xml',
         'views/endpoint_menus.xml',
-        'wizard/endpoint_enrollment_key_reveal_views.xml',
     ],
     'installable': True,
     'application': False,

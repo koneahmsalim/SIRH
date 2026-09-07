@@ -1,40 +1,45 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <menuitem id="endpoint_menu_agents" name="Agents endpoint" parent="villa_nova_itam.itsm_menu_assets_root"
-              action="action_endpoint_agent" sequence="4" groups="villa_nova_itam.group_itam_manager"/>
-
-    <menuitem id="endpoint_menu_software_installed" name="Logiciels installés (parc)"
-              parent="villa_nova_itam.itsm_menu_assets_root"
-              action="action_itam_software_installed" sequence="5"
+    <!-- Regroupement de toutes les entrees RMM sous UN SEUL sous-menu
+         (au lieu de 5-6 entrees eparpillees directement sous "Actifs") -
+         simplification demandee par l'utilisateur, la navigation etait
+         jugee trop dispersee. -->
+    <menuitem id="endpoint_menu_rmm_root" name="Gestion des postes (RMM)"
+              parent="villa_nova_itam.itsm_menu_assets_root" sequence="4"
               groups="villa_nova_itam.group_itam_manager"/>
 
-    <menuitem id="endpoint_menu_software_not_licensed" name="Logiciels sans licence suivie"
-              parent="villa_nova_itam.itsm_menu_assets_root"
-              action="action_itam_software_not_licensed" sequence="6"
-              groups="villa_nova_itam.group_itam_manager"/>
+    <menuitem id="endpoint_menu_agents" name="Agents endpoint" parent="endpoint_menu_rmm_root"
+              action="action_endpoint_agent" sequence="1"/>
+
+    <!-- Une seule entree "Logiciels installes" - le filtre "Sans licence
+         suivie" deja present dans sa vue de recherche remplace le second
+         menu qui existait avant (action_itam_software_not_licensed reste
+         disponible techniquement, juste plus dupliquee en menu). -->
+    <menuitem id="endpoint_menu_software_installed" name="Logiciels installés"
+              parent="endpoint_menu_rmm_root"
+              action="action_itam_software_installed" sequence="2"/>
 
     <menuitem id="endpoint_menu_remote_commands" name="Commandes à distance"
-              parent="villa_nova_itam.itsm_menu_assets_root"
-              action="action_remote_command" sequence="7"
-              groups="villa_nova_itam.group_itam_manager"/>
-
-    <menuitem id="endpoint_menu_approved_scripts" name="Scripts approuvés"
-              parent="villa_nova_itsm.itsm_menu_config_root"
-              action="action_approved_script" sequence="11"
-              groups="villa_nova_itam.group_itam_manager"/>
+              parent="endpoint_menu_rmm_root"
+              action="action_remote_command" sequence="3"/>
 
     <menuitem id="endpoint_menu_discovery" name="Découverte réseau"
-              parent="villa_nova_itam.itsm_menu_assets_root"
-              action="action_discovery_scan" sequence="8"
-              groups="villa_nova_itam.group_itam_manager"/>
+              parent="endpoint_menu_rmm_root"
+              action="action_discovery_scan" sequence="4"/>
 
     <menuitem id="endpoint_menu_security_risk" name="Analyse de risque du parc"
-              parent="villa_nova_itam.itsm_menu_assets_root"
-              action="action_security_risk" sequence="9"
+              parent="endpoint_menu_rmm_root"
+              action="action_security_risk" sequence="5"/>
+
+    <menuitem id="endpoint_menu_config_root" name="Endpoint (RMM)"
+              parent="villa_nova_itsm.itsm_menu_config_root" sequence="10"
               groups="villa_nova_itam.group_itam_manager"/>
 
     <menuitem id="endpoint_menu_enrollment_keys" name="Clés d'enrôlement d'agents"
-              parent="villa_nova_itsm.itsm_menu_config_root"
-              action="action_endpoint_enrollment_key" sequence="10"
-              groups="villa_nova_itam.group_itam_manager"/>
+              parent="endpoint_menu_config_root"
+              action="action_endpoint_enrollment_key" sequence="1"/>
+
+    <menuitem id="endpoint_menu_approved_scripts" name="Scripts approuvés"
+              parent="endpoint_menu_config_root"
+              action="action_approved_script" sequence="2"/>
 </odoo>

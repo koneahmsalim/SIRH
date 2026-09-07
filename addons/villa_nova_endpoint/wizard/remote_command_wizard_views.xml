@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="remote_command_wizard_view_form" model="ir.ui.view">
+        <field name="name">itsm.remote.command.wizard.form</field>
+        <field name="model">itsm.remote.command.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Envoyer une commande à distance">
+                <widget name="web_ribbon" title="Sensible" bg_color="text-bg-warning" invisible="not is_sensitive"/>
+                <group>
+                    <field name="equipment_id"/>
+                    <field name="command_type"/>
+                    <field name="parameters" invisible="command_type == 'run_script'"
+                           required="parameter_required"
+                           placeholder="Nom du service, ou message à afficher"/>
+                    <field name="script_id" invisible="command_type != 'run_script'"
+                           required="command_type == 'run_script'"/>
+                    <field name="is_sensitive" invisible="1"/>
+                    <field name="parameter_required" invisible="1"/>
+                </group>
+                <footer>
+                    <button name="action_send" type="object" string="Envoyer" class="btn-primary"
+                            confirm="Cette action sera transmise au prochain check-in de l'agent. Continuer ?"/>
+                    <button string="Annuler" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_remote_command_wizard" model="ir.actions.act_window">
+        <field name="name">Envoyer une commande à distance</field>
+        <field name="res_model">itsm.remote.command.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+</odoo>
