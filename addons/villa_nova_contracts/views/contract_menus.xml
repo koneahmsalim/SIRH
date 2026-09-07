@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <menuitem id="contract_menu_contracts" name="Contrats" parent="villa_nova_itam.itsm_menu_assets_root"
+              action="itsm_contract_action" sequence="6"/>
+</odoo>

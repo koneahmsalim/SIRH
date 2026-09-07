@@ -10,6 +10,9 @@
         "espace de travail unifie façon ServiceDesk Plus. Phases 4-5 de la "
         "plateforme ITSM complete construite phase par phase."
     ),
+
+    'icon': '/villa_nova_itam/static/description/icon.png',
+
     'version': '18.0.1.1.0',
     'category': 'Services/Helpdesk',
     'author': 'Villa Nova',

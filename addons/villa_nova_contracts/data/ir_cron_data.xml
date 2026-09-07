@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="cron_check_contract_renewals" model="ir.cron">
+        <field name="name">Contrats : vérifier les renouvellements</field>
+        <field name="model_id" ref="model_itsm_contract"/>
+        <field name="state">code</field>
+        <field name="code">model._cron_check_contract_renewals()</field>
+        <field name="interval_number">1</field>
+        <field name="interval_type">days</field>
+        <field name="active" eval="True"/>
+    </record>
+
+    <record id="cron_check_warranty_renewals" model="ir.cron">
+        <field name="name">ITAM : vérifier les garanties matérielles</field>
+        <field name="model_id" ref="model_maintenance_equipment"/>
+        <field name="state">code</field>
+        <field name="code">model._cron_check_warranty_renewals()</field>
+        <field name="interval_number">1</field>
+        <field name="interval_type">days</field>
+        <field name="active" eval="True"/>
+    </record>
+
+    <record id="cron_check_license_renewals" model="ir.cron">
+        <field name="name">ITAM : vérifier les renouvellements de licences</field>
+        <field name="model_id" ref="model_itam_software_license"/>
+        <field name="state">code</field>
+        <field name="code">model._cron_check_license_renewals()</field>
+        <field name="interval_number">1</field>
+        <field name="interval_type">days</field>
+        <field name="active" eval="True"/>
+    </record>
+</odoo>

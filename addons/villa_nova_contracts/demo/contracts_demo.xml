@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+
+        <record id="demo_vendor_dell" model="res.partner">
+            <field name="name">Dell Technologies Afrique</field>
+            <field name="is_company">True</field>
+            <field name="supplier_rank">1</field>
+            <field name="email">support@dell-afrique.example.com</field>
+        </record>
+        <record id="demo_vendor_microsoft" model="res.partner">
+            <field name="name">Microsoft Afrique</field>
+            <field name="is_company">True</field>
+            <field name="supplier_rank">1</field>
+            <field name="email">licences@microsoft-afrique.example.com</field>
+        </record>
+
+        <!-- Tracabilite achat -> actif : le serveur a ete achete via ce bon
+             de commande. -->
+        <record id="demo_po_server" model="purchase.order">
+            <field name="partner_id" ref="demo_vendor_dell"/>
+            <field name="date_order" eval="(DateTime.now() - relativedelta(years=2, days=5)).strftime('%Y-%m-%d %H:%M:%S')"/>
+            <field name="state">purchase</field>
+        </record>
+        <record id="villa_nova_itam.demo_asset_server" model="maintenance.equipment">
+            <field name="purchase_order_id" ref="demo_po_server"/>
+            <field name="partner_id" ref="demo_vendor_dell"/>
+        </record>
+
+        <!-- Contrat de support actif, couvre le serveur et le switch. -->
+        <record id="demo_contract_dell_support" model="itsm.contract">
+            <field name="name">Support Dell PowerEdge R440 - contrat annuel</field>
+            <field name="contract_type">support</field>
+            <field name="vendor_id" ref="demo_vendor_dell"/>
+            <field name="reference">DELL-SUP-2026-0472</field>
+            <field name="responsible_id" ref="base.user_admin"/>
+            <field name="start_date" eval="(DateTime.now() - relativedelta(months=8)).strftime('%Y-%m-%d')"/>
+            <field name="end_date" eval="(DateTime.now() + relativedelta(months=4)).strftime('%Y-%m-%d')"/>
+            <field name="cost">1800.0</field>
+            <field name="auto_renew">True</field>
+            <field name="purchase_order_id" ref="demo_po_server"/>
+            <field name="equipment_ids" eval="[(6, 0, [
+                ref('villa_nova_itam.demo_asset_server'), ref('villa_nova_itam.demo_asset_switch')])]"/>
+        </record>
+
+        <!-- Contrat de licence Microsoft, expire bientot - demontre le
+             rappel de renouvellement. -->
+        <record id="demo_contract_microsoft" model="itsm.contract">
+            <field name="name">Microsoft 365 E3 - abonnement annuel</field>
+            <field name="contract_type">license</field>
+            <field name="vendor_id" ref="demo_vendor_microsoft"/>
+            <field name="responsible_id" ref="base.user_admin"/>
+            <field name="start_date" eval="(DateTime.now() - relativedelta(months=11)).strftime('%Y-%m-%d')"/>
+            <field name="end_date" eval="(DateTime.now() + relativedelta(days=15)).strftime('%Y-%m-%d')"/>
+            <field name="cost">18000.0</field>
+            <field name="license_ids" eval="[(6, 0, [ref('villa_nova_itam.demo_license_m365')])]"/>
+        </record>
+
+    </data>
+</odoo>

@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="res_partner_view_form_itam_vendor" model="ir.ui.view">
+        <field name="name">res.partner.form.itam.vendor</field>
+        <field name="model">res.partner</field>
+        <field name="inherit_id" ref="base.view_partner_form"/>
+        <field name="arch" type="xml">
+            <div class="oe_button_box" name="button_box" position="inside">
+                <button type="object" name="action_view_itam_equipment" class="oe_stat_button" icon="fa-laptop"
+                        invisible="itam_equipment_count == 0">
+                    <field string="Actifs fournis" name="itam_equipment_count" widget="statinfo"/>
+                </button>
+                <button type="object" name="action_view_itsm_contracts" class="oe_stat_button" icon="fa-file-text-o"
+                        invisible="itsm_contract_count == 0">
+                    <field string="Contrats" name="itsm_contract_count" widget="statinfo"/>
+                </button>
+            </div>
+        </field>
+    </record>
+</odoo>
