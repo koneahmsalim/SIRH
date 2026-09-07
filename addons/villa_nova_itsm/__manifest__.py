@@ -32,6 +32,7 @@
         'views/itsm_ticket_template_views.xml',
         'views/itsm_canned_response_views.xml',
         'views/itsm_approval_views.xml',
+        'views/portal_style.xml',
         'views/portal_templates.xml',
         'views/itsm_menus.xml',
         'views/automation_rules_view.xml',

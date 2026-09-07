@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Le design system villa_nova_theme n'est charge que dans le bundle
+         backend (web.assets_backend) - le tenter dans web.assets_frontend
+         n'a, en pratique dans cet environnement, jamais fait apparaitre le
+         contenu ajoute dans le bundle compile/servi (constat reproductible :
+         meme un fichier CSS trivial sans aucune dependance SCSS n'apparait
+         pas, cache clair + redemarrage complet du conteneur inclus) - piste
+         non resolue, documentee ici plutot que silencieusement contournee.
+         Injection directe en <style> dans portal.portal_layout a la place :
+         moins elegant qu'un vrai bundle partage, mais garanti de s'afficher
+         puisque c'est simplement du HTML rendu, pas un fichier d'assets mis
+         en cache. Reprend les memes valeurs de marque (couleurs, rayons)
+         que design_tokens.scss pour que le parcours backend -> portail
+         reste visuellement coherent. -->
+    <template id="portal_style" inherit_id="portal.portal_layout" name="Portail : cohérence visuelle Villa Nova">
+        <!-- portal.portal_layout delegue son &lt;head&gt; a portal.frontend_layout
+             (donc a web.frontend_layout) - pas de &lt;head&gt; dans l'arch de CE
+             template pour y xpath directement. Un &lt;style&gt; en tete du corps
+             fonctionne tout aussi bien (le CSS s'applique quel que soit
+             l'emplacement de la balise) et #wrap existe reellement ici. -->
+        <xpath expr="//div[@id='wrap']" position="before">
+            <style>
+                :root {
+                    --vn-crimson: #DC143C;
+                    --vn-crimson-dark: #A80F2E;
+                    --vn-graphite: #2A2D2F;
+                    --vn-slate: #758696;
+                    --vn-radius-sm: 6px;
+                    --vn-radius-md: 10px;
+                    --vn-radius-lg: 14px;
+                    --vn-radius-full: 999px;
+                    --vn-shadow-1: 0 1px 2px rgba(20, 22, 23, .05);
+                    --vn-shadow-2: 0 2px 8px rgba(20, 22, 23, .06), 0 1px 2px rgba(20, 22, 23, .04);
+                }
+                .vn-badge {
+                    display: inline-flex; align-items: center; gap: .25rem;
+                    padding: .25em .65em; border-radius: var(--vn-radius-full);
+                    font-size: .75rem; font-weight: 600; line-height: 1.4;
+                }
+                .vn-badge::before {
+                    content: ""; width: 6px; height: 6px; border-radius: 50%; background-color: currentColor;
+                }
+                .vn-badge-success { background-color: rgba(31, 138, 87, .12); color: #196f46; }
+                .vn-badge-warning { background-color: rgba(201, 138, 10, .14); color: #a06f08; }
+                .vn-badge-danger { background-color: rgba(228, 87, 46, .12); color: #c2481f; }
+                .vn-badge-info { background-color: rgba(44, 122, 158, .12); color: #256a8a; }
+                .vn-badge-neutral { background-color: #EEF1F2; color: var(--vn-slate); }
+                .vn-badge-brand { background-color: rgba(220, 20, 60, .1); color: var(--vn-crimson-dark); }
+                .vn-card {
+                    background-color: #fff; border: 1px solid #EEF1F2; border-radius: var(--vn-radius-lg);
+                    box-shadow: var(--vn-shadow-1); transition: box-shadow .18s;
+                }
+                .vn-card-interactive:hover { box-shadow: var(--vn-shadow-2); }
+                .btn-primary {
+                    background-color: var(--vn-crimson); border-color: var(--vn-crimson);
+                }
+                .btn-primary:hover {
+                    background-color: var(--vn-crimson-dark); border-color: var(--vn-crimson-dark);
+                }
+                a { color: var(--vn-crimson-dark); }
+            </style>
+        </xpath>
+    </template>
+</odoo>
