@@ -7,6 +7,7 @@
     </record>
 
     <menuitem id="itsm_menu_root" name="ITSM" sequence="20"
+              web_icon="villa_nova_itsm,static/description/icon.png"
               groups="villa_nova_itsm.group_itsm_user"/>
 
     <menuitem id="itsm_menu_dashboard" name="Tableau de bord" parent="itsm_menu_root"
