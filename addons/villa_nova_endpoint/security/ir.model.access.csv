@@ -16,3 +16,5 @@ access_itam_discovery_scan_user,itam.discovery.scan.user,model_itam_discovery_sc
 access_itam_discovery_scan_manager,itam.discovery.scan.manager,model_itam_discovery_scan,villa_nova_itam.group_itam_manager,1,1,1,1
 access_itam_discovery_device_user,itam.discovery.device.user,model_itam_discovery_device,base.group_user,1,0,0,0
 access_itam_discovery_device_manager,itam.discovery.device.manager,model_itam_discovery_device,villa_nova_itam.group_itam_manager,1,1,1,1
+access_itsm_approved_script_user,itsm.approved.script.user,model_itsm_approved_script,base.group_user,1,0,0,0
+access_itsm_approved_script_manager,itsm.approved.script.manager,model_itsm_approved_script,villa_nova_itam.group_itam_manager,1,1,1,1

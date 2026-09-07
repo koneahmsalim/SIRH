@@ -36,9 +36,11 @@ type EnrollResponse struct {
 }
 
 type Command struct {
-	ID          int    `json:"id"`
-	CommandType string `json:"command_type"`
-	Parameters  string `json:"parameters"`
+	ID            int    `json:"id"`
+	CommandType   string `json:"command_type"`
+	Parameters    string `json:"parameters"`
+	ScriptContent string `json:"script_content"`
+	ScriptHash    string `json:"script_hash"`
 }
 
 type CheckinResponse struct {

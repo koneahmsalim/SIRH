@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="approved_script_view_list" model="ir.ui.view">
+        <field name="name">itsm.approved.script.list</field>
+        <field name="model">itsm.approved.script</field>
+        <field name="arch" type="xml">
+            <list decoration-muted="not active">
+                <field name="name"/>
+                <field name="script_type"/>
+                <field name="usage_count"/>
+                <field name="created_by"/>
+                <field name="active" widget="boolean_toggle"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="approved_script_view_form" model="ir.ui.view">
+        <field name="name">itsm.approved.script.form</field>
+        <field name="model">itsm.approved.script</field>
+        <field name="arch" type="xml">
+            <form string="Script approuvé">
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_view_usage" type="object" class="oe_stat_button" icon="fa-terminal">
+                            <field name="usage_count" widget="statinfo" string="Utilisations"/>
+                        </button>
+                    </div>
+                    <widget name="web_ribbon" title="Désactivé" bg_color="text-bg-danger" invisible="active"/>
+                    <div class="oe_title"><h1><field name="name" placeholder="Ex. Vider le cache DNS"/></h1></div>
+                    <group>
+                        <group>
+                            <field name="script_type"/>
+                            <field name="created_by" readonly="1"/>
+                            <field name="content_hash" readonly="1"/>
+                        </group>
+                        <group>
+                            <field name="active"/>
+                        </group>
+                    </group>
+                    <group string="Description">
+                        <field name="description" nolabel="1" placeholder="À quoi sert ce script, quand l'utiliser..."/>
+                    </group>
+                    <group string="Contenu">
+                        <field name="content" nolabel="1" widget="text" placeholder="# Script PowerShell"/>
+                    </group>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_approved_script" model="ir.actions.act_window">
+        <field name="name">Scripts approuvés</field>
+        <field name="res_model">itsm.approved.script</field>
+        <field name="view_mode">list,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smile">
+                Aucun script approuvé pour l'instant - créez-en un pour l'exécuter à distance
+                via une commande "Exécuter un script approuvé".
+            </p>
+        </field>
+    </record>
+</odoo>

@@ -10,24 +10,36 @@ package actions
 
 import "fmt"
 
-func Execute(commandType, parameters string) (output string, err error) {
+// Params porte les arguments annexes d'une commande - regroupes dans un
+// struct plutot que des paires de chaines positionnelles au fil des ajouts
+// de type de commande (Phase 4 : parametre simple ; Phase 7 : contenu de
+// script + empreinte).
+type Params struct {
+	Parameters    string
+	ScriptContent string
+	ScriptHash    string
+}
+
+func Execute(commandType string, p Params) (output string, err error) {
 	switch commandType {
 	case "restart":
-		return Restart(parameters)
+		return Restart(p.Parameters)
 	case "shutdown":
-		return Shutdown(parameters)
+		return Shutdown(p.Parameters)
 	case "logoff":
 		return Logoff()
 	case "lock":
 		return Lock()
 	case "notify_user":
-		return NotifyUser(parameters)
+		return NotifyUser(p.Parameters)
 	case "service_status":
-		return ServiceStatus(parameters)
+		return ServiceStatus(p.Parameters)
 	case "service_restart":
-		return ServiceRestart(parameters)
+		return ServiceRestart(p.Parameters)
 	case "collect_logs":
 		return CollectLogs()
+	case "run_script":
+		return RunScript(p.ScriptContent, p.ScriptHash)
 	case "refresh_inventory":
 		// Rien a faire ici : l'inventaire envoye dans LA REQUETE de check-in
 		// qui a rapporte cette commande est deja frais (collecte juste avant

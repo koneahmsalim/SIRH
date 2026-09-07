@@ -11,14 +11,17 @@ COMMAND_TYPE_SELECTION = [
     ('service_restart', "Redémarrer un service"),
     ('collect_logs', "Collecter les journaux système"),
     ('refresh_inventory', "Forcer l'actualisation de l'inventaire"),
+    ('run_script', "Exécuter un script approuvé"),
 ]
 
 # Actions perturbatrices pour l'utilisateur ou un service potentiellement en
 # production - passent par une approbation d'un second gestionnaire ITAM
 # avant transmission a l'agent (contrainte explicite du projet : "validation
 # des actions sensibles"). Le reste (verrouillage, notification, lecture
-# seule) ne perturbe personne et part directement.
-SENSITIVE_COMMAND_TYPES = ('restart', 'shutdown', 'logoff', 'service_restart')
+# seule) ne perturbe personne et part directement. run_script est TOUJOURS
+# sensible, meme si le script est deja approuve en bibliotheque - executer
+# un script reste plus puissant que le reste du catalogue, aucune exception.
+SENSITIVE_COMMAND_TYPES = ('restart', 'shutdown', 'logoff', 'service_restart', 'run_script')
 
 # Commandes necessitant un parametre texte (nom de service ou message) -
 # valide a la soumission plutot que de decouvrir l'erreur cote agent.
@@ -53,10 +56,11 @@ class ItsmRemoteCommand(models.Model):
     """Catalogue FERME de commandes predefinies executables sur un poste via
     son agent - jamais de code/commande arbitraire (contrainte explicite du
     projet, voir COMMAND_TYPE_SELECTION ci-dessus et le meme catalogue cote
-    agent Go dans agent/internal/actions/actions.go). L'execution de scripts
-    approuves par un catalogue admin est un perimetre EXPLICITEMENT reporte a
-    une phase ulterieure (Phase 7 "Gestion de scripts" de la feuille de
-    route), pas traite ici.
+    agent Go dans agent/internal/actions/actions.go). run_script fait
+    exception controlee a "predefini" : le CONTENU vient d'itsm.approved.script
+    (cure par un admin, jamais une chaine libre), et est FIGE (pinned_script_*)
+    au moment de la soumission - editer le script en bibliotheque plus tard
+    n'affecte jamais une commande deja soumise.
 
     Etat pending_approval/approval_id reutilise le moteur d'approbation
     existant (itsm.approval, deja utilise par le CAB des changements -
@@ -79,6 +83,17 @@ class ItsmRemoteCommand(models.Model):
         string="Paramètre",
         help="Nom du service (service_status/service_restart) ou message à afficher (notify_user). "
              "Ignoré pour les autres types de commande.",
+    )
+    script_id = fields.Many2one('itsm.approved.script', string="Script à exécuter")
+    pinned_script_hash = fields.Char(
+        string="Empreinte du script (figée)", copy=False, readonly=True,
+        help="Empreinte SHA-256 du script APPROUVÉ au moment de la soumission - une édition "
+             "ultérieure du script en bibliothèque n'affecte pas cette commande.",
+    )
+    pinned_script_content = fields.Text(
+        string="Contenu du script (figé)", copy=False, readonly=True,
+        help="Copie exacte du contenu exécuté, conservée pour l'audit même si le script "
+             "en bibliothèque est modifié ou supprimé ensuite.",
     )
     is_sensitive = fields.Boolean(string="Action sensible", compute='_compute_is_sensitive', store=True)
 
@@ -136,6 +151,19 @@ class ItsmRemoteCommand(models.Model):
         if self.command_type in PARAMETER_REQUIRED_TYPES and not self.parameters:
             raise UserError(_(
                 "Cette commande nécessite un paramètre (nom du service)."))
+        if self.command_type == 'run_script':
+            if not self.script_id:
+                raise UserError(_("Sélectionnez un script approuvé à exécuter."))
+            if not self.script_id.active:
+                raise UserError(_("Ce script a été désactivé - il ne peut plus être exécuté."))
+            # Figer le contenu MAINTENANT : si le script est edite entre la
+            # soumission et l'approbation/execution, c'est TOUJOURS ce
+            # contenu-ci (celui vu et approuve) qui sera envoye a l'agent,
+            # jamais une version plus recente non revue.
+            self.write({
+                'pinned_script_hash': self.script_id.content_hash,
+                'pinned_script_content': self.script_id.content,
+            })
 
         if not self.is_sensitive:
             self.write({'state': 'pending'})
@@ -172,10 +200,14 @@ class ItsmRemoteCommand(models.Model):
         if not commands:
             return []
         commands.write({'state': 'sent', 'sent_date': fields.Datetime.now()})
-        return [
-            {'id': c.id, 'command_type': c.command_type, 'parameters': c.parameters or ''}
-            for c in commands
-        ]
+        result = []
+        for c in commands:
+            entry = {'id': c.id, 'command_type': c.command_type, 'parameters': c.parameters or ''}
+            if c.command_type == 'run_script':
+                entry['script_content'] = c.pinned_script_content or ''
+                entry['script_hash'] = c.pinned_script_hash or ''
+            result.append(entry)
+        return result
 
     @api.model
     def _report_result(self, agent, command_id, status, output=None, error=None):

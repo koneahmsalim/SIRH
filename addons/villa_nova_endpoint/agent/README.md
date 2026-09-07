@@ -49,8 +49,11 @@ villa-nova-endpoint-agent.exe -uninstall-service  REM retire le service Windows
 | `service_status` / `service_restart` | Interroge/redémarre un service Windows nommé (Service Control Manager) | `service_restart` uniquement |
 | `collect_logs` | Erreurs/avertissements des journaux Application+Système des dernières 24h (WMI `Win32_NTLogEvent`) | Non |
 | `refresh_inventory` | Sans effet propre : l'inventaire envoyé dans la requête de check-in qui a rapporté la commande est déjà frais | Non |
+| `run_script` | Exécute un script PowerShell de la bibliothèque approuvée (Phase 7) | Oui, toujours |
 
 `lock`/`logoff`/`notify_user` agissent DANS la session de l'utilisateur actuellement connecté depuis le service LocalSystem (WTSQueryUserToken + CreateProcessAsUser) - si personne n'est connecté (poste à l'écran de verrouillage sans session, ou éteint), la commande échoue proprement avec une erreur explicite plutôt que d'agir sur une session arbitraire.
+
+`run_script` (Phase 7) : le contenu du script est celui APPROUVÉ dans la bibliothèque Odoo (`itsm.approved.script`), figé au moment de la soumission de la commande - éditer le script en bibliothèque après coup n'affecte jamais une commande déjà soumise. L'agent recalcule l'empreinte SHA-256 du contenu reçu et refuse d'exécuter si elle ne correspond pas à celle annoncée par le serveur (défense en profondeur, en plus du TLS attendu en production). Écrit dans un fichier temporaire, exécuté via `powershell.exe -NoProfile -NonInteractive -ExecutionPolicy Bypass`, avec un délai maximal de 5 minutes.
 
 Chaque commande est rapportée en deux temps à `/endpoint/agent/command_result` : `running` avant exécution, puis `completed`/`failed` avec la sortie. Pour `restart`/`shutdown`/`logoff`, le second rapport peut ne jamais partir si le processus est tué avant - la commande reste alors visible côté SIRH en statut "En cours d'exécution" indéfiniment. C'est une limite connue et acceptée (même comportement que les outils RMM établis), pas un bug à corriger dans l'immédiat.
 

@@ -47,7 +47,11 @@
                             <field name="agent_id" readonly="1"/>
                             <field name="command_type" readonly="state != 'draft'"/>
                             <field name="parameters" readonly="state != 'draft'"
+                                   invisible="command_type == 'run_script'"
                                    placeholder="Nom du service, ou message à afficher"/>
+                            <field name="script_id" readonly="state != 'draft'"
+                                   invisible="command_type != 'run_script'"
+                                   domain="[('active', '=', True)]"/>
                             <field name="is_sensitive" readonly="1"/>
                         </group>
                         <group>

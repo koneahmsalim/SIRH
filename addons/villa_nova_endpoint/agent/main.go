@@ -169,7 +169,11 @@ func runCommand(c *client.Client, cfg *config.Config, cmd client.Command) {
 		return
 	}
 
-	output, err := actions.Execute(cmd.CommandType, cmd.Parameters)
+	output, err := actions.Execute(cmd.CommandType, actions.Params{
+		Parameters:    cmd.Parameters,
+		ScriptContent: cmd.ScriptContent,
+		ScriptHash:    cmd.ScriptHash,
+	})
 	result := client.CommandResultRequest{CommandID: cmd.ID, Output: output}
 	if err != nil {
 		result.Status = "failed"
