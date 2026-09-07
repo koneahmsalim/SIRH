@@ -41,7 +41,7 @@ class MaintenanceEquipment(models.Model):
 
     warranty_status = fields.Selection(
         WARRANTY_STATUS_SELECTION, string="Statut de garantie",
-        compute='_compute_warranty_status', store=True,
+        compute='_compute_warranty_status', store=True, index=True,
     )
 
     ticket_ids = fields.One2many('itsm.ticket', 'equipment_id', string="Tickets")

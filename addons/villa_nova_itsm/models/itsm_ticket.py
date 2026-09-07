@@ -105,19 +105,23 @@ class ItsmTicket(models.Model):
     source = fields.Selection(SOURCE_SELECTION, string="Source", default='backend', required=True)
 
     state = fields.Selection(STATE_SELECTION, string="Statut", default='new', required=True, tracking=True,
-                              group_expand='_expand_states')
+                              group_expand='_expand_states', index=True)
     active = fields.Boolean(default=True)
 
     company_id = fields.Many2one('res.company', default=lambda self: self.env.company, required=True)
 
-    partner_id = fields.Many2one('res.partner', string="Demandeur", tracking=True)
+    # index=True sur partner_id : evalue a chaque chargement de liste/page
+    # portail (regle "partner_id = moi OU je suis dans les destinataires du
+    # message"), state/category_id/service_id : filtres les plus frequents
+    # du tableau de bord et de l'agregation analytique (Phase 10).
+    partner_id = fields.Many2one('res.partner', string="Demandeur", tracking=True, index=True)
     partner_email = fields.Char(related='partner_id.email', string="E-mail du demandeur", readonly=True)
     employee_id = fields.Many2one('hr.employee', string="Employé concerné", tracking=True)
     user_id = fields.Many2one('res.users', string="Agent assigné", tracking=True, index=True)
     team_id = fields.Many2one('itsm.team', string="Équipe", tracking=True, index=True)
 
-    category_id = fields.Many2one('itsm.category', string="Catégorie", tracking=True)
-    service_id = fields.Many2one('itsm.service', string="Service")
+    category_id = fields.Many2one('itsm.category', string="Catégorie", tracking=True, index=True)
+    service_id = fields.Many2one('itsm.service', string="Service", index=True)
     tag_ids = fields.Many2many('itsm.tag', string="Étiquettes")
 
     impact = fields.Selection(IMPACT_URGENCY_SELECTION, string="Impact", default='medium', required=True, tracking=True)
@@ -128,7 +132,7 @@ class ItsmTicket(models.Model):
     # la contrainte NOT NULL casse cet ordre des la creation en lot).
     priority = fields.Selection(
         PRIORITY_SELECTION, string="Priorité", compute='_compute_priority', store=True, readonly=False,
-        tracking=True,
+        tracking=True, index=True,
         help="Calculée automatiquement à partir de l'impact et de l'urgence (matrice ITIL), modifiable manuellement.",
     )
     priority_sequence = fields.Integer(compute='_compute_priority_sequence', store=True)

@@ -57,7 +57,9 @@ class ItsmChange(models.Model):
     subject = fields.Char(string="Sujet", required=True, tracking=True)
     description = fields.Html(string="Description")
     change_type = fields.Selection(CHANGE_TYPE_SELECTION, string="Type", default='normal', required=True, tracking=True)
-    state = fields.Selection(STATE_SELECTION, string="Statut", default='draft', required=True, tracking=True)
+    state = fields.Selection(
+        STATE_SELECTION, string="Statut", default='draft', required=True, tracking=True, index=True,
+    )
     risk_level = fields.Selection(RISK_LEVEL_SELECTION, string="Niveau de risque", default='medium', tracking=True)
 
     team_id = fields.Many2one('itsm.team', string="Équipe")

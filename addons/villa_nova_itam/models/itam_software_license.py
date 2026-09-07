@@ -44,7 +44,7 @@ class ItamSoftwareLicense(models.Model):
     expiration_date = fields.Date(string="Date d'expiration")
     renewal_status = fields.Selection(
         RENEWAL_STATUS_SELECTION, string="Statut de renouvellement",
-        compute='_compute_renewal_status', store=True,
+        compute='_compute_renewal_status', store=True, index=True,
     )
 
     notes = fields.Text(string="Notes")

@@ -58,7 +58,7 @@ class MaintenanceEquipment(models.Model):
     last_security_scan = fields.Datetime(string="Dernier scan sécurité")
     compliance_status = fields.Selection(
         COMPLIANCE_STATUS_SELECTION, string="Conformité sécurité",
-        compute='_compute_compliance_status', store=True,
+        compute='_compute_compliance_status', store=True, index=True,
     )
 
     @api.depends('last_seen')

@@ -37,7 +37,7 @@ class ItsmContract(models.Model):
     cost = fields.Float(string="Coût")
     auto_renew = fields.Boolean(string="Renouvellement automatique")
     renewal_status = fields.Selection(
-        RENEWAL_STATUS_SELECTION, string="Statut", compute='_compute_renewal_status', store=True,
+        RENEWAL_STATUS_SELECTION, string="Statut", compute='_compute_renewal_status', store=True, index=True,
     )
 
     equipment_ids = fields.Many2many(
