@@ -1,0 +1,4 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_itsm_kb_article_agent,itsm.kb.article.agent,model_itsm_kb_article,villa_nova_itsm.group_itsm_agent,1,1,1,0
+access_itsm_kb_article_manager,itsm.kb.article.manager,model_itsm_kb_article,villa_nova_itsm.group_itsm_manager,1,1,1,1
+access_itsm_kb_article_portal,itsm.kb.article.portal,model_itsm_kb_article,base.group_portal,1,0,0,0

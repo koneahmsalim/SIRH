@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <menuitem id="knowledge_menu_articles" name="Base de connaissances" parent="villa_nova_itsm.itsm_menu_root"
+              action="itsm_kb_article_action" sequence="7"/>
+</odoo>

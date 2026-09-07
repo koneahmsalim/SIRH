@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="itsm_ticket_view_form_kb" model="ir.ui.view">
+        <field name="name">itsm.ticket.form.kb</field>
+        <field name="model">itsm.ticket</field>
+        <field name="inherit_id" ref="villa_nova_itsm.itsm_ticket_view_form"/>
+        <field name="arch" type="xml">
+            <notebook position="inside">
+                <page string="Base de connaissances" name="knowledge">
+                    <group string="Articles suggérés (même catégorie)" invisible="not suggested_kb_article_ids">
+                        <field name="suggested_kb_article_ids" nolabel="1" readonly="1">
+                            <list decoration-muted="1">
+                                <field name="name"/>
+                                <field name="helpful_ratio" widget="percentage"/>
+                            </list>
+                        </field>
+                    </group>
+                    <group string="Articles utilisés pour résoudre ce ticket">
+                        <field name="kb_article_ids" nolabel="1" widget="many2many_tags"/>
+                    </group>
+                </page>
+            </notebook>
+        </field>
+    </record>
+</odoo>

@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="portal_my_home_knowledge" inherit_id="portal.portal_my_home">
+        <xpath expr="//div[hasclass('o_portal_docs')]" position="inside">
+            <t t-call="portal.portal_docs_entry">
+                <t t-set="title">Base de connaissances</t>
+                <t t-set="url" t-value="'/my/knowledge'"/>
+            </t>
+            <t t-call="portal.portal_docs_entry">
+                <t t-set="title">Catalogue de services</t>
+                <t t-set="url" t-value="'/my/services'"/>
+            </t>
+        </xpath>
+    </template>
+
+    <!-- Preselection du service depuis le catalogue -->
+    <template id="portal_ticket_new_preselect" inherit_id="villa_nova_itsm.portal_ticket_new">
+        <xpath expr="//option[@t-foreach='services']" position="attributes">
+            <attribute name="t-att-selected">service.id == selected_service_id</attribute>
+        </xpath>
+    </template>
+
+    <template id="portal_services_catalog" name="Portail : catalogue de services">
+        <t t-call="portal.portal_layout">
+            <t t-set="breadcrumbs_searchbar" t-value="True"/>
+            <t t-call="portal.portal_searchbar">
+                <t t-set="title">Catalogue de services</t>
+            </t>
+            <t t-if="not services">
+                <p class="text-muted">Aucun service disponible pour l'instant.</p>
+            </t>
+            <div t-else="" class="row g-3">
+                <div t-foreach="services" t-as="service" class="col-12 col-md-6 col-lg-4">
+                    <div class="card h-100">
+                        <div class="card-body d-flex flex-column">
+                            <h5 class="card-title">
+                                <i t-if="service.icon" t-attf-class="fa #{service.icon} me-2"/>
+                                <t t-esc="service.name"/>
+                            </h5>
+                            <p class="card-text text-muted flex-grow-1" t-field="service.description"/>
+                            <span t-if="service.requires_approval" class="badge text-bg-warning align-self-start mb-2">
+                                Nécessite une approbation
+                            </span>
+                            <a t-attf-href="/my/tickets/new?service_id=#{service.id}" class="btn btn-primary mt-auto">
+                                Demander ce service
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </t>
+    </template>
+
+    <template id="portal_knowledge_list" name="Portail : base de connaissances">
+        <t t-call="portal.portal_layout">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h1 class="mb-0">Base de connaissances</h1>
+            </div>
+            <form method="get" action="/my/knowledge" class="mb-4 d-flex" style="max-width: 480px;">
+                <input type="text" name="search" class="form-control me-2" placeholder="Rechercher un article..."
+                       t-att-value="search"/>
+                <button type="submit" class="btn btn-primary">Rechercher</button>
+            </form>
+            <t t-if="not articles">
+                <p class="text-muted">Aucun article ne correspond à votre recherche.</p>
+            </t>
+            <t t-else="">
+                <div class="row g-3">
+                    <div t-foreach="articles" t-as="article" class="col-12 col-md-6">
+                        <a t-attf-href="/my/knowledge/#{article.id}" class="text-decoration-none">
+                            <div class="card h-100">
+                                <div class="card-body">
+                                    <h5 class="card-title text-body" t-esc="article.name"/>
+                                    <p t-if="article.category_id" class="text-muted small mb-0"
+                                       t-esc="article.category_id.name"/>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+                <t t-call="portal.pager"/>
+            </t>
+        </t>
+    </template>
+
+    <template id="portal_knowledge_detail" name="Portail : article de la base de connaissances">
+        <t t-call="portal.portal_layout">
+            <div class="container py-4" style="max-width: 720px;">
+                <a href="/my/knowledge" class="btn btn-link ps-0">&#8592; Retour à la base de connaissances</a>
+                <h1 t-esc="article.name"/>
+                <div t-field="article.content"/>
+                <hr/>
+                <div class="d-flex align-items-center gap-2">
+                    <span class="text-muted">Cet article vous a-t-il été utile ?</span>
+                    <form t-attf-action="/my/knowledge/#{article.id}/vote" method="post" class="d-inline">
+                        <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                        <input type="hidden" name="helpful" value="1"/>
+                        <button type="submit" class="btn btn-sm btn-outline-success">
+                            <i class="fa fa-thumbs-up"/> Oui
+                        </button>
+                    </form>
+                    <form t-attf-action="/my/knowledge/#{article.id}/vote" method="post" class="d-inline">
+                        <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                        <input type="hidden" name="helpful" value="0"/>
+                        <button type="submit" class="btn btn-sm btn-outline-secondary">
+                            <i class="fa fa-thumbs-down"/> Non
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </t>
+    </template>
+</odoo>

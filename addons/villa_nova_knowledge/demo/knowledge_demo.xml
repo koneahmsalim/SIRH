@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+
+        <record id="demo_kb_vpn" model="itsm.kb.article">
+            <field name="name">Comment se connecter au VPN</field>
+            <field name="category_id" ref="villa_nova_itsm.demo_cat_reseau"/>
+            <field name="state">published</field>
+            <field name="is_public">True</field>
+            <field name="author_id" ref="base.user_admin"/>
+            <field name="related_service_ids" eval="[(6, 0, [ref('villa_nova_itsm.demo_service_vpn')])]"/>
+            <field name="view_count">42</field>
+            <field name="helpful_count">18</field>
+            <field name="not_helpful_count">2</field>
+            <field name="content">&lt;p&gt;1. Ouvrez le client VPN installe sur votre poste.&lt;/p&gt;
+                &lt;p&gt;2. Saisissez votre identifiant professionnel et votre mot de passe habituel.&lt;/p&gt;
+                &lt;p&gt;3. Selectionnez le serveur "IAG-Principal" et cliquez sur Connecter.&lt;/p&gt;
+                &lt;p&gt;Si la connexion echoue de maniere repetee, verifiez votre connexion internet puis
+                contactez le support si le probleme persiste.&lt;/p&gt;</field>
+        </record>
+
+        <record id="demo_kb_printer" model="itsm.kb.article">
+            <field name="name">Comment installer l'imprimante réseau</field>
+            <field name="category_id" ref="villa_nova_itsm.demo_cat_imprimante"/>
+            <field name="state">published</field>
+            <field name="is_public">True</field>
+            <field name="author_id" ref="base.user_admin"/>
+            <field name="view_count">27</field>
+            <field name="helpful_count">15</field>
+            <field name="not_helpful_count">1</field>
+            <field name="content">&lt;p&gt;1. Depuis les parametres d'impression de votre poste, ajoutez une
+                imprimante reseau.&lt;/p&gt;
+                &lt;p&gt;2. Recherchez "HP-LaserJet-RDC" dans la liste des imprimantes disponibles.&lt;/p&gt;
+                &lt;p&gt;3. Installez le pilote propose automatiquement et imprimez une page de test.&lt;/p&gt;</field>
+        </record>
+        <record id="villa_nova_itsm.demo_ticket_5" model="itsm.ticket">
+            <field name="kb_article_ids" eval="[(6, 0, [ref('demo_kb_printer')])]"/>
+        </record>
+
+        <record id="demo_kb_password" model="itsm.kb.article">
+            <field name="name">Procédure de réinitialisation de mot de passe</field>
+            <field name="category_id" ref="villa_nova_itsm.demo_cat_acces"/>
+            <field name="state">published</field>
+            <field name="is_public">True</field>
+            <field name="author_id" ref="base.user_admin"/>
+            <field name="view_count">63</field>
+            <field name="helpful_count">30</field>
+            <field name="not_helpful_count">4</field>
+            <field name="content">&lt;p&gt;Sur la page de connexion, cliquez sur "Mot de passe oublie" et suivez
+                les instructions envoyees a votre adresse professionnelle. Le lien de reinitialisation est
+                valable 30 minutes.&lt;/p&gt;</field>
+        </record>
+
+        <!-- Article interne, non publie et non visible sur le portail -
+             illustre la distinction brouillon/interne vs publie/public. -->
+        <record id="demo_kb_switch_internal" model="itsm.kb.article">
+            <field name="name">Notes internes - configuration du switch principal</field>
+            <field name="category_id" ref="villa_nova_itsm.demo_cat_reseau"/>
+            <field name="state">draft</field>
+            <field name="is_public">False</field>
+            <field name="author_id" ref="base.user_admin"/>
+            <field name="content">&lt;p&gt;VLAN 10 = bureaux, VLAN 20 = serveurs. Mot de passe admin dans le
+                coffre-fort partage de l'equipe infrastructure.&lt;/p&gt;</field>
+        </record>
+
+    </data>
+</odoo>
