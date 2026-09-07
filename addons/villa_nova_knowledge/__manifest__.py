@@ -12,7 +12,7 @@
     'category': 'Services/Helpdesk',
     'author': 'Villa Nova',
     'license': 'LGPL-3',
-    'depends': ['villa_nova_itsm'],
+    'depends': ['villa_nova_itsm', 'website'],
     'data': [
         'security/knowledge_security.xml',
         'security/ir.model.access.csv',
@@ -26,4 +26,5 @@
     ],
     'installable': True,
     'application': False,
+    'post_init_hook': 'post_init',
 }
