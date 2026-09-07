@@ -3,6 +3,16 @@
     <menuitem id="endpoint_menu_agents" name="Agents endpoint" parent="villa_nova_itam.itsm_menu_assets_root"
               action="action_endpoint_agent" sequence="4" groups="villa_nova_itam.group_itam_manager"/>
 
+    <menuitem id="endpoint_menu_software_installed" name="Logiciels installés (parc)"
+              parent="villa_nova_itam.itsm_menu_assets_root"
+              action="action_itam_software_installed" sequence="5"
+              groups="villa_nova_itam.group_itam_manager"/>
+
+    <menuitem id="endpoint_menu_software_not_licensed" name="Logiciels sans licence suivie"
+              parent="villa_nova_itam.itsm_menu_assets_root"
+              action="action_itam_software_not_licensed" sequence="6"
+              groups="villa_nova_itam.group_itam_manager"/>
+
     <menuitem id="endpoint_menu_enrollment_keys" name="Clés d'enrôlement d'agents"
               parent="villa_nova_itsm.itsm_menu_config_root"
               action="action_endpoint_enrollment_key" sequence="10"

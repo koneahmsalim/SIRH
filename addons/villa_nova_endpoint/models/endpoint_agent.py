@@ -1,5 +1,6 @@
 import secrets
 import uuid
+from datetime import timedelta
 
 from werkzeug.security import check_password_hash, generate_password_hash
 
@@ -21,6 +22,12 @@ STATE_SELECTION = [
 CHECKIN_STALE_MINUTES = 45
 CHECKIN_OFFLINE_MINUTES = 180
 
+# Seuil d'ALERTE (activite pour le gestionnaire), volontairement beaucoup
+# plus large que CHECKIN_OFFLINE_MINUTES ci-dessus : un poste eteint pour la
+# nuit/le week-end passe "hors ligne" au sens connectivite (badge) sans que
+# ce soit anormal - seule une absence prolongee justifie une action humaine.
+OFFLINE_ALERT_DAYS = 3
+
 
 class ItsmEndpointAgent(models.Model):
     """Identite dediee par poste (PAS res.users.apikeys, prevu pour une
@@ -31,7 +38,7 @@ class ItsmEndpointAgent(models.Model):
     voir controllers/agent.py et enrollment_key._find_valid()."""
     _name = 'itsm.endpoint.agent'
     _description = "Agent endpoint (identité de poste)"
-    _inherit = ['mail.thread']
+    _inherit = ['mail.thread', 'mail.activity.mixin']
     _order = 'enrolled_date desc'
     # Pas de contrainte SQL unique(equipment_id) : un actif accumule un
     # HISTORIQUE d'agents au fil des reimagements (un seul 'enrolled' a la
@@ -132,6 +139,45 @@ class ItsmEndpointAgent(models.Model):
         if not agent or not check_password_hash(agent.secret_hash, secret):
             return None
         return agent
+
+    def _escalate_offline(self, notify_users):
+        """Meme mecanisme de deduplication par sous-chaine de resume que les
+        rappels de garantie/contrat/licence (villa_nova_contracts) - une
+        seule activite tant que le poste reste hors ligne, pas une par
+        passage de cron."""
+        self.ensure_one()
+        equipment_name = self.equipment_id.display_name
+        for user in notify_users:
+            already_notified = self.activity_ids.filtered(
+                lambda a: a.user_id == user and equipment_name in (a.summary or ''))
+            if already_notified:
+                continue
+            self.activity_schedule(
+                'mail.mail_activity_data_todo',
+                user_id=user.id,
+                summary=_("Poste hors ligne : %(name)s", name=self.equipment_id.display_name),
+                note=_(
+                    "L'agent endpoint de <b>%(name)s</b> (%(uuid)s) n'a pas fait de check-in "
+                    "depuis le %(date)s - vérifier si le poste est éteint durablement, "
+                    "débranché du réseau, ou si l'agent/service a un problème.",
+                    name=self.equipment_id.display_name, uuid=self.agent_uuid,
+                    date=self.last_checkin or _("jamais"),
+                ),
+            )
+
+    @api.model
+    def _cron_alert_offline_agents(self):
+        managers = self.env.ref('villa_nova_itam.group_itam_manager').users.filtered('email')
+        if not managers:
+            return
+        threshold = fields.Datetime.now() - timedelta(days=OFFLINE_ALERT_DAYS)
+        agents = self.search([
+            ('state', '=', 'enrolled'),
+            ('last_checkin', '<', threshold),
+        ])
+        for agent in agents:
+            agent._escalate_offline(managers)
+        self.env.cr.commit()
 
     def action_revoke(self):
         self.write({'state': 'revoked', 'revoked_date': fields.Datetime.now()})

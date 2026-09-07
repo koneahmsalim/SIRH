@@ -4,14 +4,65 @@
         <field name="name">itam.software.installed.list</field>
         <field name="model">itam.software.installed</field>
         <field name="arch" type="xml">
-            <list create="false">
+            <list create="false" decoration-warning="not is_licensed">
                 <field name="equipment_id"/>
                 <field name="name"/>
                 <field name="version"/>
                 <field name="publisher"/>
                 <field name="install_date"/>
                 <field name="source"/>
+                <field name="is_licensed" widget="boolean_toggle" readonly="1"/>
             </list>
+        </field>
+    </record>
+
+    <record id="itam_software_installed_view_search" model="ir.ui.view">
+        <field name="name">itam.software.installed.search</field>
+        <field name="model">itam.software.installed</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name"/>
+                <field name="equipment_id"/>
+                <field name="publisher"/>
+                <filter name="not_licensed" string="Sans licence suivie" domain="[('is_licensed', '=', False)]"/>
+                <group expand="0" string="Regrouper par">
+                    <filter name="group_name" string="Logiciel" context="{'group_by': 'name'}"/>
+                    <filter name="group_equipment" string="Actif" context="{'group_by': 'equipment_id'}"/>
+                    <filter name="group_publisher" string="Éditeur" context="{'group_by': 'publisher'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_itam_software_installed" model="ir.actions.act_window">
+        <field name="name">Logiciels installés (parc)</field>
+        <field name="res_model">itam.software.installed</field>
+        <field name="view_mode">list</field>
+        <field name="context">{'search_default_group_name': 1}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smile">
+                Aucun logiciel remonté pour l'instant - alimenté automatiquement par les
+                agents endpoint à chaque enrôlement/check-in.
+            </p>
+        </field>
+    </record>
+
+    <record id="action_itam_software_not_licensed" model="ir.actions.act_window">
+        <field name="name">Logiciels installés sans licence suivie</field>
+        <field name="res_model">itam.software.installed</field>
+        <field name="view_mode">list</field>
+        <field name="domain">[('is_licensed', '=', False)]</field>
+        <field name="context">{'search_default_group_name': 1}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smile">
+                Aucun écart détecté - tous les logiciels installés remontés par les agents
+                correspondent par nom à une licence suivie dans le catalogue ITAM.
+            </p>
+            <p>
+                Rapprochement par nom (exact ou partiel, insensible à la casse) - une
+                heuristique à vérifier manuellement avant toute conclusion d'audit, pas une
+                preuve juridique de non-conformité.
+            </p>
         </field>
     </record>
 

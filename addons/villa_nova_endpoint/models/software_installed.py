@@ -1,4 +1,4 @@
-from odoo import fields, models
+from odoo import api, fields, models
 
 SOURCE_SELECTION = [
     ('registry', "Registre Windows"),
@@ -26,3 +26,30 @@ class ItamSoftwareInstalled(models.Model):
     publisher = fields.Char(string="Éditeur")
     install_date = fields.Date(string="Date d'installation")
     source = fields.Selection(SOURCE_SELECTION, string="Source", default='registry')
+
+    is_licensed = fields.Boolean(
+        string="Sous licence suivie", compute='_compute_is_licensed', search='_search_is_licensed',
+        help="Rapprochement par nom avec le catalogue de licences (Phase 5) - heuristique "
+             "(correspondance exacte ou partielle, insensible à la casse), pas une garantie "
+             "juridique de conformité. À vérifier manuellement avant toute conclusion d'audit.",
+    )
+
+    @api.depends('name')
+    def _compute_is_licensed(self):
+        license_names = [n.lower() for n in self.env['itam.software.license'].search([]).mapped('name') if n]
+        for line in self:
+            name = (line.name or '').lower()
+            line.is_licensed = bool(name) and any(
+                name == ln or ln in name or name in ln for ln in license_names)
+
+    @api.model
+    def _search_is_licensed(self, operator, value):
+        # Rapprochement flou impossible a exprimer en SQL pur : calcule en
+        # Python puis filtre par IDs - volume attendu (quelques centaines a
+        # quelques milliers de lignes par poste x parc) largement compatible
+        # avec cette approche, pas besoin d'une vue SQL dediee.
+        if operator not in ('=', '!='):
+            raise NotImplementedError
+        want_licensed = value if operator == '=' else not value
+        matching_ids = self.search([]).filtered(lambda l: l.is_licensed == want_licensed).ids
+        return [('id', 'in', matching_ids)]

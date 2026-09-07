@@ -54,6 +54,29 @@
         </field>
     </record>
 
+    <record id="endpoint_agent_view_graph" model="ir.ui.view">
+        <field name="name">itsm.endpoint.agent.graph</field>
+        <field name="model">itsm.endpoint.agent</field>
+        <field name="arch" type="xml">
+            <graph string="Parc endpoints" type="bar">
+                <field name="checkin_status"/>
+                <field name="id" type="measure" string="Nombre de postes"/>
+            </graph>
+        </field>
+    </record>
+
+    <record id="endpoint_agent_view_pivot" model="ir.ui.view">
+        <field name="name">itsm.endpoint.agent.pivot</field>
+        <field name="model">itsm.endpoint.agent</field>
+        <field name="arch" type="xml">
+            <pivot string="Parc endpoints">
+                <field name="platform" type="row"/>
+                <field name="checkin_status" type="col"/>
+                <field name="id" type="measure" string="Nombre de postes"/>
+            </pivot>
+        </field>
+    </record>
+
     <record id="endpoint_agent_view_search" model="ir.ui.view">
         <field name="name">itsm.endpoint.agent.search</field>
         <field name="model">itsm.endpoint.agent</field>
@@ -77,7 +100,7 @@
     <record id="action_endpoint_agent" model="ir.actions.act_window">
         <field name="name">Agents endpoint</field>
         <field name="res_model">itsm.endpoint.agent</field>
-        <field name="view_mode">list,form</field>
+        <field name="view_mode">list,form,graph,pivot</field>
         <field name="context">{'search_default_enrolled': 1}</field>
         <field name="help" type="html">
             <p class="o_view_nocontent_smile">
