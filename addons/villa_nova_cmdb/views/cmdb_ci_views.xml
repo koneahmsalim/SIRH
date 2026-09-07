@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="cmdb_equipment_view_form" model="ir.ui.view">
+        <field name="name">maintenance.equipment.form.cmdb</field>
+        <field name="model">maintenance.equipment</field>
+        <field name="inherit_id" ref="villa_nova_itam.itam_equipment_view_form"/>
+        <field name="arch" type="xml">
+            <sheet position="before">
+                <header>
+                    <button type="object" name="action_cmdb_impact_analysis" string="Analyse d'impact"
+                            class="btn btn-secondary" icon="fa-exclamation-triangle"/>
+                </header>
+            </sheet>
+            <div class="oe_button_box" name="button_box" position="inside">
+                <button type="object" name="action_view_cmdb_relations" class="oe_stat_button" icon="fa-sitemap">
+                    <field string="Relations CMDB" name="cmdb_relation_count" widget="statinfo"/>
+                </button>
+            </div>
+        </field>
+    </record>
+
+    <record id="cmdb_service_view_form" model="ir.ui.view">
+        <field name="name">itsm.service.form.cmdb</field>
+        <field name="model">itsm.service</field>
+        <field name="inherit_id" ref="villa_nova_itsm.itsm_service_view_form"/>
+        <field name="arch" type="xml">
+            <sheet position="before">
+                <header>
+                    <button type="object" name="action_cmdb_impact_analysis" string="Analyse d'impact"
+                            class="btn btn-secondary" icon="fa-exclamation-triangle"/>
+                </header>
+            </sheet>
+            <group position="before">
+                <div class="oe_button_box" name="button_box">
+                    <button type="object" name="action_view_cmdb_relations" class="oe_stat_button" icon="fa-sitemap">
+                        <field string="Relations CMDB" name="cmdb_relation_count" widget="statinfo"/>
+                    </button>
+                </div>
+            </group>
+        </field>
+    </record>
+
+    <record id="cmdb_impact_wizard_view_form" model="ir.ui.view">
+        <field name="name">cmdb.impact.analysis.wizard.form</field>
+        <field name="model">cmdb.impact.analysis.wizard</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <h2><field name="ci_name" readonly="1" nolabel="1"/></h2>
+                    <field name="result_html" readonly="1" nolabel="1"/>
+                </sheet>
+                <footer>
+                    <button string="Fermer" class="btn btn-primary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+</odoo>

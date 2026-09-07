@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+
+        <!-- Petit graphe de CI realiste : le service VPN depend du serveur
+             de fichiers, et le switch reseau y est connecte - suffisant
+             pour une analyse d'impact parlante (si le serveur tombe, le
+             VPN est impacte). -->
+        <record id="demo_relation_vpn_depends_on_server" model="cmdb.relation">
+            <field name="source_ref" eval="'itsm.service,%d' % ref('villa_nova_itsm.demo_service_vpn')"/>
+            <field name="relation_type">depends_on</field>
+            <field name="target_ref" eval="'maintenance.equipment,%d' % ref('villa_nova_itam.demo_asset_server')"/>
+        </record>
+        <record id="demo_relation_switch_connects_server" model="cmdb.relation">
+            <field name="source_ref" eval="'maintenance.equipment,%d' % ref('villa_nova_itam.demo_asset_switch')"/>
+            <field name="relation_type">connects_to</field>
+            <field name="target_ref" eval="'maintenance.equipment,%d' % ref('villa_nova_itam.demo_asset_server')"/>
+        </record>
+
+        <!-- Rattache le ticket majeur existant ("Serveur de fichiers
+             inaccessible") au serveur concerne - l'analyse d'impact sur ce
+             serveur montrera alors ce ticket ouvert via le service VPN. -->
+        <record id="villa_nova_itsm.demo_ticket_2" model="itsm.ticket">
+            <field name="equipment_id" ref="villa_nova_itam.demo_asset_server"/>
+        </record>
+
+    </data>
+</odoo>

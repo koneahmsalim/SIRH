@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="cmdb_relation_view_list" model="ir.ui.view">
+        <field name="name">cmdb.relation.list</field>
+        <field name="model">cmdb.relation</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="source_ref"/>
+                <field name="relation_type"/>
+                <field name="target_ref"/>
+                <field name="notes"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="cmdb_relation_view_form" model="ir.ui.view">
+        <field name="name">cmdb.relation.form</field>
+        <field name="model">cmdb.relation</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <group>
+                        <field name="source_ref"/>
+                        <field name="relation_type"/>
+                        <field name="target_ref"/>
+                        <field name="notes"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="cmdb_relation_view_search" model="ir.ui.view">
+        <field name="name">cmdb.relation.search</field>
+        <field name="model">cmdb.relation</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="source_ref"/>
+                <field name="target_ref"/>
+                <field name="relation_type"/>
+                <group expand="0" string="Regrouper par">
+                    <filter string="Type de relation" name="group_type" context="{'group_by': 'relation_type'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="cmdb_relation_action" model="ir.actions.act_window">
+        <field name="name">Relations CMDB</field>
+        <field name="res_model">cmdb.relation</field>
+        <field name="view_mode">list,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">Aucune relation CMDB pour l'instant</p>
+            <p>Ex. « Service VPN dépend de Serveur de fichiers » - permet l'analyse d'impact.</p>
+        </field>
+    </record>
+</odoo>

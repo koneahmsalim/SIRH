@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <menuitem id="cmdb_menu_relations" name="Relations CMDB" parent="villa_nova_itam.itsm_menu_assets_root"
+              action="cmdb_relation_action" sequence="5"/>
+</odoo>

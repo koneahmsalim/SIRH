@@ -1,0 +1,4 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_cmdb_relation_user,cmdb.relation.user,model_cmdb_relation,base.group_user,1,0,0,0
+access_cmdb_relation_manager,cmdb.relation.manager,model_cmdb_relation,villa_nova_itam.group_itam_manager,1,1,1,1
+access_cmdb_impact_wizard_user,cmdb.impact.analysis.wizard.user,model_cmdb_impact_analysis_wizard,base.group_user,1,1,1,1
