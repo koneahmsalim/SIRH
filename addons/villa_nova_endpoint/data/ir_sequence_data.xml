@@ -7,4 +7,11 @@
         <field name="padding">5</field>
         <field name="company_id" eval="False"/>
     </record>
+    <record id="seq_itam_discovery_scan" model="ir.sequence">
+        <field name="name">Scans de découverte réseau</field>
+        <field name="code">itam.discovery.scan</field>
+        <field name="prefix">SCAN-%(year)s-</field>
+        <field name="padding">4</field>
+        <field name="company_id" eval="False"/>
+    </record>
 </odoo>

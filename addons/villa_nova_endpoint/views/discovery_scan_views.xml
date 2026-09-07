@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="discovery_device_view_list" model="ir.ui.view">
+        <field name="name">itam.discovery.device.list</field>
+        <field name="model">itam.discovery.device</field>
+        <field name="arch" type="xml">
+            <list create="false" decoration-muted="device_type_guess == 'unknown'">
+                <field name="ip_address"/>
+                <field name="mac_address"/>
+                <field name="hostname"/>
+                <field name="device_type_guess" widget="badge"
+                       decoration-success="device_type_guess == 'known_agent'"
+                       decoration-info="device_type_guess == 'known_asset'"
+                       decoration-warning="device_type_guess == 'unknown'"/>
+                <field name="matched_equipment_id"/>
+                <button name="action_create_asset" type="object" string="Créer l'actif" icon="fa-plus"
+                        invisible="matched_equipment_id"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="discovery_scan_view_list" model="ir.ui.view">
+        <field name="name">itam.discovery.scan.list</field>
+        <field name="model">itam.discovery.scan</field>
+        <field name="arch" type="xml">
+            <list decoration-danger="state == 'failed'" decoration-success="state == 'completed'">
+                <field name="name"/>
+                <field name="subnet"/>
+                <field name="requested_by"/>
+                <field name="started_date"/>
+                <field name="device_count"/>
+                <field name="new_device_count"/>
+                <field name="state" widget="badge"
+                       decoration-success="state == 'completed'"
+                       decoration-danger="state == 'failed'"
+                       decoration-info="state == 'running'"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="discovery_scan_view_form" model="ir.ui.view">
+        <field name="name">itam.discovery.scan.form</field>
+        <field name="model">itam.discovery.scan</field>
+        <field name="arch" type="xml">
+            <form string="Scan de découverte réseau">
+                <header>
+                    <button name="action_run_scan" type="object" string="Lancer le scan" class="btn-primary"
+                            invisible="state == 'running'"
+                            confirm="Ce scan interroge activement le sous-réseau indiqué (ping sweep nmap). Continuer ?"/>
+                    <field name="state" widget="statusbar"/>
+                </header>
+                <sheet>
+                    <div class="oe_title"><h1><field name="name" readonly="1"/></h1></div>
+                    <group>
+                        <group>
+                            <field name="subnet" readonly="state == 'running'"/>
+                            <field name="requested_by" readonly="1"/>
+                        </group>
+                        <group>
+                            <field name="started_date" readonly="1"/>
+                            <field name="finished_date" readonly="1"/>
+                            <field name="device_count" readonly="1"/>
+                        </group>
+                    </group>
+                    <div class="alert alert-danger" role="alert" invisible="not error_message">
+                        <field name="error_message" readonly="1" nolabel="1"/>
+                    </div>
+                    <notebook>
+                        <page string="Appareils détectés" name="devices">
+                            <field name="device_ids" readonly="1" nolabel="1"/>
+                        </page>
+                        <page string="Sortie brute (débogage)" name="raw" groups="base.group_no_one">
+                            <field name="raw_output" readonly="1" nolabel="1"/>
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <record id="discovery_scan_view_search" model="ir.ui.view">
+        <field name="name">itam.discovery.scan.search</field>
+        <field name="model">itam.discovery.scan</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name"/>
+                <field name="subnet"/>
+                <group expand="0" string="Regrouper par">
+                    <filter name="group_state" string="Statut" context="{'group_by': 'state'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_discovery_scan" model="ir.actions.act_window">
+        <field name="name">Découverte réseau</field>
+        <field name="res_model">itam.discovery.scan</field>
+        <field name="view_mode">list,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smile">
+                Créez un scan pour découvrir les appareils actifs sur un sous-réseau
+                (ping sweep) - nécessite que ce serveur ait une route réseau vers ce
+                sous-réseau.
+            </p>
+        </field>
+    </record>
+</odoo>

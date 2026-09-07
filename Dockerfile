@@ -1,7 +1,7 @@
 FROM odoo:18
 
 USER root
-RUN apt-get update && apt-get install -y --no-install-recommends iputils-ping && rm -rf /var/lib/apt/lists/*
+RUN apt-get update && apt-get install -y --no-install-recommends iputils-ping nmap && rm -rf /var/lib/apt/lists/*
 # pandas : utilise par hrms_dashboard (join_resign_trends, get_attrition_rate).
 # future : dependance transitive constatee dans le conteneur reel.
 # Installes manuellement dans le conteneur a un moment donne, jamais
