@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+
+        <!-- Probleme relie aux deux incidents reseau existants (Phase 1) -
+             demontre le lien incident -> probleme -> cause racine. -->
+        <record id="demo_problem_network" model="itsm.problem">
+            <field name="subject">Pannes réseau récurrentes le matin</field>
+            <field name="description">&lt;p&gt;Plusieurs incidents reseau (VPN, acces au serveur de fichiers) sont
+                remontes chaque matin depuis une semaine, tous vers 8h-9h.&lt;/p&gt;</field>
+            <field name="state">investigating</field>
+            <field name="priority">high</field>
+            <field name="team_id" ref="villa_nova_itsm.demo_team_infra"/>
+            <field name="user_id" ref="base.user_admin"/>
+            <field name="root_cause">&lt;p&gt;Le switch reseau principal sature au pic de connexion matinal - il
+                approche sa capacite maximale annoncee par le fabricant.&lt;/p&gt;</field>
+        </record>
+        <record id="villa_nova_itsm.demo_ticket_1" model="itsm.ticket">
+            <field name="problem_id" ref="demo_problem_network"/>
+        </record>
+        <record id="villa_nova_itsm.demo_ticket_2" model="itsm.ticket">
+            <field name="problem_id" ref="demo_problem_network"/>
+        </record>
+
+        <record id="demo_problem_payroll" model="itsm.problem">
+            <field name="subject">Lenteur récurrente de l'application de paie</field>
+            <field name="description">&lt;p&gt;Plusieurs utilisateurs signalent des temps de reponse tres longs sur
+                l'application de paie en fin de mois.&lt;/p&gt;</field>
+            <field name="state">new</field>
+            <field name="priority">medium</field>
+            <field name="team_id" ref="villa_nova_itsm.demo_team_infra"/>
+        </record>
+
+        <!-- Changement normal, encore en attente d'approbation CAB - montre
+             le workflow complet avec le moteur d'approbation generalise. -->
+        <record id="demo_change_switch" model="itsm.change">
+            <field name="subject">Remplacement du switch réseau principal</field>
+            <field name="description">&lt;p&gt;Remplacer le switch Cisco Catalyst 2960 par un modele avec plus de
+                capacite pour resoudre la saturation matinale.&lt;/p&gt;</field>
+            <field name="change_type">normal</field>
+            <field name="risk_level">medium</field>
+            <field name="state">submitted</field>
+            <field name="team_id" ref="villa_nova_itsm.demo_team_infra"/>
+            <field name="problem_id" ref="demo_problem_network"/>
+            <field name="equipment_ids" eval="[(6, 0, [
+                ref('villa_nova_itam.demo_asset_switch'), ref('villa_nova_itam.demo_asset_server')])]"/>
+            <field name="implementation_plan">&lt;p&gt;1. Configurer le nouveau switch en parallele.
+                2. Basculer le trafic hors heures de pointe. 3. Verifier la connectivite.&lt;/p&gt;</field>
+            <field name="backout_plan">&lt;p&gt;Rebrancher l'ancien switch, deja conserve en etat de
+                fonctionnement.&lt;/p&gt;</field>
+        </record>
+        <record id="demo_approval_change_switch" model="itsm.approval">
+            <field name="change_id" ref="demo_change_switch"/>
+            <field name="approver_id" ref="base.user_admin"/>
+        </record>
+
+        <!-- Changement standard (pre-approuve), deja planifie. -->
+        <record id="demo_change_patch" model="itsm.change">
+            <field name="subject">Mise à jour de sécurité mensuelle - serveurs</field>
+            <field name="change_type">standard</field>
+            <field name="risk_level">low</field>
+            <field name="state">scheduled</field>
+            <field name="team_id" ref="villa_nova_itsm.demo_team_infra"/>
+            <field name="equipment_ids" eval="[(6, 0, [ref('villa_nova_itam.demo_asset_server')])]"/>
+            <field name="scheduled_start" eval="(DateTime.now() + relativedelta(days=5, hour=22)).strftime('%Y-%m-%d %H:%M:%S')"/>
+            <field name="scheduled_end" eval="(DateTime.now() + relativedelta(days=5, hour=23)).strftime('%Y-%m-%d %H:%M:%S')"/>
+        </record>
+
+        <!-- Changement d'urgence deja implemente - exemple de cycle complet. -->
+        <record id="demo_change_emergency" model="itsm.change">
+            <field name="subject">Correctif urgent - faille de sécurité critique</field>
+            <field name="change_type">emergency</field>
+            <field name="risk_level">high</field>
+            <field name="state">implemented</field>
+            <field name="team_id" ref="villa_nova_itsm.demo_team_infra"/>
+            <field name="user_id" ref="base.user_admin"/>
+            <field name="equipment_ids" eval="[(6, 0, [ref('villa_nova_itam.demo_asset_server')])]"/>
+        </record>
+        <record id="demo_approval_change_emergency" model="itsm.approval">
+            <field name="change_id" ref="demo_change_emergency"/>
+            <field name="approver_id" ref="base.user_admin"/>
+            <field name="state">approved</field>
+            <field name="decision_date" eval="(DateTime.now() - relativedelta(days=3)).strftime('%Y-%m-%d %H:%M:%S')"/>
+        </record>
+
+        <record id="demo_release_2026_03" model="itsm.release">
+            <field name="name">Release 2026.03</field>
+            <field name="description">&lt;p&gt;Cycle de maintenance mensuel.&lt;/p&gt;</field>
+            <field name="state">planned</field>
+            <field name="target_date" eval="(DateTime.now() + relativedelta(days=5)).strftime('%Y-%m-%d')"/>
+        </record>
+        <record id="demo_change_patch" model="itsm.change">
+            <field name="release_id" ref="demo_release_2026_03"/>
+        </record>
+
+    </data>
+</odoo>

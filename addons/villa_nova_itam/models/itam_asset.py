@@ -60,6 +60,7 @@ class MaintenanceEquipment(models.Model):
             else:
                 equipment.warranty_status = 'valid'
 
+    @api.depends('ticket_ids')
     def _compute_ticket_count(self):
         for equipment in self:
             equipment.ticket_count = len(equipment.ticket_ids)

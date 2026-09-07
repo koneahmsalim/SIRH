@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="itsm_change_view_list" model="ir.ui.view">
+        <field name="name">itsm.change.list</field>
+        <field name="model">itsm.change</field>
+        <field name="arch" type="xml">
+            <list decoration-danger="risk_level == 'high'">
+                <field name="name"/>
+                <field name="subject"/>
+                <field name="change_type" widget="badge"/>
+                <field name="risk_level" widget="badge"
+                       decoration-danger="risk_level == 'high'" decoration-warning="risk_level == 'medium'"/>
+                <field name="team_id"/>
+                <field name="scheduled_start"/>
+                <field name="approval_state" widget="badge"
+                       decoration-success="approval_state == 'approved'"
+                       decoration-warning="approval_state in ('pending', 'to_request')"
+                       decoration-danger="approval_state == 'refused'"
+                       decoration-muted="approval_state == 'none'"/>
+                <field name="state" widget="badge"
+                       decoration-success="state == 'implemented'" decoration-danger="state == 'failed'"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="itsm_change_view_form" model="ir.ui.view">
+        <field name="name">itsm.change.form</field>
+        <field name="model">itsm.change</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <button type="object" name="action_submit" string="Soumettre" class="btn-primary"
+                            invisible="state != 'draft'"/>
+                    <button type="object" name="action_request_cab_approval" string="Demander l'approbation CAB"
+                            invisible="state != 'submitted' or not requires_approval or approval_state not in ('to_request', 'refused')"/>
+                    <button type="object" name="action_schedule" string="Planifier" class="btn-primary"
+                            invisible="state != 'submitted'"/>
+                    <button type="object" name="action_start_implementation" string="Démarrer l'implémentation"
+                            class="btn-primary" invisible="state != 'scheduled'"/>
+                    <button type="object" name="action_implement" string="Marquer comme implémenté"
+                            class="btn-primary" invisible="state != 'in_progress'"/>
+                    <button type="object" name="action_fail" string="Marquer comme échoué"
+                            invisible="state != 'in_progress'"/>
+                    <button type="object" name="action_cancel" string="Annuler"
+                            invisible="state in ('implemented', 'cancelled')"/>
+                    <field name="state" widget="statusbar"
+                           statusbar_visible="draft,submitted,scheduled,in_progress,implemented"/>
+                </header>
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button type="object" name="action_cmdb_impact_preview" class="oe_stat_button"
+                                icon="fa-exclamation-triangle" invisible="not equipment_ids">
+                            <div class="o_stat_info">
+                                <span class="o_stat_text">Aperçu</span>
+                                <span class="o_stat_text">d'impact</span>
+                            </div>
+                        </button>
+                    </div>
+                    <div class="oe_title">
+                        <label for="subject"/>
+                        <h1><field name="subject" placeholder="ex. Remplacement du switch réseau principal"/></h1>
+                    </div>
+                    <div class="alert alert-warning" role="alert" invisible="approval_state != 'refused'">
+                        Ce changement a été refusé par le CAB - consultez le fil de discussion pour le motif,
+                        puis corrigez et redemandez l'approbation si nécessaire.
+                    </div>
+                    <group>
+                        <group>
+                            <field name="change_type"/>
+                            <field name="risk_level"/>
+                            <field name="team_id"/>
+                            <field name="requires_approval" invisible="1"/>
+                            <field name="approval_state" widget="badge"
+                                   decoration-success="approval_state == 'approved'"
+                                   decoration-warning="approval_state in ('pending', 'to_request')"
+                                   decoration-danger="approval_state == 'refused'"
+                                   decoration-muted="approval_state == 'none'"/>
+                        </group>
+                        <group>
+                            <field name="scheduled_start"/>
+                            <field name="scheduled_end"/>
+                            <field name="user_id"/>
+                            <field name="problem_id"/>
+                            <field name="release_id"/>
+                        </group>
+                    </group>
+                    <field name="equipment_ids" widget="many2many_tags"/>
+                    <notebook>
+                        <page string="Description" name="description">
+                            <field name="description"/>
+                        </page>
+                        <page string="Plan d'implémentation" name="implementation_plan">
+                            <field name="implementation_plan"/>
+                        </page>
+                        <page string="Plan de retour arrière" name="backout_plan">
+                            <field name="backout_plan"/>
+                        </page>
+                        <page string="Approbations" name="approvals" invisible="not requires_approval">
+                            <field name="approval_ids">
+                                <list>
+                                    <field name="approver_id"/>
+                                    <field name="state" widget="badge"
+                                           decoration-success="state == 'approved'" decoration-danger="state == 'refused'"/>
+                                    <field name="decision_date"/>
+                                    <button type="object" name="action_approve" string="Approuver"
+                                            invisible="state != 'pending'" class="btn-link"/>
+                                    <button type="object" name="action_refuse" string="Refuser"
+                                            invisible="state != 'pending'" class="btn-link"/>
+                                </list>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <record id="itsm_change_view_search" model="ir.ui.view">
+        <field name="name">itsm.change.search</field>
+        <field name="model">itsm.change</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name"/>
+                <field name="subject"/>
+                <field name="team_id"/>
+                <filter string="En attente d'approbation" name="pending_approval" domain="[('approval_state', '=', 'pending')]"/>
+                <filter string="Planifiés" name="scheduled" domain="[('state', '=', 'scheduled')]"/>
+                <group expand="0" string="Regrouper par">
+                    <filter string="Statut" name="group_state" context="{'group_by': 'state'}"/>
+                    <filter string="Type" name="group_type" context="{'group_by': 'change_type'}"/>
+                    <filter string="Niveau de risque" name="group_risk" context="{'group_by': 'risk_level'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="itsm_change_action" model="ir.actions.act_window">
+        <field name="name">Changements</field>
+        <field name="res_model">itsm.change</field>
+        <field name="view_mode">list,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">Créer un changement</p>
+            <p>Une modification contrôlée de l'environnement IT, avec évaluation du risque et approbation CAB.</p>
+        </field>
+    </record>
+</odoo>

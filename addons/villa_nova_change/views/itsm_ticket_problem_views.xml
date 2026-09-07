@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="itsm_ticket_view_form_problem" model="ir.ui.view">
+        <field name="name">itsm.ticket.form.problem</field>
+        <field name="model">itsm.ticket</field>
+        <field name="inherit_id" ref="villa_nova_itam.itsm_ticket_view_form_itam"/>
+        <field name="arch" type="xml">
+            <field name="equipment_id" position="after">
+                <field name="problem_id"/>
+            </field>
+        </field>
+    </record>
+</odoo>

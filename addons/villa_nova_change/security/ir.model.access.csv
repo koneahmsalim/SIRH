@@ -1,0 +1,7 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_itsm_problem_user,itsm.problem.user,model_itsm_problem,villa_nova_itsm.group_itsm_agent,1,0,0,0
+access_itsm_problem_manager,itsm.problem.manager,model_itsm_problem,group_change_manager,1,1,1,1
+access_itsm_change_user,itsm.change.user,model_itsm_change,villa_nova_itsm.group_itsm_agent,1,0,0,0
+access_itsm_change_manager,itsm.change.manager,model_itsm_change,group_change_manager,1,1,1,1
+access_itsm_release_user,itsm.release.user,model_itsm_release,villa_nova_itsm.group_itsm_agent,1,0,0,0
+access_itsm_release_manager,itsm.release.manager,model_itsm_release,group_change_manager,1,1,1,1

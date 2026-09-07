@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="itsm_release_view_list" model="ir.ui.view">
+        <field name="name">itsm.release.list</field>
+        <field name="model">itsm.release</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="name"/>
+                <field name="target_date"/>
+                <field name="change_count"/>
+                <field name="state" widget="badge" decoration-success="state == 'released'"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="itsm_release_view_form" model="ir.ui.view">
+        <field name="name">itsm.release.form</field>
+        <field name="model">itsm.release</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <button type="object" name="action_start" string="Démarrer" class="btn-primary"
+                            invisible="state != 'planned'"/>
+                    <button type="object" name="action_release" string="Marquer comme déployée"
+                            class="btn-primary" invisible="state != 'in_progress'"/>
+                    <button type="object" name="action_cancel" string="Annuler"
+                            invisible="state in ('released', 'cancelled')"/>
+                    <field name="state" widget="statusbar" statusbar_visible="planned,in_progress,released"/>
+                </header>
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button type="object" name="action_view_changes" class="oe_stat_button" icon="fa-wrench">
+                            <field string="Changements" name="change_count" widget="statinfo"/>
+                        </button>
+                    </div>
+                    <div class="oe_title">
+                        <label for="name"/>
+                        <h1><field name="name" placeholder="ex. Release 2026.03"/></h1>
+                    </div>
+                    <group>
+                        <field name="target_date"/>
+                        <field name="unimplemented_change_count" invisible="1"/>
+                    </group>
+                    <field name="description"/>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <record id="itsm_release_action" model="ir.actions.act_window">
+        <field name="name">Releases</field>
+        <field name="res_model">itsm.release</field>
+        <field name="view_mode">list,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">Créer une release</p>
+            <p>Regroupe plusieurs changements déployés ensemble.</p>
+        </field>
+    </record>
+</odoo>
