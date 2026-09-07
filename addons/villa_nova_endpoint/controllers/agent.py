@@ -2,6 +2,7 @@ import json
 import logging
 
 from odoo import fields, http
+from odoo.exceptions import UserError
 from odoo.http import request
 
 _logger = logging.getLogger(__name__)
@@ -79,6 +80,7 @@ class EndpointAgentController(http.Controller):
                 'checkin_count': agent.checkin_count + 1,
                 'agent_version': payload.get('agent_version') or agent.agent_version,
             })
+            commands = request.env['itsm.remote.command'].sudo()._dispatch_for_agent(agent)
         except Exception:
             _logger.exception("villa_nova_endpoint : échec du check-in de l'agent %s", agent.agent_uuid)
             return request.make_json_response({'error': 'checkin_failed'}, status=500)
@@ -86,11 +88,38 @@ class EndpointAgentController(http.Controller):
         return request.make_json_response({
             'status': 'ok',
             'checkin_interval_seconds': 900,
-            # Liste volontairement vide : le protocole de check-in est concu
-            # pour porter des commandes en attente des la Phase "Actions a
-            # distance" (roadmap RMM, objectif 4) SANS changer de contrat
-            # d'API - mais aucune execution de commande n'est implementee
-            # dans cette phase (contrainte explicite de l'utilisateur : pas
-            # d'execution arbitraire non controlee).
-            'commands': [],
+            'commands': commands,
         })
+
+    @http.route('/endpoint/agent/command_result', type='http', auth='public', methods=['POST'], csrf=False)
+    def command_result(self, **kwargs):
+        agent_id = request.httprequest.headers.get('X-Agent-Id')
+        agent_secret = request.httprequest.headers.get('X-Agent-Secret')
+        agent = request.env['itsm.endpoint.agent']._authenticate(agent_id, agent_secret)
+        if not agent:
+            return request.make_json_response({'error': 'invalid_credentials'}, status=401)
+
+        payload = self._read_json()
+        if payload is None:
+            return request.make_json_response({'error': 'invalid_json'}, status=400)
+
+        command_id = payload.get('command_id')
+        status = payload.get('status')
+        if not command_id or status not in ('running', 'completed', 'failed'):
+            return request.make_json_response({'error': 'invalid_payload'}, status=400)
+
+        try:
+            request.env['itsm.remote.command'].sudo()._report_result(
+                agent, command_id, status, output=payload.get('output'), error=payload.get('error'))
+        except UserError as e:
+            # Commande introuvable pour CET agent (mauvais command_id, ou
+            # appartenant a un autre poste) - rejet normal/attendu, pas une
+            # erreur serveur : pas de traceback dans les logs pour ça.
+            return request.make_json_response({'error': 'command_not_found', 'detail': str(e)}, status=404)
+        except Exception:
+            _logger.exception(
+                "villa_nova_endpoint : échec du compte-rendu de commande #%s (agent %s)",
+                command_id, agent.agent_uuid)
+            return request.make_json_response({'error': 'report_failed'}, status=500)
+
+        return request.make_json_response({'status': 'ok'})

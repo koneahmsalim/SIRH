@@ -44,12 +44,15 @@ class MaintenanceEquipmentEndpoint(models.Model):
     network_interface_ids = fields.One2many('itam.network.interface', 'equipment_id', string="Interfaces réseau")
     installed_software_ids = fields.One2many('itam.software.installed', 'equipment_id', string="Logiciels installés")
     installed_software_count = fields.Integer(string="Nombre de logiciels", compute='_compute_endpoint_counts')
+    remote_command_ids = fields.One2many('itsm.remote.command', 'equipment_id', string="Commandes à distance")
+    remote_command_count = fields.Integer(string="Nombre de commandes", compute='_compute_endpoint_counts')
 
-    @api.depends('disk_ids', 'installed_software_ids')
+    @api.depends('disk_ids', 'installed_software_ids', 'remote_command_ids')
     def _compute_endpoint_counts(self):
         for equipment in self:
             equipment.disk_count = len(equipment.disk_ids)
             equipment.installed_software_count = len(equipment.installed_software_ids)
+            equipment.remote_command_count = len(equipment.remote_command_ids)
 
     def _endpoint_apply_inventory(self, vals):
         """Point d'application UNIQUE de l'inventaire agent, appele a la fois
@@ -150,4 +153,15 @@ class MaintenanceEquipmentEndpoint(models.Model):
             'res_model': 'itam.hardware.disk',
             'view_mode': 'list,form',
             'domain': [('equipment_id', '=', self.id)],
+        }
+
+    def action_view_remote_commands(self):
+        self.ensure_one()
+        return {
+            'type': 'ir.actions.act_window',
+            'name': self.name,
+            'res_model': 'itsm.remote.command',
+            'view_mode': 'list,form',
+            'domain': [('equipment_id', '=', self.id)],
+            'context': {'default_equipment_id': self.id},
         }

@@ -17,6 +17,7 @@ import (
 	"os"
 	"time"
 
+	"github.com/infinity-africa/villa-nova-endpoint-agent/internal/actions"
 	"github.com/infinity-africa/villa-nova-endpoint-agent/internal/client"
 	"github.com/infinity-africa/villa-nova-endpoint-agent/internal/config"
 	"github.com/infinity-africa/villa-nova-endpoint-agent/internal/inventory"
@@ -129,7 +130,10 @@ func runCheckinLoop(stop <-chan struct{}) {
 		if resp.CheckinIntervalSeconds > 0 {
 			interval = time.Duration(resp.CheckinIntervalSeconds) * time.Second
 		}
-		log.Printf("check-in ok (prochain dans %s)", interval)
+		log.Printf("check-in ok (prochain dans %s, %d commande(s) reçue(s))", interval, len(resp.Commands))
+		for _, cmd := range resp.Commands {
+			runCommand(c, cfg, cmd)
+		}
 	}
 
 	// stop == nil en mode -run au premier plan : un canal nil bloque
@@ -145,6 +149,39 @@ func runCheckinLoop(stop <-chan struct{}) {
 		case <-stop:
 			return
 		}
+	}
+}
+
+// runCommand execute UNE commande predefinie recue du serveur et rapporte sa
+// progression en deux temps ("running" avant execution, "completed"/"failed"
+// apres) - pour les commandes qui interrompent la session/le poste
+// (redemarrage, arret, deconnexion), le second rapport peut ne jamais partir
+// si le processus est tue avant : limite connue, voir README.md. Une
+// commande dont le rapport "running" echoue n'est PAS executee (mieux vaut
+// une commande non executee et signalee comme telle au prochain check-in
+// qu'une commande executee sans laisser de trace côté serveur).
+func runCommand(c *client.Client, cfg *config.Config, cmd client.Command) {
+	log.Printf("commande #%d (%s) : démarrage", cmd.ID, cmd.CommandType)
+	if err := c.ReportCommandResult(cfg.AgentID, cfg.AgentSecret, client.CommandResultRequest{
+		CommandID: cmd.ID, Status: "running",
+	}); err != nil {
+		log.Printf("commande #%d : échec du rapport de démarrage, exécution annulée par prudence : %v", cmd.ID, err)
+		return
+	}
+
+	output, err := actions.Execute(cmd.CommandType, cmd.Parameters)
+	result := client.CommandResultRequest{CommandID: cmd.ID, Output: output}
+	if err != nil {
+		result.Status = "failed"
+		result.Error = err.Error()
+		log.Printf("commande #%d (%s) : échec : %v", cmd.ID, cmd.CommandType, err)
+	} else {
+		result.Status = "completed"
+		log.Printf("commande #%d (%s) : terminée", cmd.ID, cmd.CommandType)
+	}
+	if reportErr := c.ReportCommandResult(cfg.AgentID, cfg.AgentSecret, result); reportErr != nil {
+		log.Printf("commande #%d : échec du rapport final (%s) - normal si la commande a coupé la "+
+			"session/le poste (redémarrage/arrêt/déconnexion) : %v", cmd.ID, result.Status, reportErr)
 	}
 }
 

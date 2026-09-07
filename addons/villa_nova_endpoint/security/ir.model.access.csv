@@ -10,3 +10,5 @@ access_itam_network_interface_manager,itam.network.interface.manager,model_itam_
 access_itam_software_installed_user,itam.software.installed.user,model_itam_software_installed,base.group_user,1,0,0,0
 access_itam_software_installed_manager,itam.software.installed.manager,model_itam_software_installed,villa_nova_itam.group_itam_manager,1,1,0,0
 access_itsm_endpoint_enrollment_key_reveal,itsm.endpoint.enrollment.key.reveal,model_itsm_endpoint_enrollment_key_reveal,villa_nova_itam.group_itam_manager,1,1,1,1
+access_itsm_remote_command_user,itsm.remote.command.user,model_itsm_remote_command,base.group_user,1,0,0,0
+access_itsm_remote_command_manager,itsm.remote.command.manager,model_itsm_remote_command,villa_nova_itam.group_itam_manager,1,1,1,0

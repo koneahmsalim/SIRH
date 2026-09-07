@@ -20,6 +20,11 @@
                         invisible="not endpoint_agent_id">
                     <field name="disk_count" widget="statinfo" string="Disques"/>
                 </button>
+                <button name="action_view_remote_commands" type="object"
+                        class="oe_stat_button" icon="fa-terminal"
+                        invisible="not endpoint_agent_id">
+                    <field name="remote_command_count" widget="statinfo" string="Commandes"/>
+                </button>
             </div>
             <notebook position="inside">
                 <page string="Agent RMM" name="endpoint_agent">

@@ -13,6 +13,11 @@
               action="action_itam_software_not_licensed" sequence="6"
               groups="villa_nova_itam.group_itam_manager"/>
 
+    <menuitem id="endpoint_menu_remote_commands" name="Commandes à distance"
+              parent="villa_nova_itam.itsm_menu_assets_root"
+              action="action_remote_command" sequence="7"
+              groups="villa_nova_itam.group_itam_manager"/>
+
     <menuitem id="endpoint_menu_enrollment_keys" name="Clés d'enrôlement d'agents"
               parent="villa_nova_itsm.itsm_menu_config_root"
               action="action_endpoint_enrollment_key" sequence="10"
