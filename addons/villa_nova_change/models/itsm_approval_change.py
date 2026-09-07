@@ -10,11 +10,16 @@ class ItsmApproval(models.Model):
 
     change_id = fields.Many2one('itsm.change', string="Changement", ondelete='cascade', index=True)
 
-    _sql_constraints = [
-        ('target_required', 'CHECK (ticket_id IS NOT NULL OR change_id IS NOT NULL)',
-         "Une approbation doit être liée à un ticket ou à un changement."),
-    ]
-
+    # Pas de CHECK SQL "au moins une cible requise" ici : ce moteur est
+    # desormais etendu par plusieurs modules INDEPENDANTS les uns des autres
+    # (villa_nova_change, villa_nova_endpoint, villa_nova_contracts...) qui
+    # ne se connaissent pas entre eux. Un CHECK partage par nom se ferait
+    # ecraser par le dernier module charge et casserait retroactivement les
+    # lignes des AUTRES cibles (colonne inexistante si ce module n'est pas
+    # installe, ou condition trop etroite sinon) - constate en pratique en
+    # ajoutant la 3e extension. Une cible manquante est inoffensive
+    # (_get_approval_target renvoie un recordset vide, action_approve/
+    # action_refuse verifient deja `if target:` avant d'agir).
     def _get_approval_target(self):
         self.ensure_one()
         return self.change_id or super()._get_approval_target()

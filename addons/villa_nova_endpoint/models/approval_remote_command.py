@@ -5,21 +5,19 @@ class ItsmApproval(models.Model):
     """Meme generalisation localisee que villa_nova_change/itsm_approval_change.py :
     ajoute remote_command_id au moteur d'approbation existant et surcharge
     _get_approval_target(), sans toucher au reste (action_approve/
-    action_refuse generiques reutilises tels quels). La contrainte SQL
-    target_required est redefinie ici pour inclure ce troisieme type de
-    cible - Odoo fusionne les _sql_constraints par nom a travers les
-    modules, la derniere definition chargee (celle-ci, villa_nova_endpoint
-    dependant de villa_nova_change) remplace la precedente en base."""
+    action_refuse generiques reutilises tels quels).
+
+    Pas de contrainte SQL "cible requise" : ce moteur est etendu par
+    plusieurs modules independants (villa_nova_change, ce module,
+    villa_nova_contracts...) qui ne se connaissent pas entre eux - un CHECK
+    partage par nom se ferait ecraser par le dernier module charge et
+    casserait les lignes des autres cibles (colonne inexistante si ce
+    module n'est pas installe). Voir le meme commentaire, plus detaille,
+    dans villa_nova_change/itsm_approval_change.py."""
     _inherit = 'itsm.approval'
 
     remote_command_id = fields.Many2one('itsm.remote.command', string="Commande à distance",
                                          ondelete='cascade', index=True)
-
-    _sql_constraints = [
-        ('target_required',
-         'CHECK (ticket_id IS NOT NULL OR change_id IS NOT NULL OR remote_command_id IS NOT NULL)',
-         "Une approbation doit être liée à un ticket, un changement ou une commande à distance."),
-    ]
 
     def _get_approval_target(self):
         self.ensure_one()
