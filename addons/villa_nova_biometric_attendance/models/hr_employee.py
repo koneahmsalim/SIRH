@@ -146,16 +146,22 @@ class HrEmployee(models.Model):
 
     @api.model
     def get_villa_nova_today_overview(self):
-        """Vue "qui est la aujourd'hui" pour la RH : 4 groupes qui
+        """Vue "qui est la aujourd'hui" pour la RH : 5 groupes qui
         s'excluent (un employe n'apparait que dans un seul) - Present
         (arrive a l'heure, toujours sur place), En retard (arrive en
         retard aujourd'hui, present ou deja reparti - l'info utile est
         qu'il est arrive en retard, pas s'il est encore la), En conge
         (conge valide couvrant aujourd'hui), Absent (attendu aujourd'hui,
-        aucun pointage, pas en conge). Un employe arrive a l'heure puis
-        deja reparti n'apparait dans aucun des 4 - acceptable pour une vue
-        "en un coup d'oeil", pas un rapport exhaustif (voir le wizard
-        Retards & absences pour ca).
+        relie au boitier, aucun pointage, pas en conge), Non enregistres
+        (aucun device_id_num - jamais pu pointer, quoi qu'il arrive : melanger
+        ce cas avec "Absent" laissait croire chaque jour a une absence
+        injustifiee alors qu'il s'agit d'un trou de parametrage, pas d'un
+        comportement de l'employe - constat reel remonte par un utilisateur
+        apres la decouverte du meme trou sur Gbagba/Bah, cf.
+        villa_nova_biometric_attendance/models/biometric_device_details.py).
+        Un employe arrive a l'heure puis deja reparti n'apparait dans aucun
+        des 5 - acceptable pour une vue "en un coup d'oeil", pas un rapport
+        exhaustif (voir le wizard Retards & absences pour ca).
 
         Perimetre = tous les employes actifs avec un horaire de travail,
         PAS seulement ceux relies au boitier biometrique (device_id_num) :
@@ -204,7 +210,7 @@ class HrEmployee(models.Model):
                 'leave_type': leave.holiday_status_id.name if leave else False,
             }
 
-        present, late, absent, on_leave = [], [], [], []
+        present, late, absent, on_leave, unregistered = [], [], [], [], []
         if not is_holiday:
             for employee in working_employees:
                 leave = leave_by_employee.get(employee.id)
@@ -213,7 +219,15 @@ class HrEmployee(models.Model):
                     continue
                 att = last_att_by_employee.get(employee.id)
                 if not att:
-                    absent.append(serialize(employee))
+                    # Sans device_id_num, aucun pointage n'a jamais pu
+                    # arriver (le rapprochement boitier -> employe se fait
+                    # uniquement par ce numero) - categorie distincte
+                    # d'"Absent" (qui, lui, suppose l'employe suivi par le
+                    # boitier mais n'ayant pas pointe aujourd'hui).
+                    if not employee.device_id_num:
+                        unregistered.append(serialize(employee))
+                    else:
+                        absent.append(serialize(employee))
                 elif att.villa_nova_punctuality == 'late':
                     late.append(serialize(employee, att))
                 elif not att.check_out:
@@ -225,5 +239,6 @@ class HrEmployee(models.Model):
             'present': sorted(present, key=lambda e: e['name']),
             'late': sorted(late, key=lambda e: e['check_in'] or ''),
             'absent': sorted(absent, key=lambda e: e['name']),
+            'unregistered': sorted(unregistered, key=lambda e: e['name']),
             'on_leave': sorted(on_leave, key=lambda e: e['name']),
         }

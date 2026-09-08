@@ -9,7 +9,7 @@
             </div>
 
             <div t-if="state.loading" class="vn-today-columns">
-                <t t-foreach="[1,2,3,4]" t-as="i" t-key="i">
+                <t t-foreach="[1,2,3,4,5]" t-as="i" t-key="i">
                     <span class="vn-skeleton" style="height: 240px; border-radius: var(--vn-radius-lg);"/>
                 </t>
             </div>
@@ -70,6 +70,19 @@
                          class="vn-today-row" t-on-click="() => this.openLeave(emp.leave_id)" role="button">
                         <span class="vn-today-row-name" t-esc="emp.name"/>
                         <span class="vn-today-row-dept" t-esc="emp.leave_type"/>
+                    </div>
+                </div>
+
+                <div class="vn-card vn-today-col" title="Aucun identifiant boîtier renseigné - n'a jamais pu pointer, indépendamment de sa présence réelle">
+                    <div class="vn-today-col-head">
+                        <span class="vn-badge vn-badge-warning" t-esc="state.unregistered.length"/>
+                        <h2>Non enregistrés</h2>
+                    </div>
+                    <div t-if="!state.unregistered.length" class="vn-today-col-empty">Tout le monde est relié au boîtier.</div>
+                    <div t-foreach="state.unregistered" t-as="emp" t-key="emp.id"
+                         class="vn-today-row" t-on-click="() => this.openEmployee(emp.id)" role="button">
+                        <span class="vn-today-row-name" t-esc="emp.name"/>
+                        <span class="vn-today-row-dept" t-esc="emp.department"/>
                     </div>
                 </div>
             </div>

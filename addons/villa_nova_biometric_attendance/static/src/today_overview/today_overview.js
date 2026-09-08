@@ -14,7 +14,10 @@ export class VillaNovaTodayOverview extends Component {
     setup() {
         this.orm = useService("orm");
         this.actionService = useService("action");
-        this.state = useState({ loading: true, date: "", isHoliday: false, present: [], late: [], absent: [], onLeave: [] });
+        this.state = useState({
+            loading: true, date: "", isHoliday: false,
+            present: [], late: [], absent: [], onLeave: [], unregistered: [],
+        });
 
         onWillStart(() => this.load());
     }
@@ -28,6 +31,7 @@ export class VillaNovaTodayOverview extends Component {
         this.state.late = data.late;
         this.state.absent = data.absent;
         this.state.onLeave = data.on_leave;
+        this.state.unregistered = data.unregistered;
         this.state.loading = false;
     }
 
