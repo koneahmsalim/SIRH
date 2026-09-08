@@ -6,13 +6,14 @@ from odoo import api, fields, models
 from .zk_machine_attendance import DEVICE_TZ
 
 # Meme heure d'arrivee attendue que le rapport retards/absences existant
-# (villa.nova.attendance.report.wizard.late_threshold, defaut 8h) - avec la
-# tolerance de 30 min confirmee par l'utilisateur (arrivee jusqu'a 8h30
-# comptee "a l'heure"). Contrairement au rapport, ce seuil n'est pas
-# reglable par ecran ici : il sert a un badge visuel + un filtre rapide au
+# (villa.nova.attendance.report.wizard.late_threshold, defaut 8h). Aucune
+# marge de tolerance : un pointage apres 8h00 pile est compte en retard
+# (tolerance de 30 min initialement en place, retiree sur demande explicite
+# de l'utilisateur). Contrairement au rapport, ce seuil n'est pas reglable
+# par ecran ici : il sert a un badge visuel + un filtre rapide au
 # quotidien, pas a un calcul RH exportable dont les parametres doivent
 # rester ajustables au moment de le lancer.
-LATE_ARRIVAL_CUTOFF = time(8, 30)
+LATE_ARRIVAL_CUTOFF = time(8, 0)
 
 
 class HrAttendance(models.Model):
