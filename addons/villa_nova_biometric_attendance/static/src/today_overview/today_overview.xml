@@ -28,8 +28,10 @@
                     <div t-foreach="state.present" t-as="emp" t-key="emp.id"
                          class="vn-today-row" t-on-click="() => this.openEmployee(emp.id)" role="button">
                         <span class="vn-today-row-name" t-esc="emp.name"/>
-                        <span class="vn-today-row-dept" t-esc="emp.department"/>
-                        <span class="vn-today-row-time" t-esc="this.formatTime(emp.check_in)"/>
+                        <div class="vn-today-row-meta">
+                            <span class="vn-today-row-dept" t-esc="emp.department"/>
+                            <span class="vn-today-row-time" t-esc="this.formatTime(emp.check_in)"/>
+                        </div>
                     </div>
                 </div>
 
@@ -42,8 +44,10 @@
                     <div t-foreach="state.late" t-as="emp" t-key="emp.id"
                          class="vn-today-row" t-on-click="() => this.openEmployee(emp.id)" role="button">
                         <span class="vn-today-row-name" t-esc="emp.name"/>
-                        <span class="vn-today-row-dept" t-esc="emp.department"/>
-                        <span class="vn-today-row-time" t-esc="this.formatTime(emp.check_in)"/>
+                        <div class="vn-today-row-meta">
+                            <span class="vn-today-row-dept" t-esc="emp.department"/>
+                            <span class="vn-today-row-time" t-esc="this.formatTime(emp.check_in)"/>
+                        </div>
                     </div>
                 </div>
 

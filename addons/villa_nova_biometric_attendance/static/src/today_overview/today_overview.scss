@@ -59,11 +59,18 @@
         padding: var(--vn-space-3) 0;
     }
 
+    // Le nom occupe toute la largeur de la carte sur sa propre ligne (peut
+    // passer a la ligne, jamais tronque) - departement/heure relegues en
+    // metadonnee secondaire compacte en dessous. Avant : nom + departement +
+    // heure sur UNE seule ligne (grid 1fr auto auto), ou un departement long
+    // ("Entites Commerciales") ecrasait la colonne du nom jusqu'a le rendre
+    // illisible (tronque a 1-2 caracteres) - constat reel remonte par
+    // l'utilisateur sur une capture d'ecran, aggrave par le passage a 5
+    // colonnes (cartes plus etroites).
     &-row {
-        display: grid;
-        grid-template-columns: 1fr auto auto;
-        align-items: center;
-        gap: var(--vn-space-2);
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
         padding: var(--vn-space-2) var(--vn-space-1);
         border-radius: var(--vn-radius-sm);
         cursor: pointer;
@@ -75,19 +82,30 @@
 
     &-row-name {
         font-weight: 500;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
+        line-height: 1.3;
+        overflow-wrap: break-word;
+    }
+
+    &-row-meta {
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+        gap: var(--vn-space-2);
     }
 
     &-row-dept {
         color: var(--vn-slate, #5b6266);
-        font-size: 0.85rem;
+        font-size: 0.8rem;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        min-width: 0;
     }
 
     &-row-time {
+        flex-shrink: 0;
         font-variant-numeric: tabular-nums;
-        font-size: 0.85rem;
+        font-size: 0.8rem;
         color: var(--vn-slate, #5b6266);
     }
 }
