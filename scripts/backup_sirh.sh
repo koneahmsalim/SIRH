@@ -30,7 +30,24 @@ CONTENEUR_ODOO="${SIRH_ODOO_CONTAINER:-odoo18-hrms-odoo-1}"
 FILESTORE="/var/lib/odoo/.local/share/Odoo/filestore/${DB_NAME}"
 RETENTION_JOURS="${SIRH_RETENTION:-7}"
 
-DESTINATION="${1:-$(dirname "$0")/../backups}"
+# On resout la racine du projet en passant par "cd ... && pwd" plutot qu'en
+# concatenant dirname "$0" : appele avec un chemin Windows (cas d'une tache
+# planifiee), $0 vaut "C:/Users/..." et tar prend alors "C:" pour un hote
+# distant ("Cannot connect to C: resolve failed"). pwd renvoie toujours une
+# forme POSIX exploitable.
+RACINE=$(cd "$(dirname "$0")/.." 2>/dev/null && pwd)
+DESTINATION="${1:-${RACINE}/backups}"
+
+# Lance sans terminal (tache planifiee, cron), le script n'a personne pour lire
+# sa sortie : elle part dans un journal. En usage manuel elle reste a l'ecran.
+# Sans cela, un echec en execution automatique est parfaitement invisible -
+# c'est exactement ce qui s'est produit au premier essai de la tache planifiee,
+# qui rapportait "succes" sans jamais produire d'archive.
+if [ ! -t 1 ]; then
+    mkdir -p "$DESTINATION"
+    exec >> "${DESTINATION}/backup.log" 2>&1
+    echo "--- execution automatique, PATH=$PATH"
+fi
 HORODATAGE=$(date +%Y%m%d_%H%M%S)
 ARCHIVE="${DESTINATION}/sirh_${HORODATAGE}.tar.gz"
 TRAVAIL=$(mktemp -d)
