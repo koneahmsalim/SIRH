@@ -13,6 +13,7 @@
     'data': [
         'security/ir.model.access.csv',
         'security/default_user_groups.xml',
+        'security/timesheet_day_rules.xml',
         'views/timesheet_activity_views.xml',
         'views/account_analytic_line_views.xml',
         'views/my_week_action.xml',

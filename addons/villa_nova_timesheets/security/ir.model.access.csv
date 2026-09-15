@@ -1,3 +1,5 @@
 id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
-access_villa_nova_timesheet_activity_user,villa.nova.timesheet.activity.user,model_villa_nova_timesheet_activity,base.group_user,1,0,0,0
+access_villa_nova_timesheet_activity_user,villa.nova.timesheet.activity.user,model_villa_nova_timesheet_activity,base.group_user,1,0,1,0
 access_villa_nova_timesheet_activity_hr,villa.nova.timesheet.activity.hr,model_villa_nova_timesheet_activity,hr_timesheet.group_hr_timesheet_approver,1,1,1,1
+access_villa_nova_timesheet_day_user,villa.nova.timesheet.day.user,model_villa_nova_timesheet_day,base.group_user,1,1,1,0
+access_villa_nova_timesheet_day_approver,villa.nova.timesheet.day.approver,model_villa_nova_timesheet_day,hr_timesheet.group_hr_timesheet_approver,1,1,1,1

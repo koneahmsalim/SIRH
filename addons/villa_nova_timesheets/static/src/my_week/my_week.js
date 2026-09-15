@@ -137,7 +137,7 @@ export class VillaNovaMyWeek extends Component {
         const start = toISODate(this.state.weekStart);
         const end = toISODate(addDays(this.state.weekStart, 6));
 
-        const [lines, recentLines, attendances, leaves] = await Promise.all([
+        const [lines, recentLines, attendances, leaves, dayStatus] = await Promise.all([
             this.orm.searchRead(
                 "account.analytic.line",
                 [["employee_id", "=", this.state.employeeId], ["date", ">=", start], ["date", "<=", end]],
@@ -175,6 +175,11 @@ export class VillaNovaMyWeek extends Component {
                 ],
                 ["date_from", "date_to", "holiday_status_id"]
             ),
+            this.orm.call("villa.nova.timesheet.day", "get_week_status", [
+                this.state.employeeId,
+                start,
+                toISODate(addDays(this.state.weekStart, 6)),
+            ]),
         ]);
 
         // Preload tasks for projects already used this week, so the dropdown
@@ -195,6 +200,7 @@ export class VillaNovaMyWeek extends Component {
         for (let i = 0; i < 7; i++) {
             const dateObj = addDays(this.state.weekStart, i);
             const dateStr = toISODate(dateObj);
+            const completed = dayStatus[dateStr] === "complete";
             const leave = leaves.find(
                 (l) => l.date_from.slice(0, 10) <= dateStr && l.date_to.slice(0, 10) >= dateStr
             );
@@ -228,6 +234,12 @@ export class VillaNovaMyWeek extends Component {
                 onLeave: leave ? leave.holiday_status_id[1] : null,
                 attendanceHours,
                 attendanceMismatch: attendanceHours > 0 && Math.abs(attendanceGap) >= ATTENDANCE_GAP_THRESHOLD,
+                completed,
+                // Calcule ici plutot que dans le template : une condition
+                // composee dans un t-if s'y compilait mal (le bouton
+                // s'affichait sans que son gestionnaire de clic soit lie).
+                // Un simple acces de propriete ne souffre pas de ce defaut.
+                canFinish: !completed && total > 0,
             });
         }
         this.state.days = days;
@@ -362,6 +374,33 @@ export class VillaNovaMyWeek extends Component {
     askDelete(lineId) {
         this.state.deletingId = this.state.deletingId === lineId ? null : lineId;
     }
+    async toggleDayCompletion(day) {
+        // La cloture est declarative : le collaborateur signale que sa saisie
+        // du jour est faite, et son responsable en est informe. Elle ne verrouille
+        // rien - une journee rouverte redevient modifiable, d'ou la bascule
+        // plutot qu'une action a sens unique.
+        try {
+            const etat = await this.orm.call("villa.nova.timesheet.day", "toggle_day", [
+                this.state.employeeId,
+                day.date,
+            ]);
+            // Rechargement complet de la semaine plutot qu'une mutation locale
+            // de l'etat : muter l'objet issu du t-foreach ne declenchait pas le
+            // re-rendu (l'affichage gardait un train de retard, la bascule ne
+            // devenant visible qu'au clic suivant). La cloture est une action
+            // ponctuelle - une fois par jour et par personne - donc l'aller-retour
+            // supplementaire ne coute rien face a un affichage faux.
+            await this.loadWeek();
+        } catch (error) {
+            // Le serveur refuse une cloture sans aucune heure saisie : on
+            // laisse remonter le message, il explique quoi faire.
+            this.notification.add(
+                error.data && error.data.message ? error.data.message : "Clôture impossible.",
+                { type: "warning" }
+            );
+        }
+    }
+
     async confirmDelete(lineId) {
         await this.orm.unlink("account.analytic.line", [lineId]);
         this.state.deletingId = null;

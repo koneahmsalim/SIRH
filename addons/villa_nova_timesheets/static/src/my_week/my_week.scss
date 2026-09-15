@@ -392,3 +392,51 @@
     gap: var(--vn-space-2);
     margin-top: var(--vn-space-1);
 }
+
+// Cloture de journee : le bouton reste discret tant que la journee est en
+// cours, et cede la place a un bandeau de confirmation une fois declaree -
+// l'etat doit se lire d'un coup d'oeil sur la semaine entiere.
+.vn-myweek-finish-day {
+    margin-top: var(--vn-space-2);
+}
+
+.vn-myweek-finish-btn {
+    width: 100%;
+    border: 1px dashed var(--vn-slate-light, #aebdc1);
+    background: transparent;
+    color: var(--vn-slate, #5b6266);
+    border-radius: var(--vn-radius-sm);
+    padding: var(--vn-space-2);
+    font-size: 0.85rem;
+    cursor: pointer;
+
+    &:hover {
+        border-color: var(--vn-crimson, #dc143c);
+        color: var(--vn-crimson, #dc143c);
+        border-style: solid;
+    }
+}
+
+.vn-myweek-day-done {
+    display: flex;
+    align-items: center;
+    gap: var(--vn-space-2);
+    padding: var(--vn-space-2);
+    margin-bottom: var(--vn-space-2);
+    border-radius: var(--vn-radius-sm);
+    background: rgba(31, 138, 87, 0.08);
+    color: #1f8a57;
+    font-size: 0.85rem;
+}
+
+.vn-myweek-reopen {
+    margin-left: auto;
+    border: none;
+    background: transparent;
+    color: var(--vn-slate, #5b6266);
+    text-decoration: underline;
+    font-size: 0.8rem;
+    cursor: pointer;
+
+    &:hover { color: var(--vn-crimson, #dc143c); }
+}

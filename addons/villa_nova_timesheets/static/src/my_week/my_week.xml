@@ -50,6 +50,13 @@
                             </span>
                         </div>
 
+                        <div t-if="day.completed" class="vn-myweek-day-done">
+                            <i class="fa fa-check-circle"/>
+                            Journée déclarée terminée
+                            <button class="vn-myweek-reopen" t-on-click="() => this.toggleDayCompletion(day)"
+                                    title="Rouvrir cette journée pour corriger la saisie">Rouvrir</button>
+                        </div>
+
                         <div t-if="day.attendanceMismatch" class="vn-myweek-attendance-gap"
                              t-att-title="'Badgeuse : ' + day.attendanceHours.toFixed(1) + 'h ce jour-là'">
                             <i class="fa fa-exclamation-triangle"/>
@@ -96,6 +103,14 @@
                             <div t-elif="!day.entries.length and state.openDay !== day.index" class="vn-myweek-empty">
                                 Rien enregistré
                             </div>
+                        </div>
+
+                        <div t-if="day.canFinish" class="vn-myweek-finish-day">
+                            <button class="vn-myweek-finish-btn"
+                                    t-on-click="() => this.toggleDayCompletion(day)"
+                                    title="Signale à votre responsable que votre saisie du jour est terminée">
+                                <i class="fa fa-check"/> Terminer ma journée
+                            </button>
                         </div>
 
                         <div t-if="state.openDay === day.index" class="vn-myweek-add-form">

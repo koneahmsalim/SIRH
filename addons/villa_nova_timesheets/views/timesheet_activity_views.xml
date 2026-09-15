@@ -4,7 +4,8 @@
         <field name="name">villa.nova.timesheet.activity.list</field>
         <field name="model">villa.nova.timesheet.activity</field>
         <field name="arch" type="xml">
-            <list decoration-muted="not active">
+            <list decoration-muted="not active" decoration-warning="a_valider">
+                <field name="a_valider" optional="show" widget="boolean_toggle"/>
                 <field name="code"/>
                 <field name="name"/>
                 <field name="category_lvl1" optional="show"/>
@@ -14,6 +15,8 @@
                 <field name="billability_default"/>
                 <field name="project_required"/>
                 <field name="visibility_scope"/>
+                <field name="project_ids" widget="many2many_tags" optional="hide"/>
+                <field name="created_by_employee_id" optional="hide"/>
                 <field name="active" widget="boolean_toggle"/>
             </list>
         </field>
@@ -24,8 +27,15 @@
         <field name="model">villa.nova.timesheet.activity</field>
         <field name="arch" type="xml">
             <form>
+                <header>
+                    <button name="action_valider_code" type="object" string="Valider ce code"
+                            class="oe_highlight" invisible="not a_valider"
+                            groups="hr_timesheet.group_hr_timesheet_approver"
+                            help="Intègre ce code proposé par un collaborateur à la nomenclature officielle."/>
+                </header>
                 <sheet>
                     <widget name="web_ribbon" title="Archivé" bg_color="text-bg-danger" invisible="active"/>
+                    <widget name="web_ribbon" title="À valider" bg_color="text-bg-warning" invisible="not a_valider"/>
                     <div class="oe_title">
                         <label for="code"/>
                         <h1><field name="code" placeholder="ex. HR-TIM-01"/></h1>
@@ -50,6 +60,15 @@
                                invisible="visibility_scope != 'department'"/>
                         <field name="profile_description"/>
                     </group>
+                    <group string="Rattachement aux projets">
+                        <field name="project_ids" widget="many2many_tags"
+                               options="{'no_create': True}"
+                               placeholder="Laisser vide pour un code transverse, non lié à un projet"/>
+                    </group>
+                    <group string="Origine" invisible="not a_valider">
+                        <field name="created_by_employee_id"/>
+                    </group>
+                    <field name="a_valider" invisible="1"/>
                     <field name="active" invisible="1"/>
                 </sheet>
             </form>
@@ -65,6 +84,8 @@
                 <field name="name"/>
                 <field name="category_lvl1"/>
                 <field name="entity"/>
+                <field name="project_ids"/>
+                <filter string="À valider" name="a_valider" domain="[('a_valider', '=', True)]"/>
                 <filter string="Archivés" name="inactive" domain="[('active', '=', False)]"/>
                 <group expand="0" string="Regrouper par">
                     <filter string="Entité" name="groupby_entity" context="{'group_by': 'entity'}"/>
