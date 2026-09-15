@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+
+        <!-- La fiche de depart est livree entierement en anglais par le module
+             tiers. On reprend ici les libelles en francais et on affiche le
+             preavis legal ivoirien, calcule sur l'anciennete, a cote de la date
+             de depart souhaitee : c'est au moment de fixer cette date que
+             l'information est utile, pas dans une note consultee apres coup. -->
+        <record id="hr_resignation_view_form_villa_nova" model="ir.ui.view">
+            <field name="name">hr.resignation.form.villa.nova.fr</field>
+            <field name="model">hr.resignation</field>
+            <field name="inherit_id" ref="hr_resignation.hr_resignation_view_form"/>
+            <field name="arch" type="xml">
+
+                <xpath expr="//form" position="attributes">
+                    <attribute name="string">Départ d'un salarié</attribute>
+                </xpath>
+
+                <xpath expr="//button[@name='action_confirm_resignation']" position="attributes">
+                    <attribute name="string">Confirmer</attribute>
+                </xpath>
+                <xpath expr="//button[@name='action_cancel_resignation']" position="attributes">
+                    <attribute name="string">Annuler</attribute>
+                </xpath>
+                <xpath expr="//button[@name='action_approve_resignation']" position="attributes">
+                    <attribute name="string">Valider</attribute>
+                </xpath>
+                <xpath expr="//button[@name='action_reject_resignation']" position="attributes">
+                    <attribute name="string">Refuser</attribute>
+                </xpath>
+                <xpath expr="//button[@name='action_reset_to_draft']" position="attributes">
+                    <attribute name="string">Remettre en brouillon</attribute>
+                </xpath>
+
+                <!-- Odoo interdit @string comme selecteur d'heritage : les trois
+                     groupes n'ayant pas d'attribut name, on les cible par leur
+                     position dans le groupe parent. -->
+                <xpath expr="(//group/group)[1]" position="attributes">
+                    <attribute name="string">Salarié concerné</attribute>
+                </xpath>
+                <xpath expr="(//group/group)[2]" position="attributes">
+                    <attribute name="string">Dates et préavis</attribute>
+                </xpath>
+                <xpath expr="(//group/group)[3]" position="attributes">
+                    <attribute name="string">Motif du départ</attribute>
+                </xpath>
+
+                <xpath expr="//field[@name='employee_contract']" position="attributes">
+                    <attribute name="string">Contrat de travail</attribute>
+                </xpath>
+                <xpath expr="//field[@name='joined_date']" position="attributes">
+                    <attribute name="string">Date d'entrée dans l'entreprise</attribute>
+                </xpath>
+                <xpath expr="//field[@name='resign_confirm_date']" position="attributes">
+                    <attribute name="string">Date de la demande</attribute>
+                </xpath>
+                <xpath expr="//field[@name='expected_revealing_date']" position="attributes">
+                    <attribute name="string">Date de départ souhaitée</attribute>
+                </xpath>
+                <xpath expr="//field[@name='approved_revealing_date']" position="attributes">
+                    <attribute name="string">Date de départ validée</attribute>
+                </xpath>
+                <xpath expr="//field[@name='notice_period']" position="attributes">
+                    <attribute name="string">Préavis retenu</attribute>
+                </xpath>
+                <xpath expr="//field[@name='reason']" position="attributes">
+                    <attribute name="string">Motif détaillé</attribute>
+                </xpath>
+
+                <!-- Le preavis legal s'insere juste avant le preavis effectivement
+                     retenu, pour que l'ecart entre les deux saute aux yeux. -->
+                <xpath expr="//field[@name='notice_period']" position="before">
+                    <field name="x_anciennete_mois"/>
+                    <field name="x_preavis_legal"/>
+                    <field name="x_date_fin_preavis"/>
+                </xpath>
+
+            </field>
+        </record>
+
+        <record id="hr_resignation_view_tree_villa_nova" model="ir.ui.view">
+            <field name="name">hr.resignation.list.villa.nova.fr</field>
+            <field name="model">hr.resignation</field>
+            <field name="inherit_id" ref="hr_resignation.hr_resignation_view_tree"/>
+            <field name="arch" type="xml">
+                <xpath expr="//field[@name='joined_date']" position="attributes">
+                    <attribute name="string">Date d'entrée</attribute>
+                </xpath>
+                <xpath expr="//field[@name='expected_revealing_date']" position="attributes">
+                    <attribute name="string">Départ souhaité</attribute>
+                </xpath>
+            </field>
+        </record>
+
+    </data>
+</odoo>

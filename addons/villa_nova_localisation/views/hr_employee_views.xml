@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+
+        <!-- La fiche employe agrege des onglets et des boutons venus d'une
+             dizaine de modules, dont plusieurs livres en anglais. Resultat :
+             une barre de boutons ou "Contrats" et "Congé" cotoient
+             "Announcements", "Payslips" et "Loans". On reprend ces libelles en
+             francais, en gardant des intitules courts : ces boutons sont
+             alignes horizontalement et un libelle long casse la mise en page. -->
+        <record id="hr_employee_view_form_villa_nova_fr" model="ir.ui.view">
+            <field name="name">hr.employee.form.villa.nova.fr</field>
+            <field name="model">hr.employee</field>
+            <field name="inherit_id" ref="hr.view_employee_form"/>
+            <field name="priority" eval="99"/>
+            <field name="arch" type="xml">
+
+                <!-- Boutons statistiques -->
+                <xpath expr="//field[@name='announcement_count']" position="attributes">
+                    <attribute name="string">Annonces</attribute>
+                </xpath>
+                <xpath expr="//field[@name='payslip_count']" position="attributes">
+                    <attribute name="string">Bulletins</attribute>
+                </xpath>
+                <xpath expr="//field[@name='loan_count']" position="attributes">
+                    <attribute name="string">Prêts</attribute>
+                </xpath>
+
+                <!-- Onglets -->
+                <!-- Cette page arrive sans attribut name dans la vue combinee
+                     (contrairement aux autres onglets) : on la designe par le
+                     champ qu'elle contient, seul point d'accroche stable. -->
+                <xpath expr="//page[field[@name='badge_ids']]" position="attributes">
+                    <attribute name="string">Badges reçus</attribute>
+                </xpath>
+                <xpath expr="//page[@name='insurance_ids']" position="attributes">
+                    <attribute name="string">Prévoyance</attribute>
+                </xpath>
+
+                <!-- Blocs d'identite ajoutes par hr_employee_updation.
+                     "Dependence Details" devient "Personnes à charge" : c'est
+                     le terme employe en paie et en couverture sociale (CMU),
+                     la traduction litterale ne voudrait rien dire. -->
+                <xpath expr="//group[@name='identification_id']" position="attributes">
+                    <attribute name="string">Pièce d'identité</attribute>
+                </xpath>
+                <xpath expr="//group[@name='passport_id']" position="attributes">
+                    <attribute name="string">Passeport</attribute>
+                </xpath>
+                <xpath expr="//group[@name='family_info_ids']" position="attributes">
+                    <attribute name="string">Personnes à charge</attribute>
+                </xpath>
+
+            </field>
+        </record>
+
+    </data>
+</odoo>

@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Types de contrat du droit du travail ivoirien (Code du travail 2015).
+         Rappels utiles au parametrage RH, volontairement portes par le libelle
+         plutot que caches dans une documentation separee :
+           - le CDD ne peut exceder 2 ans et n'est renouvelable qu'une fois ;
+             au-dela (ou des le 2e renouvellement) il se transforme de plein
+             droit en CDI ;
+           - la periode d'essai est plafonnee a 6 mois pour les cadres, 3 mois
+             pour les agents de maitrise et employes, 1 mois pour les ouvriers.
+         noupdate="1" : ces types sont ensuite rattaches a des contrats reels,
+         une mise a jour du module ne doit pas ecraser un libelle ajuste sur le
+         terrain. -->
+    <data noupdate="1">
+
+        <record id="contract_type_cdi" model="hr.contract.type">
+            <field name="name">CDI — Contrat à durée indéterminée</field>
+            <field name="code">CDI</field>
+            <field name="country_id" ref="base.ci"/>
+            <field name="sequence">10</field>
+        </record>
+
+        <record id="contract_type_cdd" model="hr.contract.type">
+            <field name="name">CDD — Contrat à durée déterminée</field>
+            <field name="code">CDD</field>
+            <field name="country_id" ref="base.ci"/>
+            <field name="sequence">20</field>
+        </record>
+
+        <record id="contract_type_essai" model="hr.contract.type">
+            <field name="name">Engagement à l'essai</field>
+            <field name="code">ESSAI</field>
+            <field name="country_id" ref="base.ci"/>
+            <field name="sequence">30</field>
+        </record>
+
+        <record id="contract_type_temps_partiel" model="hr.contract.type">
+            <field name="name">Contrat à temps partiel</field>
+            <field name="code">PARTIEL</field>
+            <field name="country_id" ref="base.ci"/>
+            <field name="sequence">40</field>
+        </record>
+
+        <record id="contract_type_apprentissage" model="hr.contract.type">
+            <field name="name">Contrat d'apprentissage</field>
+            <field name="code">APPRENTI</field>
+            <field name="country_id" ref="base.ci"/>
+            <field name="sequence">50</field>
+        </record>
+
+        <record id="contract_type_stage" model="hr.contract.type">
+            <field name="name">Convention de stage</field>
+            <field name="code">STAGE</field>
+            <field name="country_id" ref="base.ci"/>
+            <field name="sequence">60</field>
+        </record>
+
+        <record id="contract_type_interim" model="hr.contract.type">
+            <field name="name">Contrat de travail temporaire (intérim)</field>
+            <field name="code">INTERIM</field>
+            <field name="country_id" ref="base.ci"/>
+            <field name="sequence">70</field>
+        </record>
+
+        <record id="contract_type_chantier" model="hr.contract.type">
+            <field name="name">Contrat de chantier ou d'opération</field>
+            <field name="code">CHANTIER</field>
+            <field name="country_id" ref="base.ci"/>
+            <field name="sequence">80</field>
+        </record>
+
+    </data>
+</odoo>

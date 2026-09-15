@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Regimes de couverture sociale obligatoires en Cote d'Ivoire.
+         Les taux sont portes dans la note de chaque regime plutot que dans un
+         document a part : c'est l'ecran que la RH a sous les yeux au moment de
+         rattacher un salarie, donc l'endroit ou l'information doit vivre.
+         Taux verifies aupres du CLEISS (centre de liaison europeen de securite
+         sociale) - a reverifier a chaque loi de finances, les plafonds etant
+         revalorises periodiquement.
+         noupdate="1" : une mise a jour du module ne doit pas ecraser un taux
+         ajuste par la RH apres evolution reglementaire. -->
+    <data noupdate="1">
+
+        <record id="insurance_policy_cnps_retraite" model="insurance.policy">
+            <!-- 7,70 % employeur sur 14 % au total -->
+            <field name="x_part_employeur_pct">55.0</field>
+            <field name="name">CNPS — Assurance vieillesse (retraite)</field>
+            <field name="note_field" type="html">
+                <div>
+                    <p><b>Régime obligatoire — Caisse Nationale de Prévoyance Sociale.</b></p>
+                    <ul>
+                        <li>Cotisation employeur : <b>7,70 %</b> du salaire brut</li>
+                        <li>Cotisation salarié : <b>6,30 %</b> du salaire brut</li>
+                        <li>Taux global : <b>14 %</b></li>
+                        <li>Plafond mensuel de cotisation : <b>3 375 000 FCFA</b></li>
+                    </ul>
+                    <p>Seule branche donnant lieu à une retenue sur le salaire du
+                       travailleur : toutes les autres cotisations CNPS sont
+                       intégralement à la charge de l'employeur.</p>
+                </div>
+            </field>
+        </record>
+
+        <record id="insurance_policy_cnps_prestations_familiales" model="insurance.policy">
+            <!-- integralement a la charge de l'employeur -->
+            <field name="x_part_employeur_pct">100.0</field>
+            <field name="name">CNPS — Prestations familiales et maternité</field>
+            <field name="note_field" type="html">
+                <div>
+                    <p><b>Régime obligatoire — à la charge exclusive de l'employeur.</b></p>
+                    <ul>
+                        <li>Cotisation employeur : <b>5 %</b> du salaire brut</li>
+                        <li>Cotisation salarié : <b>néant</b></li>
+                        <li>Plafond mensuel de cotisation : <b>70 000 FCFA</b></li>
+                    </ul>
+                    <p>Couvre les allocations familiales, les prestations prénatales
+                       et de maternité, ainsi que les indemnités journalières de
+                       congé de maternité.</p>
+                </div>
+            </field>
+        </record>
+
+        <record id="insurance_policy_cnps_accidents_travail" model="insurance.policy">
+            <!-- integralement a la charge de l'employeur -->
+            <field name="x_part_employeur_pct">100.0</field>
+            <field name="name">CNPS — Accidents du travail et maladies professionnelles</field>
+            <field name="note_field" type="html">
+                <div>
+                    <p><b>Régime obligatoire — à la charge exclusive de l'employeur.</b></p>
+                    <ul>
+                        <li>Cotisation employeur : <b>de 2 % à 5 %</b> du salaire brut,
+                            selon le niveau de risque du secteur d'activité</li>
+                        <li>Cotisation salarié : <b>néant</b></li>
+                        <li>Plafond mensuel de cotisation : <b>70 000 FCFA</b></li>
+                    </ul>
+                    <p>Le taux applicable est notifié par la CNPS en fonction de
+                       l'activité déclarée de l'entreprise ; le vérifier auprès de
+                       la caisse avant de le reprendre en paie.</p>
+                </div>
+            </field>
+        </record>
+
+        <record id="insurance_policy_cmu" model="insurance.policy">
+            <!-- forfait de 1 000 F reparti 500 employeur / 500 salarie -->
+            <field name="x_part_employeur_pct">50.0</field>
+            <field name="name">CMU — Couverture Maladie Universelle</field>
+            <field name="note_field" type="html">
+                <div>
+                    <p><b>Régime obligatoire — cotisation forfaitaire, non
+                       proportionnelle au salaire.</b></p>
+                    <ul>
+                        <li>Montant : <b>1 000 FCFA par mois et par personne couverte</b></li>
+                        <li>Répartition : <b>500 FCFA employeur / 500 FCFA salarié</b></li>
+                        <li>Ayants droit pris en charge par l'employeur : le conjoint
+                            et jusqu'à <b>6 enfants de moins de 21 ans</b></li>
+                    </ul>
+                    <p>Le montant à provisionner dépend donc de la composition
+                       familiale déclarée, et non de la rémunération.</p>
+                </div>
+            </field>
+        </record>
+
+        <record id="insurance_policy_complementaire_sante" model="insurance.policy">
+            <field name="name">Assurance santé complémentaire (facultative)</field>
+            <field name="note_field" type="html">
+                <div>
+                    <p><b>Régime facultatif, souscrit auprès d'un assureur privé.</b></p>
+                    <p>Vient en complément de la CMU, dont le panier de soins reste
+                       limité. Renseigner ici la police négociée par l'entreprise :
+                       taux de prise en charge, plafond annuel, répartition
+                       employeur / salarié, et périmètre des ayants droit.</p>
+                    <p>À rattacher salarié par salarié, la couverture pouvant
+                       différer selon la catégorie professionnelle.</p>
+                </div>
+            </field>
+        </record>
+
+    </data>
+</odoo>

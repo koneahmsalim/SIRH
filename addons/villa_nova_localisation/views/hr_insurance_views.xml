@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+
+        <!-- Le champ natif "amount" porte la cotisation TOTALE, sans rien dire
+             de sa repartition. Les 1 000 F de la CMU ont ainsi ete lus comme un
+             montant errone, alors qu'il s'agit du forfait complet dont seuls
+             500 F sont retenus sur le salaire. Les deux parts apparaissent
+             desormais a cote du total, sur la liste comme sur le formulaire. -->
+        <record id="hr_insurance_view_form_villa_nova" model="ir.ui.view">
+            <field name="name">hr.insurance.form.villa.nova.repartition</field>
+            <field name="model">hr.insurance</field>
+            <field name="inherit_id" ref="hr_insurance.hr_insurance_view_form"/>
+            <field name="arch" type="xml">
+                <field name="amount" position="attributes">
+                    <attribute name="string">Cotisation totale</attribute>
+                </field>
+                <field name="amount" position="after">
+                    <field name="currency_id" invisible="1"/>
+                    <field name="x_part_employeur" widget="monetary"/>
+                    <field name="x_part_salarie" widget="monetary"/>
+                </field>
+            </field>
+        </record>
+
+        <record id="hr_insurance_view_tree_villa_nova" model="ir.ui.view">
+            <field name="name">hr.insurance.list.villa.nova.repartition</field>
+            <field name="model">hr.insurance</field>
+            <field name="inherit_id" ref="hr_insurance.hr_insurance_view_tree"/>
+            <field name="arch" type="xml">
+                <field name="amount" position="attributes">
+                    <attribute name="string">Cotisation totale</attribute>
+                </field>
+                <field name="amount" position="after">
+                    <field name="currency_id" column_invisible="1"/>
+                    <field name="x_part_employeur" sum="Total employeur"/>
+                    <field name="x_part_salarie" sum="Total salarié"/>
+                </field>
+            </field>
+        </record>
+
+        <record id="insurance_policy_view_form_villa_nova" model="ir.ui.view">
+            <field name="name">insurance.policy.form.villa.nova.repartition</field>
+            <field name="model">insurance.policy</field>
+            <field name="inherit_id" ref="hr_insurance.insurance_policy_view_form"/>
+            <field name="arch" type="xml">
+                <field name="name" position="after">
+                    <field name="x_part_employeur_pct"/>
+                </field>
+            </field>
+        </record>
+
+    </data>
+</odoo>

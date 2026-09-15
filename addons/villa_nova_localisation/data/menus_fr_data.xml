@@ -1,0 +1,202 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Les modules RH tiers (OpenHRMS et assimiles) livrent leur navigation en
+         anglais, au milieu d'un SIRH par ailleurs entierement francophone. On
+         reprend ici leurs libelles en EQUIVALENTS METIER francais plutot qu'en
+         traduction litterale, qui donnerait souvent un resultat sans signification
+         pour une equipe RH :
+           - "Transfers"   -> "Mutations"   (le terme RH francais consacre pour un
+                                             changement d'affectation interne)
+           - "Appraisal"   -> "Entretiens d'évaluation" ("Évaluations" seul
+                                             entrerait en collision avec le menu
+                                             villa_nova du meme nom)
+           - "Resignation" -> "Départs"     (le modele couvre la demission ET le
+                                             licenciement : resignation_type vaut
+                                             'resigned' ou 'fired')
+           - "Reminders"   -> "Rappels d'échéances" (le module surveille des dates
+                                             d'expiration, il ne s'agit pas de
+                                             pense-betes) -->
+    <data>
+
+        <!-- ============ Applications de premier niveau ============ -->
+
+        <record id="hrms_dashboard.hrms_dashboard_menu_root" model="ir.ui.menu">
+            <field name="name">Tableau de bord RH</field>
+        </record>
+
+        <record id="hr_reward_warning.hr_announcement_menu_root" model="ir.ui.menu">
+            <field name="name">Annonces internes</field>
+        </record>
+
+        <record id="hr_reminder.hr_reminder_menu" model="ir.ui.menu">
+            <field name="name">Rappels d'échéances</field>
+        </record>
+
+        <record id="hr_employee_transfer.employee_transfer_menu_create_transfer" model="ir.ui.menu">
+            <field name="name">Mutations</field>
+        </record>
+
+        <record id="oh_appraisal.hr_appraisal_menu_root" model="ir.ui.menu">
+            <field name="name">Entretiens d'évaluation</field>
+        </record>
+
+        <record id="hr_payroll_community.menu_hr_payroll_community_root" model="ir.ui.menu">
+            <field name="name">Paie</field>
+        </record>
+
+        <record id="hr_resignation.hr_resignation_menu_root" model="ir.ui.menu">
+            <field name="name">Départs</field>
+        </record>
+
+        <!-- ============ Annonces internes ============ -->
+
+        <record id="hr_reward_warning.hr_announcement_menu_view_announcements" model="ir.ui.menu">
+            <field name="name">Annonces</field>
+        </record>
+
+        <!-- ============ Entretiens d'évaluation ============ -->
+
+        <record id="oh_appraisal.hr_appraisal_menu" model="ir.ui.menu">
+            <field name="name">Entretiens</field>
+        </record>
+
+        <record id="oh_appraisal.hr_appraisal_menu_answers" model="ir.ui.menu">
+            <field name="name">Réponses aux questionnaires</field>
+        </record>
+
+        <!-- ============ Départs ============ -->
+
+        <record id="hr_resignation.hr_resignation_menu_request" model="ir.ui.menu">
+            <field name="name">Demandes de départ</field>
+        </record>
+
+        <record id="hr_resignation.hr_resignation_menu_approved_request" model="ir.ui.menu">
+            <field name="name">Départs validés</field>
+        </record>
+
+        <!-- ============ Paie ============ -->
+
+        <record id="hr_payroll_community.menu_department_tree" model="ir.ui.menu">
+            <field name="name">Bulletins de paie</field>
+        </record>
+
+        <record id="hr_payroll_community.menu_hr_payslip_run" model="ir.ui.menu">
+            <field name="name">Lots de bulletins</field>
+        </record>
+
+        <record id="hr_payroll_community.menu_hr_payroll_structure_view" model="ir.ui.menu">
+            <field name="name">Grilles salariales</field>
+        </record>
+
+        <record id="hr_payroll_community.menu_action_hr_salary_rule_form" model="ir.ui.menu">
+            <field name="name">Règles de paie</field>
+        </record>
+
+        <record id="hr_payroll_community.menu_action_hr_contribution_register" model="ir.ui.menu">
+            <field name="name">Registres de cotisations</field>
+        </record>
+
+        <record id="hr_payroll_community.menu_hr_payroll_global_settings" model="ir.ui.menu">
+            <field name="name">Paramètres</field>
+        </record>
+
+        <!-- ============ Prêts et avances sur salaire ============ -->
+
+        <record id="ohrms_loan.hr_loan_menu_root" model="ir.ui.menu">
+            <field name="name">Prêts et avances</field>
+        </record>
+
+        <record id="ohrms_loan.hr_loan_menu_requests" model="ir.ui.menu">
+            <field name="name">Demandes de prêt</field>
+        </record>
+
+        <record id="ohrms_salary_advance.salary_advance_menu_root" model="ir.ui.menu">
+            <field name="name">Avances sur salaire</field>
+        </record>
+
+        <record id="ohrms_salary_advance.salary_advance_menu_own" model="ir.ui.menu">
+            <field name="name">Demander une avance</field>
+        </record>
+
+        <record id="ohrms_salary_advance.salary_advance_menu_my_approved" model="ir.ui.menu">
+            <field name="name">Mes avances validées</field>
+        </record>
+
+        <record id="ohrms_salary_advance.salary_advance_menu_to_approve" model="ir.ui.menu">
+            <field name="name">Avances à valider</field>
+        </record>
+
+        <!-- ============ Prévoyance et assurances ============ -->
+
+        <record id="hr_insurance.hr_insurance_menu" model="ir.ui.menu">
+            <field name="name">Prévoyance et assurances</field>
+        </record>
+
+        <record id="hr_insurance.menu_hr_insurance" model="ir.ui.menu">
+            <field name="name">Prévoyance</field>
+        </record>
+
+        <record id="hr_insurance.policy_management_menu" model="ir.ui.menu">
+            <field name="name">Régimes et garanties</field>
+        </record>
+
+        <!-- ============ Documents du personnel ============ -->
+
+        <record id="oh_employee_documents_expiry.hr_document_menu" model="ir.ui.menu">
+            <field name="name">Modèles de documents</field>
+        </record>
+
+        <record id="oh_employee_documents_expiry.document_type_menu" model="ir.ui.menu">
+            <field name="name">Types de documents</field>
+        </record>
+
+        <!-- ============ Demandes de services généraux ============
+             Le module couvre les demandes internes de moyens et d'interventions
+             (logistique, moyens generaux), pas des "services" au sens commercial. -->
+
+        <record id="ohrms_service_request.service_root" model="ir.ui.menu">
+            <field name="name">Services généraux</field>
+        </record>
+
+        <record id="ohrms_service_request.service_requests" model="ir.ui.menu">
+            <field name="name">Faire une demande</field>
+        </record>
+
+        <record id="ohrms_service_request.service_approve" model="ir.ui.menu">
+            <field name="name">Demandes à valider</field>
+        </record>
+
+        <record id="ohrms_service_request.execute_service" model="ir.ui.menu">
+            <field name="name">Interventions à réaliser</field>
+        </record>
+
+        <record id="ohrms_service_request.service_report" model="ir.ui.menu">
+            <field name="name">Analyse</field>
+        </record>
+
+        <record id="ohrms_service_request.service_pivot" model="ir.ui.menu">
+            <field name="name">Analyse des demandes</field>
+        </record>
+
+        <!-- ============ Pointeuse biométrique ============ -->
+
+        <record id="hr_biometric_attendance.biometric_device_details_menu" model="ir.ui.menu">
+            <field name="name">Pointeuse biométrique</field>
+        </record>
+
+        <record id="hr_biometric_attendance.biometric_device_details_sub_menu" model="ir.ui.menu">
+            <field name="name">Appareils de pointage</field>
+        </record>
+
+        <record id="hr_biometric_attendance.daily_attendance_menu" model="ir.ui.menu">
+            <field name="name">Analyse des pointages</field>
+        </record>
+
+        <!-- ============ Divers ============ -->
+
+        <record id="hr_leave_request_aliasing.res_config_settings_menu_email_alias" model="ir.ui.menu">
+            <field name="name">Paramètres</field>
+        </record>
+
+    </data>
+</odoo>
