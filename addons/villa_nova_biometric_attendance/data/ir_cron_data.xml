@@ -10,5 +10,39 @@
             <field name="interval_type">minutes</field>
             <field name="active">True</field>
         </record>
+
+        <!-- Cadence hebdomadaire volontaire : l'enrolement d'un badge est un
+             acte manuel cote informatique (empreinte a poser sur le boitier
+             PUIS identifiant a reporter dans la fiche). Une alerte quotidienne
+             sur une action qui prend plusieurs jours a etre traitee deviendrait
+             du bruit, et le bruit finit par se faire ignorer. -->
+        <!-- Filet de securite : rapproche ce que dit le boitier, ce qui est
+             enregistre en base et ce qui s'affiche dans le tableau du jour.
+             Un salarie qui a badge ne doit jamais finir en "absent" sans que
+             personne ne s'en apercoive - c'est exactement ce qui s'est produit
+             le 10/09/2026, ou seul le fait que des salaries se soient plaints
+             a permis de decouvrir le probleme.
+             Toutes les 2 heures : la methode ne fait rien en dehors de la plage
+             06h-20h, et chaque interrogation du boitier mobilise le lecteur une
+             vingtaine de secondes. -->
+        <record id="ir_cron_villa_nova_controle_presences" model="ir.cron">
+            <field name="name">Villa Nova - Controle de coherence des pointages</field>
+            <field name="model_id" ref="hr_biometric_attendance.model_biometric_device_details"/>
+            <field name="state">code</field>
+            <field name="code">model._cron_villa_nova_controle_presences()</field>
+            <field name="interval_number">2</field>
+            <field name="interval_type">hours</field>
+            <field name="active">True</field>
+        </record>
+
+        <record id="ir_cron_villa_nova_alerte_badges_manquants" model="ir.cron">
+            <field name="name">Villa Nova - Alerte informatique : salaries sans identifiant badge</field>
+            <field name="model_id" ref="hr.model_hr_employee"/>
+            <field name="state">code</field>
+            <field name="code">model._cron_villa_nova_alerte_badges_manquants()</field>
+            <field name="interval_number">1</field>
+            <field name="interval_type">weeks</field>
+            <field name="active">True</field>
+        </record>
     </data>
 </odoo>

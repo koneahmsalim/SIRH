@@ -17,6 +17,7 @@ export class VillaNovaTodayOverview extends Component {
         this.state = useState({
             loading: true, date: "", isHoliday: false,
             present: [], late: [], absent: [], onLeave: [], unregistered: [],
+            deviceAlert: false, deviceSince: null,
         });
 
         onWillStart(() => this.load());
@@ -32,6 +33,15 @@ export class VillaNovaTodayOverview extends Component {
         this.state.absent = data.absent;
         this.state.onLeave = data.on_leave;
         this.state.unregistered = data.unregistered;
+        // Liaison avec le boitier : quand elle est rompue, aucun pointage ne
+        // remonte et tout le monde bascule en "Absent". On le signale plutot
+        // que de laisser lire une information fausse.
+        // Booleen precalcule plutot qu'une condition composee dans le
+        // template : une expression composee dans un t-if se compile mal chez
+        // OWL (element affiche mais gestionnaires non lies, sans erreur).
+        const liaison = data.device_status || { reachable: true };
+        this.state.deviceAlert = liaison.reachable === false;
+        this.state.deviceSince = liaison.since || null;
         this.state.loading = false;
     }
 

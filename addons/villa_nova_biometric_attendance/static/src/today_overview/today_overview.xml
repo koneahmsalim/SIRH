@@ -8,6 +8,17 @@
                 <span t-if="state.date" class="vn-today-date" t-esc="state.date"/>
             </div>
 
+            <div t-if="state.deviceAlert" class="vn-today-device-down">
+                <i class="fa fa-plug"/>
+                <div>
+                    <b>Boîtier de pointage injoignable<t t-if="state.deviceSince"> depuis le <t t-esc="state.deviceSince"/></t>.</b>
+                    <div>Aucun pointage ne remonte tant que la liaison n'est pas rétablie.
+                    Les salariés ci-dessous ne sont pas nécessairement absents : leurs badgeages
+                    sont conservés dans la mémoire du boîtier et seront repris automatiquement
+                    à la reconnexion.</div>
+                </div>
+            </div>
+
             <div t-if="state.loading" class="vn-today-columns">
                 <t t-foreach="[1,2,3,4,5]" t-as="i" t-key="i">
                     <span class="vn-skeleton" style="height: 240px; border-radius: var(--vn-radius-lg);"/>
@@ -51,10 +62,12 @@
                     </div>
                 </div>
 
-                <div class="vn-card vn-today-col">
+                <div class="vn-card vn-today-col" t-att-class="{'vn-today-col-unreliable': state.deviceAlert}">
                     <div class="vn-today-col-head">
                         <span class="vn-badge vn-badge-neutral" t-esc="state.absent.length"/>
                         <h2>Absents</h2>
+                        <span t-if="state.deviceAlert" class="vn-today-col-caveat"
+                              title="Le boîtier ne répond plus : cette liste ne peut pas être considérée comme fiable.">non fiable</span>
                     </div>
                     <div t-if="!state.absent.length" class="vn-today-col-empty">Tout le monde a pointé.</div>
                     <div t-foreach="state.absent" t-as="emp" t-key="emp.id"

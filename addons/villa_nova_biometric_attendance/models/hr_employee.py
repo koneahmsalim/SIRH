@@ -1,6 +1,7 @@
 from datetime import datetime, time, timedelta
 
 import pytz
+from markupsafe import Markup
 
 from odoo import api, fields, models
 
@@ -29,6 +30,74 @@ class HrEmployee(models.Model):
         help="Ne pointe jamais (badge ou appli) et ne doit pas apparaitre dans "
              "les vues de presence quotidiennes (ex. direction).",
     )
+
+    @api.model
+    def _villa_nova_employes_sans_badge(self):
+        """Salaries censes pointer mais qui n'ont aucun identifiant sur le boitier.
+
+        Sans device_id_num, un pointage physique est purement et simplement
+        ignore a la synchronisation : l'employe badge tous les jours et
+        n'apparait nulle part, sans le moindre message d'erreur. C'est
+        exactement ce qui etait arrive a deux salaries, decouvert seulement
+        parce qu'ils s'en sont plaints - d'ou cette detection systematique.
+
+        Seuls les exemptes de pointage sont exclus. On ne cherche PAS a deviner
+        les comptes techniques (agents applicatifs, comptes de service) : toute
+        heuristique du genre finirait par masquer un vrai salarie, ce qui est
+        precisement le probleme qu'on veut eviter. Un compte technique qui
+        remonte se retire d'un clic en le marquant "Exempté de pointage", et le
+        message d'alerte le dit explicitement.
+        """
+        return self.search([
+            ('active', '=', True),
+            ('villa_nova_attendance_exempt', '=', False),
+            ('device_id_num', 'in', [False, '']),
+        ])
+
+    @api.model
+    def _cron_villa_nova_alerte_badges_manquants(self):
+        """Signale a l'equipe informatique les salaries a enroler sur le boitier."""
+        manquants = self._villa_nova_employes_sans_badge()
+        if not manquants:
+            return
+
+        groupe = self.env.ref('villa_nova_itsm.group_itsm_manager', raise_if_not_found=False)
+        destinataires = groupe.users.partner_id if groupe else self.env['res.partner']
+        if not destinataires:
+            # Sans equipe informatique identifiee, on ne perd pas l'alerte :
+            # elle part vers les gestionnaires RH, qui relaieront.
+            groupe_rh = self.env.ref('hr.group_hr_manager', raise_if_not_found=False)
+            destinataires = groupe_rh.users.partner_id if groupe_rh else self.env['res.partner']
+        if not destinataires:
+            return
+
+        # message_notify echappe une chaine ordinaire (protection XSS d'Odoo 18) :
+        # sans Markup, le destinataire recoit les balises en clair. Le formatage
+        # "Markup(...) % valeur" reste sur : seule la partie template est traitee
+        # comme du HTML, les noms d'employes substitues sont echappes.
+        lignes = Markup('').join(
+            Markup('<li>%s%s</li>') % (
+                e.name,
+                (Markup(' — %s') % e.department_id.name) if e.department_id else '',
+            )
+            for e in manquants.sorted('name')
+        )
+        self.env['mail.thread'].sudo().message_notify(
+            partner_ids=destinataires.ids,
+            subject="%d salarié(s) sans identifiant sur la pointeuse" % len(manquants),
+            body=Markup(
+                "<p>Les salariés suivants n'ont aucun identifiant badge "
+                "(<i>device_id_num</i>) renseigné dans le SIRH. Tant que ce n'est pas "
+                "le cas, leurs pointages sur le boîtier sont ignorés sans aucun message "
+                "d'erreur : ils apparaîtront comme absents.</p>"
+                "<ul>%s</ul>"
+                "<p>Deux actions sont nécessaires : enrôler l'empreinte sur le boîtier, "
+                "puis reporter l'identifiant attribué dans la fiche du salarié "
+                "(onglet Paramètres RH).</p>"
+                "<p>Si l'un d'eux n'a pas vocation à pointer, cochez plutôt "
+                "« Exempté de pointage » sur sa fiche : il sortira de cette alerte.</p>"
+            ) % lignes,
+        )
 
     def _villa_nova_rebuild_attendance_from_punches(self):
         """Regle "premier pointage du jour = entree, dernier = sortie" (validee
@@ -61,6 +130,36 @@ class HrEmployee(models.Model):
         for p in punches:
             day = DEVICE_TZ.localize(p.punching_time).date()
             by_day.setdefault(day, []).append(p.punching_time)
+
+        # Une presence deja enregistree peut porter des horodatages dont le
+        # pointage brut d'origine a disparu (journal du boitier efface, purge
+        # d'historique). Elle n'est alors plus reconnue comme issue du boitier :
+        # ni supprimee ni reconstruite, elle entre en conflit avec la presence
+        # que l'on s'apprete a creer pour ce meme jour, et la contrainte native
+        # d'Odoo fait echouer toute la reconstruction - le salarie badge et
+        # ressort "absent".
+        # On REINTEGRE donc ses horodatages comme s'il s'agissait de pointages :
+        # l'information qu'ils portent (une heure d'arrivee reelle, desormais
+        # introuvable ailleurs) est conservee et fusionnee avec les pointages
+        # encore connus. Cas reel du 11/09/2026 : arrivee a 08:00 enregistree la
+        # veille, pointage brut correspondant detruit, et seule la sortie de
+        # 18:34 encore presente sur le boitier - la fusion redonne bien
+        # 08:00 -> 18:34 au lieu d'une journee reduite a 18:34.
+        # Les jours sans aucun pointage connu sont laisses tels quels : les
+        # reconstruire a partir de la seule presence existante n'apporterait
+        # rien et risquerait d'en degrader le contenu.
+        for att in Attendance.search([
+            ('employee_id', '=', self.id),
+            ('check_in', '>=', window_start),
+        ]):
+            if att.in_mode != 'badge':
+                continue  # saisie manuelle RH : jamais recalculee
+            day = DEVICE_TZ.localize(att.check_in).date()
+            if day not in by_day:
+                continue
+            for horodatage in (att.check_in, att.check_out):
+                if horodatage and horodatage not in by_day[day]:
+                    by_day[day].append(horodatage)
 
         for day, times in by_day.items():
             times.sort()
@@ -98,10 +197,25 @@ class HrEmployee(models.Model):
         # journee (hypothese : pointage de sortie jamais remonte par le
         # boitier) plutot que de bloquer indefiniment tous les recalculs
         # suivants pour cet employe des qu'il repointe.
+        # La borne est le DEBUT DE LA JOURNEE EN COURS, et non le debut de la
+        # fenetre de reconstruction. Une presence ouverte datant d'hier tombe
+        # dans la fenetre : en temps normal elle est supprimee puis recreee a
+        # l'etape precedente, mais uniquement si ses horodatages correspondent
+        # a des pointages bruts encore connus. Quand ces pointages ont disparu
+        # (journal du boitier efface, purge), la presence ouverte n'est ni
+        # reconnue ni cloturee, et la contrainte native bloque alors TOUTE
+        # nouvelle presence pour ce salarie - il badge chaque matin et ressort
+        # "absent" indefiniment. Constate le 10/09/2026 sur deux salaries,
+        # bloques par une presence ouverte de la veille.
+        # Les presences ouvertes du JOUR sont evidemment preservees : ce sont
+        # les personnes actuellement au travail, qui badgeront en sortant.
+        today_start = DEVICE_TZ.localize(
+            datetime.combine(DEVICE_TZ.localize(fields.Datetime.now()).date(), time.min)
+        ).astimezone(pytz.utc).replace(tzinfo=None)
         stale_open = Attendance.search([
             ('employee_id', '=', self.id),
             ('check_out', '=', False),
-            ('check_in', '<', window_start),
+            ('check_in', '<', today_start),
         ])
         for att in stale_open:
             day_end = DEVICE_TZ.localize(
@@ -241,4 +355,29 @@ class HrEmployee(models.Model):
             'absent': sorted(absent, key=lambda e: e['name']),
             'unregistered': sorted(unregistered, key=lambda e: e['name']),
             'on_leave': sorted(on_leave, key=lambda e: e['name']),
+            'device_status': self._villa_nova_etat_liaison_boitier(),
+        }
+
+    @api.model
+    def _villa_nova_etat_liaison_boitier(self):
+        """Etat de la liaison avec le ou les boitiers, pour le tableau du jour.
+
+        Quand le boitier ne repond plus, aucun pointage ne remonte et TOUT LE
+        MONDE bascule en "Absent". L'ecran affiche alors une information fausse
+        et actionnable : la RH pourrait relancer des salaries pourtant presents.
+        Le 15/09/2026, une machine simplement connectee au mauvais reseau a
+        ainsi produit 49 absences fictives.
+        On lit l'etat consigne par la synchronisation (toutes les 3 minutes)
+        plutot que d'interroger le boitier ici : une interrogation prend une
+        vingtaine de secondes et bloquerait l'affichage.
+        """
+        boitiers = self.env['biometric.device.details'].sudo().search([])
+        injoignables = boitiers.filtered('x_injoignable_depuis')
+        if not boitiers or not injoignables:
+            return {'reachable': True}
+        depuis = min(injoignables.mapped('x_injoignable_depuis'))
+        return {
+            'reachable': False,
+            'since': fields.Datetime.to_string(depuis),
+            'devices': injoignables.mapped('display_name'),
         }

@@ -11,6 +11,22 @@
                         type="object" class="oe_highlight"
                         help="Importe uniquement les pointages survenus depuis la derniere synchronisation. Se declenche aussi automatiquement toutes les 15 minutes (le boitier renvoie tout son historique a chaque pull, ~22s de transfert : un intervalle trop court risque de geler le lecteur d'empreinte au moment d'un badgeage)."/>
             </button>
+
+            <!-- Bouton "Clear Data" retire. Sous ce libelle anodin et sans la
+                 moindre confirmation, il effacait d'un seul clic le journal
+                 complet du boitier PHYSIQUE (conn.clear_attendance()) PUIS la
+                 totalite des pointages bruts en base (DELETE FROM
+                 zk_machine_attendance). Le 10/09/2026 a 09:02:35, un clic a
+                 ainsi detruit 3101 pointages historiques et, surtout, les
+                 badgeages du matin pas encore synchronises : cinq salaries
+                 presents se sont retrouves comptes absents, sans aucun moyen
+                 de retrouver leurs heures (ni sauvegarde, ni journalisation
+                 PostgreSQL permettant un retour en arriere).
+                 La suppression du bouton ne suffit pas a elle seule : la
+                 methode reste appelable autrement. Elle est donc egalement
+                 neutralisee cote serveur (voir action_clear_attendance dans
+                 biometric_device_details.py). -->
+            <button name="action_clear_attendance" position="replace"/>
         </field>
     </record>
 </odoo>
