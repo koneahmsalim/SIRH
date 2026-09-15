@@ -6,3 +6,7 @@ __pycache__/
 scripts/*.log
 .env
 config/odoo.conf
+
+# Configuration Claude Code personnelle : propre a chaque poste,
+# ne doit pas suivre le projet (regles de permission locales).
+.claude/settings.local.json
