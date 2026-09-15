@@ -2,9 +2,11 @@ from datetime import timedelta
 
 from odoo import _, api, fields, models
 
-# Delais legaux (Decret n98-198 du 7 mars 1998, art. 80 Code du travail ivoirien)
-JUSTIFICATIF_DELAY = timedelta(hours=24)
-ABANDON_POSTE_DELAY = timedelta(hours=72)
+# Les deux delais ne sont plus figes dans le code : ils sont parametrables par
+# la RH (Reglages > Conges), avec pour valeurs de depart celles du droit
+# ivoirien - decret n98-198 du 7 mars 1998 pour le justificatif, art. 80 du
+# Code du travail pour le seuil d'abandon de poste. Une entreprise peut
+# accorder un delai plus large que le minimum legal, jamais l'inverse.
 
 
 class HrUnplannedAbsence(models.Model):
@@ -21,8 +23,8 @@ class HrUnplannedAbsence(models.Model):
     )
     motif = fields.Text(string="Motif")
     justificatif_recu = fields.Boolean(string="Justificatif reçu")
-    justificatif_deadline = fields.Datetime(string="Délai justificatif (24h)", compute='_compute_deadlines', store=True)
-    abandon_poste_deadline = fields.Datetime(string="Seuil abandon de poste (72h)", compute='_compute_deadlines', store=True)
+    justificatif_deadline = fields.Datetime(string="Échéance du justificatif", compute='_compute_deadlines', store=True)
+    abandon_poste_deadline = fields.Datetime(string="Seuil d'alerte abandon de poste", compute='_compute_deadlines', store=True)
     state = fields.Selection(
         [
             ('declaree', "Déclarée"),
@@ -35,10 +37,13 @@ class HrUnplannedAbsence(models.Model):
 
     @api.depends('date_declaration')
     def _compute_deadlines(self):
+        delais = self.env['villa.nova.delais.absence']
+        justificatif = timedelta(hours=delais.delai_justificatif_heures())
+        abandon = timedelta(hours=delais.delai_abandon_poste_heures())
         for absence in self:
             base = absence.date_declaration or fields.Datetime.now()
-            absence.justificatif_deadline = base + JUSTIFICATIF_DELAY
-            absence.abandon_poste_deadline = base + ABANDON_POSTE_DELAY
+            absence.justificatif_deadline = base + justificatif
+            absence.abandon_poste_deadline = base + abandon
 
     @api.model_create_multi
     def create(self, vals_list):
@@ -49,7 +54,11 @@ class HrUnplannedAbsence(models.Model):
             for user in (rh_users | managers):
                 absence.activity_schedule(
                     'mail.mail_activity_data_todo',
-                    summary=_("Vérifier le justificatif d'absence de %s (délai 24h)", absence.employee_id.name),
+                    summary=_(
+                        "Vérifier le justificatif d'absence de %(nom)s (délai %(heures)sh)",
+                        nom=absence.employee_id.name,
+                        heures=self.env['villa.nova.delais.absence'].delai_justificatif_heures(),
+                    ),
                     date_deadline=absence.justificatif_deadline.date(),
                     user_id=user.id,
                 )
@@ -69,7 +78,8 @@ class HrUnplannedAbsence(models.Model):
 
     @api.model
     def _cron_check_abandon_poste(self):
-        """Article 80 du Code du travail : absence non justifiee de 72h ->
+        """Article 80 du Code du travail : absence non justifiee au-dela du
+        seuil configure (72h par defaut) ->
         alerte abandon de poste (l'employeur PEUT considerer cela comme tel,
         ce n'est jamais automatique : on notifie, on ne prend aucune decision
         a la place de l'entreprise)."""
@@ -83,7 +93,11 @@ class HrUnplannedAbsence(models.Model):
             for user in absence._get_rh_users():
                 absence.activity_schedule(
                     'mail.mail_activity_data_warning',
-                    summary=_("⚠ Absence non justifiée depuis 72h : %s", absence.employee_id.name),
+                    summary=_(
+                        "⚠ Absence non justifiée depuis %(heures)sh : %(nom)s",
+                        heures=self.env['villa.nova.delais.absence'].delai_abandon_poste_heures(),
+                        nom=absence.employee_id.name,
+                    ),
                     note=_(
                         "Conformément à l'article 80 du Code du travail, l'absence non justifiée "
                         "peut être considérée comme un abandon de poste. Décision à prendre par "

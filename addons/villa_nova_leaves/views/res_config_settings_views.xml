@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+
+        <!-- Les deux delais etaient figes dans le code : toute evolution de la
+             politique RH imposait une intervention technique. Ils sont
+             desormais saisissables directement dans les reglages de l'app
+             Conges, la ou la RH les cherchera. -->
+        <record id="res_config_settings_view_form_villa_nova_absences" model="ir.ui.view">
+            <field name="name">res.config.settings.form.villa.nova.delais.absence</field>
+            <field name="model">res.config.settings</field>
+            <field name="inherit_id" ref="base.res_config_settings_view_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="//form" position="inside">
+                    <app string="Congés" name="hr_holidays">
+                        <block title="Absences non planifiées"
+                               name="villa_nova_absences_block"
+                               help="Délais réglementaires appliqués aux absences déclarées sans préavis.">
+
+                            <setting string="Délai de remise du justificatif"
+                                     help="Temps laissé au collaborateur pour fournir un justificatif après sa déclaration d'absence. Au-delà, une relance part vers la RH et son responsable. Le droit ivoirien retient 24 heures : un délai plus large reste possible, un délai plus court ne l'est pas.">
+                                <div class="content-group">
+                                    <div class="mt16">
+                                        <field name="villa_nova_delai_justificatif" class="o_light_label"/>
+                                        <span class="ms-1">heures</span>
+                                    </div>
+                                </div>
+                            </setting>
+
+                            <setting string="Seuil d'alerte abandon de poste"
+                                     help="Durée d'absence non justifiée déclenchant une alerte auprès de la Direction Générale. L'article 80 du Code du travail retient 72 heures. Le système se contente d'alerter : la qualification d'abandon de poste reste une décision de l'entreprise.">
+                                <div class="content-group">
+                                    <div class="mt16">
+                                        <field name="villa_nova_delai_abandon_poste" class="o_light_label"/>
+                                        <span class="ms-1">heures</span>
+                                    </div>
+                                </div>
+                            </setting>
+
+                        </block>
+                    </app>
+                </xpath>
+            </field>
+        </record>
+
+    </data>
+</odoo>
