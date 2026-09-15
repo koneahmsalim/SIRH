@@ -120,6 +120,32 @@
     }
 }
 
+// Champs "etroits" natifs (hr.scss, .o_hr_narrow_field : utilise pour la
+// cible de recrutement sur la fiche de poste - "Cible : [N] nouveaux
+// employes"). En mode edition, Odoo applique .o_form_editable .o_row >
+// .o_field_widget { flex: 1 1 auto; width: 0!important } a TOUS les champs
+// enfants directs d'une .o_row (form_controller.scss), en misant sur le
+// flex-grow pour leur redonner une largeur utile. Tant que le texte voisin
+// ("nouveaux employes") pouvait se casser sur plusieurs lignes, ca passait
+// inapercu ; des qu'on l'empeche de se casser (cf. villa_nova_recruitment,
+// correctif de troncature), ce texte devient incompressible et "vole" tout
+// l'espace flexible, ecrasant le champ numerique a quasi 0px - constat reel
+// remonte par l'utilisateur (chiffre invisible, seul le texte restait).
+// Le selecteur ci-dessous reprend EXACTEMENT le contexte de la regle
+// native, prefixe .o_form_view compris (verifie via l'inspection des
+// regles CSS reellement appliquees dans le navigateur - la regle native
+// complete est ".o_form_view .o_form_editable .o_row > .o_field_widget",
+// 4 classes, pas 3 comme un premier essai le supposait) : a specificite
+// egale et toutes deux !important, c'est l'ordre de chargement qui
+// tranche, et ce module se charge apres le coeur Odoo dans le bundle -
+// verifie dans le CSS compile servi. Toute version moins specifique
+// perdrait systematiquement face a la regle native, quel que soit l'ordre.
+.o_form_view .o_form_editable .o_row > .o_hr_narrow_field {
+    flex: 0 0 auto !important;
+    width: 8rem !important;
+    max-width: 8rem !important;
+}
+
 // Dropdowns / menus contextuels.
 .dropdown-menu {
     border-radius: var(--vn-radius-md);

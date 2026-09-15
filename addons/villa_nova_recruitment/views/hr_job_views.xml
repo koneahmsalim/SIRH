@@ -19,11 +19,27 @@
                 <field name="x_validation_state" widget="statusbar" statusbar_visible="draft,to_validate,validated"/>
             </xpath>
 
+            <!-- Nommage des onglets : "Recrutement" et "Planification du
+                 recrutement" coexistaient et se confondaient a la lecture, et un
+                 onglet "Fiche de poste" a l'interieur de ce qui EST la fiche de
+                 poste n'aidait pas. Chaque onglet porte desormais le nom de ce
+                 qu'il contient reellement. Le premier onglet est cible par index
+                 car deux pages partagent le meme attribut name="recruitment_page"
+                 (hr_recruitment en ajoute une seconde) : un selecteur par nom
+                 serait ambigu. -->
+            <xpath expr="(//page[@name='recruitment_page'])[1]" position="attributes">
+                <attribute name="string">Poste et diffusion</attribute>
+            </xpath>
+
             <xpath expr="//notebook" position="inside">
-                <page string="Planification du recrutement" name="villa_nova_planification">
+                <page string="Besoin et budget" name="villa_nova_planification">
                     <group>
                         <group name="villa_nova_motif" string="Identification du besoin">
-                            <field name="x_motif_recrutement" required="1"/>
+                            <!-- Non obligatoire a la saisie : un poste peut n'exister que
+                                 pour structurer l'organisation, sans recrutement associe.
+                                 Le motif n'est exige qu'a la soumission pour validation
+                                 (cf. action_submit_for_validation). -->
+                            <field name="x_motif_recrutement"/>
                             <field name="x_delai_souhaite"/>
                             <field name="x_date_cloture"/>
                             <field name="x_budget_recrutement"/>
@@ -35,16 +51,20 @@
                         </group>
                     </group>
                 </page>
-                <page string="Fiche de poste" name="villa_nova_fiche_poste">
+                <!-- "Competences attendues" n'est volontairement PAS repris ici :
+                     le position="move" sur skill_ids ne retirait pas le champ de
+                     son emplacement d'origine (un module charge ensuite l'y
+                     remet), si bien que la meme liste de competences etait
+                     rendue DEUX fois dans le formulaire - d'autant plus visible
+                     quand le poste en portait 85. Les competences restent donc a
+                     leur emplacement natif, dans l'onglet "Poste et diffusion". -->
+                <page string="Descriptif et profil" name="villa_nova_fiche_poste">
                     <group string="Description du poste">
                         <field name="description" position="move"/>
                     </group>
                     <group string="Profil recherché">
                         <field name="requirements" nolabel="1"
                                placeholder="Diplômes, expérience, qualités requises..."/>
-                    </group>
-                    <group string="Compétences attendues">
-                        <field name="skill_ids" position="move"/>
                     </group>
                 </page>
             </xpath>
@@ -55,6 +75,18 @@
             <page name="job_description_page" position="attributes">
                 <attribute name="invisible">1</attribute>
             </page>
+
+            <!-- Le champ "Cible" (nombre de recrutements) est dans une div.o_row
+                 flex avec le texte "nouveaux employes" a cote, sans
+                 white-space:nowrap : des que la colonne se resserre (fenetre
+                 etroite, panneau lateral ouvert...), le texte se casse mot par
+                 mot ("nouveaux" / "employes" sur deux lignes empilees) au lieu
+                 de rester groupe - signale par l'utilisateur sur une capture
+                 d'ecran ou le champ semblait "etroit". Le span garde
+                 maintenant sa phrase entiere sur une seule ligne. -->
+            <xpath expr="//div[@name='recruitment_target']/span" position="attributes">
+                <attribute name="class">text-nowrap</attribute>
+            </xpath>
 
         </field>
     </record>
@@ -84,6 +116,22 @@
             <field name="is_published" position="attributes">
                 <attribute name="readonly">x_validation_state != 'validated'</attribute>
             </field>
+
+            <!-- Le circuit de validation (Brouillon -> DG -> Validé) n'existait
+                 que dans le formulaire : depuis le kanban, impossible de voir
+                 quels postes attendent une validation sans les ouvrir un par un.
+                 Le badge n'apparait que pour les deux etats qui appellent une
+                 action ; un poste valide n'en porte pas, le bandeau "PUBLIÉ"
+                 natif disant deja l'essentiel - on ajoute du signal, pas une
+                 pastille de plus sur chaque carte. -->
+            <xpath expr="//div[hasclass('o_kanban_card_header_title')]" position="inside">
+                <div class="mt-1" invisible="x_validation_state == 'validated'">
+                    <span class="badge text-bg-secondary"
+                          invisible="x_validation_state != 'draft'">Brouillon</span>
+                    <span class="badge text-bg-warning"
+                          invisible="x_validation_state != 'to_validate'">À valider par la DG</span>
+                </div>
+            </xpath>
         </field>
     </record>
 

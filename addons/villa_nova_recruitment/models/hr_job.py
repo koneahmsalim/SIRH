@@ -36,6 +36,16 @@ class HrJob(models.Model):
         copy=False,
     )
 
+    # Le bouton "Publié" est accessible en un clic depuis l'en-tete du
+    # formulaire ET depuis la carte kanban : chaque bascule ecrivait une ligne
+    # "Non -> Oui (Visible sur le site web actuel)" dans le fil de discussion.
+    # Sur un poste reel, 13 des 15 lignes de suivi venaient de ce seul champ, au
+    # point d'enterrer le message qui compte vraiment ("Poste validé par la
+    # Direction Générale"). L'information n'est pas perdue pour autant : la
+    # publication est deja conditionnee a x_validation_state (cf. write
+    # ci-dessous), et c'est CE champ, tracke, qui porte l'historique utile.
+    website_published = fields.Boolean(tracking=False)
+
     def write(self, vals):
         if vals.get('is_published'):
             new_state = vals.get('x_validation_state')
@@ -64,9 +74,12 @@ class HrJob(models.Model):
                 partner_ids=self.env.user.partner_id.ids,
                 subject=_("Poste « %s » créé", job.name),
                 body=_(
-                    "Ce poste n'est pas encore publié. Complétez l'onglet « Planification du "
-                    "recrutement » (délai, budget, objectifs) puis cliquez sur « Soumettre pour "
-                    "validation » pour que la Direction Générale puisse le valider."
+                    "Le poste est enregistré. Vous pouvez dès maintenant y rattacher des "
+                    "employés depuis leur fiche.<br/>"
+                    "S'il doit faire l'objet d'un recrutement, complétez l'onglet "
+                    "« Besoin et budget » (motif, délai, budget, objectifs) puis cliquez sur "
+                    "« Soumettre pour validation » : la Direction Générale pourra alors le "
+                    "valider et il sera publié sur le site carrière."
                 ),
             )
         return jobs
@@ -78,6 +91,19 @@ class HrJob(models.Model):
         return group.users if group else self.env['res.users']
 
     def action_submit_for_validation(self):
+        # Le motif n'est exige qu'ici, au moment ou le poste part reellement en
+        # recrutement - et non plus des la creation. Un poste peut en effet etre
+        # cree seulement pour structurer l'organisation et y rattacher des
+        # employes deja en place (embauche sur decision interne, reprise de
+        # l'existant a la mise en service) : dans ce cas, choisir entre
+        # "Création de poste / Remplacement / Renforcement" n'a aucun sens.
+        sans_motif = self.filtered(lambda job: not job.x_motif_recrutement)
+        if sans_motif:
+            raise UserError(_(
+                "Renseignez le motif du recrutement (onglet « Besoin et budget ») avant "
+                "de soumettre le poste à la Direction Générale : %s",
+                ", ".join(sans_motif.mapped('name')),
+            ))
         self.write({'x_validation_state': 'to_validate'})
         users = self._get_direction_generale_users()
         for job in self:
