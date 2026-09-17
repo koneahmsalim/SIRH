@@ -1,0 +1,27 @@
+# Fins de ligne.
+#
+# Le projet se developpe sous Windows et s'execute sous Linux. Un script shell
+# enregistre avec des fins de ligne CRLF echoue sur un serveur Linux avec un
+# message incomprehensible ("bad interpreter: No such file or directory") :
+# l'interpreteur cherche "/bin/bash\r", qui n'existe pas. Le Dockerfile
+# corrigeait deja le cas de docker-cmd.sh apres coup ; on traite ici la cause,
+# pour tous les fichiers destines au serveur.
+
+* text=auto
+
+*.sh    text eol=lf
+*.conf  text eol=lf
+*.yml   text eol=lf
+*.yaml  text eol=lf
+Dockerfile   text eol=lf
+Caddyfile    text eol=lf
+.env.prod.example text eol=lf
+
+# Binaires : jamais de conversion.
+*.png binary
+*.jpg binary
+*.gif binary
+*.ico binary
+*.pdf binary
+*.dump binary
+*.tar.gz binary
