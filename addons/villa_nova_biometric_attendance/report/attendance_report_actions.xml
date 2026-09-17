@@ -2,7 +2,7 @@
 <odoo>
 
     <record id="action_report_attendance_pdf" model="ir.actions.report">
-        <field name="name">Rapport de présence (retards / non pointé)</field>
+        <field name="name">Rapport de présence</field>
         <field name="model">villa.nova.attendance.report.wizard</field>
         <field name="report_type">qweb-pdf</field>
         <field name="report_name">villa_nova_biometric_attendance.presence_report</field>

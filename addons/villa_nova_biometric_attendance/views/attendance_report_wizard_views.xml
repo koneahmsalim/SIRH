@@ -14,6 +14,7 @@
                     </group>
                     <group>
                         <field name="report_type"/>
+                        <field name="group_by" widget="radio" options="{'horizontal': True}"/>
                         <field name="department_id"/>
                         <field name="employee_ids" widget="many2many_tags"/>
                     </group>
@@ -35,7 +36,7 @@
     </record>
 
     <menuitem id="menu_villa_nova_attendance_report"
-              name="Retards &amp; absences"
+              name="Rapport de présence"
               parent="hr_attendance.menu_hr_attendance_root"
               action="action_villa_nova_attendance_report_wizard"
               sequence="17"/>

@@ -1,6 +1,7 @@
 import base64
 import csv
 import io
+from collections import defaultdict
 from datetime import datetime, time, timedelta
 
 import pytz
@@ -13,7 +14,7 @@ from ..models.zk_machine_attendance import DEVICE_TZ
 
 class VillaNovaAttendanceReportWizard(models.TransientModel):
     _name = 'villa.nova.attendance.report.wizard'
-    _description = "Rapport de présence : retards et non-pointés"
+    _description = "Rapport de présence : présences, retards et absences"
 
     date_from = fields.Date(string="Du", required=True,
                              default=lambda self: fields.Date.today().replace(day=1))
@@ -22,10 +23,20 @@ class VillaNovaAttendanceReportWizard(models.TransientModel):
         string="Heure limite d'arrivée", default=8.0,
         help="Un pointage d'entrée après cette heure est compté comme un retard.")
     report_type = fields.Selection([
-        ('late', "Retards"),
-        ('absent', "Non pointé"),
-        ('both', "Les deux"),
-    ], string="Contenu du rapport", default='both', required=True)
+        ('all', "Retards et absences"),
+        ('late', "Retards seuls"),
+        ('absent', "Absences seules"),
+    ], string="Contenu du rapport", default='all', required=True,
+        help="Le rapport réunit le détail des retards et celui des absences "
+             "dans un seul document.")
+    group_by = fields.Selection([
+        ('employee', "Par employé"),
+        ('date', "Par date"),
+    ], string="Regroupement", default='employee', required=True,
+        help="Par employé : chaque personne forme un bloc, avec ses dates et son "
+             "sous-total — c'est la vue à retenir pour retracer un parcours "
+             "individuel. Par date : chaque journée forme un bloc, pour un suivi "
+             "quotidien.")
     department_id = fields.Many2one('hr.department', string="Département")
     employee_ids = fields.Many2many(
         'hr.employee', string="Employés",
@@ -67,65 +78,36 @@ class VillaNovaAttendanceReportWizard(models.TransientModel):
         return (start_local.astimezone(pytz.utc).replace(tzinfo=None),
                 end_local.astimezone(pytz.utc).replace(tzinfo=None))
 
-    @staticmethod
-    def _working_weekdays(employee):
-        """Jours de la semaine travailles (0=lundi ... 6=dimanche), d'apres
-        le calendrier de ressource de l'employe."""
-        return {int(a.dayofweek) for a in employee.resource_calendar_id.attendance_ids}
+    def _working_weekdays(self, employee):
+        """Jours de la semaine travailles (0=lundi ... 6=dimanche).
+
+        On retombe sur le calendrier de la societe quand l'employe n'en a pas :
+        sans ce repli, un employe sans horaire configure sortait purement et
+        simplement du rapport, ses absences comprises - le silence le plus
+        trompeur qui soit pour un rapport de presence.
+        """
+        calendar = employee.resource_calendar_id or employee.company_id.resource_calendar_id
+        if not calendar:
+            return set()
+        return {int(a.dayofweek) for a in calendar.attendance_ids}
 
     # ------------------------------------------------------------------
-    # Calcul des lignes
+    # Jours reellement attendus
     # ------------------------------------------------------------------
-    def _compute_late_lines(self, employees):
-        self.ensure_one()
-        if not employees or not self._date_range():
-            return []
-        start_utc, _end = self._day_bounds_utc(self.date_from)
-        _start, end_utc = self._day_bounds_utc(min(self.date_to, fields.Date.today()))
-        attendances = self.env['hr.attendance'].search([
-            ('employee_id', 'in', employees.ids),
-            ('check_in', '>=', start_utc),
-            ('check_in', '<=', end_utc),
-        ], order='check_in')
+    def _expected_working_days(self, employees, days):
+        """Pour chaque employe, l'ensemble des dates ou sa presence etait due :
+        jours ouvres de son horaire, hors jours feries et hors conges valides.
 
-        threshold_minutes = round(self.late_threshold * 60)
-        working_days_cache = {}
-        lines = []
-        for att in attendances:
-            employee = att.employee_id
-            if employee.id not in working_days_cache:
-                working_days_cache[employee.id] = self._working_weekdays(employee)
-            local_dt = pytz.utc.localize(att.check_in).astimezone(DEVICE_TZ)
-            if local_dt.weekday() not in working_days_cache[employee.id]:
-                continue
-            minutes_in = local_dt.hour * 60 + local_dt.minute
-            if minutes_in > threshold_minutes:
-                lines.append({
-                    'employee': employee,
-                    'date': local_dt.date(),
-                    'check_in_local': local_dt,
-                    'delay_minutes': minutes_in - threshold_minutes,
-                })
-        return lines
-
-    def _compute_absent_lines(self, employees):
+        Sert a la fois au calcul des absences et a celui de la synthese, pour
+        qu'un jour ferie ne puisse pas etre compte absent dans un tableau et
+        ouvre dans l'autre.
+        """
         self.ensure_one()
-        days = self._date_range()
         if not employees or not days:
-            return []
+            return {}
 
-        start_utc, _ = self._day_bounds_utc(days[0])
-        _, end_utc = self._day_bounds_utc(days[-1])
-
-        attendances = self.env['hr.attendance'].search([
-            ('employee_id', 'in', employees.ids),
-            ('check_in', '>=', start_utc),
-            ('check_in', '<=', end_utc),
-        ])
-        present_days = set()
-        for att in attendances:
-            local_dt = pytz.utc.localize(att.check_in).astimezone(DEVICE_TZ)
-            present_days.add((att.employee_id.id, local_dt.date()))
+        start_utc = self._day_bounds_utc(days[0])[0]
+        end_utc = self._day_bounds_utc(days[-1])[1]
 
         leaves = self.env['hr.leave'].search([
             ('employee_id', 'in', employees.ids),
@@ -133,12 +115,11 @@ class VillaNovaAttendanceReportWizard(models.TransientModel):
             ('date_from', '<=', end_utc),
             ('date_to', '>=', start_utc),
         ])
-        leave_days_by_employee = {}
+        leave_days_by_employee = defaultdict(set)
         for leave in leaves:
-            emp_days = leave_days_by_employee.setdefault(leave.employee_id.id, set())
             d = leave.date_from.date()
             while d <= leave.date_to.date():
-                emp_days.add(d)
+                leave_days_by_employee[leave.employee_id.id].add(d)
                 d += timedelta(days=1)
 
         holidays = self.env['resource.calendar.leaves'].search([
@@ -153,19 +134,165 @@ class VillaNovaAttendanceReportWizard(models.TransientModel):
                 holiday_days.add(d)
                 d += timedelta(days=1)
 
-        lines = []
+        expected = {}
         for employee in employees:
             working_days = self._working_weekdays(employee)
-            emp_leave_days = leave_days_by_employee.get(employee.id, set())
-            for day in days:
-                if day.weekday() not in working_days:
-                    continue
-                if day in holiday_days or day in emp_leave_days:
-                    continue
-                if (employee.id, day) in present_days:
-                    continue
-                lines.append({'employee': employee, 'date': day})
+            emp_leaves = leave_days_by_employee.get(employee.id, set())
+            expected[employee.id] = {
+                day for day in days
+                if day.weekday() in working_days
+                and day not in holiday_days
+                and day not in emp_leaves
+            }
+        return expected
+
+    def _present_days_by_employee(self, employees, days):
+        """Dates effectivement pointees, par employe."""
+        self.ensure_one()
+        if not employees or not days:
+            return {}
+        start_utc = self._day_bounds_utc(days[0])[0]
+        end_utc = self._day_bounds_utc(days[-1])[1]
+        attendances = self.env['hr.attendance'].search([
+            ('employee_id', 'in', employees.ids),
+            ('check_in', '>=', start_utc),
+            ('check_in', '<=', end_utc),
+        ])
+        present = defaultdict(set)
+        for att in attendances:
+            local_dt = pytz.utc.localize(att.check_in).astimezone(DEVICE_TZ)
+            present[att.employee_id.id].add(local_dt.date())
+        return present
+
+    # ------------------------------------------------------------------
+    # Calcul des lignes
+    # ------------------------------------------------------------------
+    def _compute_late_lines(self, employees):
+        self.ensure_one()
+        days = self._date_range()
+        if not employees or not days:
+            return []
+        start_utc = self._day_bounds_utc(days[0])[0]
+        end_utc = self._day_bounds_utc(days[-1])[1]
+        attendances = self.env['hr.attendance'].search([
+            ('employee_id', 'in', employees.ids),
+            ('check_in', '>=', start_utc),
+            ('check_in', '<=', end_utc),
+        ], order='check_in')
+
+        threshold_minutes = round(self.late_threshold * 60)
+        working_days_cache = {}
+
+        # On ne retient que le PREMIER pointage de chaque journee. Sans cela, un
+        # employe qui rebadge apres etre sorti (pause, rendez-vous exterieur)
+        # declenchait un second retard, calcule sur son heure de retour : un
+        # retour a 16h35 produisait "8h35 de retard" et faisait exploser le
+        # cumul. On arrive en retard une fois par jour, pas a chaque passage.
+        premier_pointage = {}
+        for att in attendances:
+            employee = att.employee_id
+            if employee.id not in working_days_cache:
+                working_days_cache[employee.id] = self._working_weekdays(employee)
+            local_dt = pytz.utc.localize(att.check_in).astimezone(DEVICE_TZ)
+            if local_dt.weekday() not in working_days_cache[employee.id]:
+                continue
+            cle = (employee.id, local_dt.date())
+            if cle not in premier_pointage or local_dt < premier_pointage[cle][1]:
+                premier_pointage[cle] = (employee, local_dt)
+
+        lines = []
+        for employee, local_dt in premier_pointage.values():
+            minutes_in = local_dt.hour * 60 + local_dt.minute
+            if minutes_in > threshold_minutes:
+                lines.append({
+                    'employee': employee,
+                    'date': local_dt.date(),
+                    'check_in_local': local_dt,
+                    'delay_minutes': minutes_in - threshold_minutes,
+                })
         return lines
+
+    def _compute_absent_lines(self, employees):
+        self.ensure_one()
+        days = self._date_range()
+        expected = self._expected_working_days(employees, days)
+        if not expected:
+            return []
+        present = self._present_days_by_employee(employees, days)
+        lines = []
+        for employee in employees:
+            emp_present = present.get(employee.id, set())
+            for day in sorted(expected.get(employee.id, ())):
+                if day not in emp_present:
+                    lines.append({'employee': employee, 'date': day})
+        return lines
+
+    def _compute_synthesis(self, employees, late_lines, absent_lines):
+        """Une ligne par employe : ce que le rapport doit montrer en premier.
+
+        Lister chaque jour de presence individuellement produirait plusieurs
+        centaines de lignes sur un mois pour un effectif de quarante personnes -
+        un export, pas un rapport. La presence est donc restituee en volume
+        (jours pointes) et en qualite (ponctualite), le detail nominatif restant
+        reserve aux retards et aux absences, qui appellent une action.
+        """
+        self.ensure_one()
+        days = self._date_range()
+        expected = self._expected_working_days(employees, days)
+
+        retards_par_employe = defaultdict(int)
+        minutes_par_employe = defaultdict(int)
+        for line in late_lines:
+            retards_par_employe[line['employee'].id] += 1
+            minutes_par_employe[line['employee'].id] += line['delay_minutes']
+
+        absences_par_employe = defaultdict(int)
+        for line in absent_lines:
+            absences_par_employe[line['employee'].id] += 1
+
+        rows = []
+        for employee in employees:
+            attendus = len(expected.get(employee.id, ()))
+            absences = absences_par_employe.get(employee.id, 0)
+            presents = max(attendus - absences, 0)
+            retards = retards_par_employe.get(employee.id, 0)
+            a_lheure = max(presents - retards, 0)
+            rows.append({
+                'employee': employee,
+                'attendus': attendus,
+                'presents': presents,
+                'a_lheure': a_lheure,
+                'retards': retards,
+                'minutes_retard': minutes_par_employe.get(employee.id, 0),
+                'absences': absences,
+                'ponctualite': (a_lheure * 100.0 / presents) if presents else 0.0,
+                'assiduite': (presents * 100.0 / attendus) if attendus else 0.0,
+                'sans_horaire': attendus == 0,
+            })
+
+        # Les situations a traiter remontent en tete : c'est un rapport d'action,
+        # pas un annuaire. A ponctualite egale, le plus absent passe devant.
+        rows.sort(key=lambda r: (r['sans_horaire'], r['ponctualite'],
+                                 -r['absences'], r['employee'].name or ''))
+        return rows
+
+    @staticmethod
+    def _totaux(rows):
+        """Totaux de la synthese, pour le pied de tableau et les cartes."""
+        attendus = sum(r['attendus'] for r in rows)
+        presents = sum(r['presents'] for r in rows)
+        a_lheure = sum(r['a_lheure'] for r in rows)
+        return {
+            'effectif': len(rows),
+            'attendus': attendus,
+            'presents': presents,
+            'a_lheure': a_lheure,
+            'retards': sum(r['retards'] for r in rows),
+            'minutes_retard': sum(r['minutes_retard'] for r in rows),
+            'absences': sum(r['absences'] for r in rows),
+            'ponctualite': (a_lheure * 100.0 / presents) if presents else 0.0,
+            'assiduite': (presents * 100.0 / attendus) if attendus else 0.0,
+        }
 
     # ------------------------------------------------------------------
     # Formatage
@@ -178,7 +305,7 @@ class VillaNovaAttendanceReportWizard(models.TransientModel):
 
     @staticmethod
     def _format_delay(minutes):
-        h, m = divmod(minutes, 60)
+        h, m = divmod(int(minutes), 60)
         if h:
             return _("%(h)dh%(m)02d") % {'h': h, 'm': m}
         return _("%(m)d min") % {'m': m}
@@ -192,8 +319,8 @@ class VillaNovaAttendanceReportWizard(models.TransientModel):
         if not employees:
             raise UserError(_("Aucun employé ne correspond aux filtres sélectionnés."))
 
-        late_lines = self._compute_late_lines(employees) if self.report_type in ('late', 'both') else []
-        absent_lines = self._compute_absent_lines(employees) if self.report_type in ('absent', 'both') else []
+        late_lines = self._compute_late_lines(employees) if self.report_type in ('all', 'late') else []
+        absent_lines = self._compute_absent_lines(employees) if self.report_type in ('all', 'absent') else []
 
         buffer = io.StringIO()
         writer = csv.writer(buffer, delimiter=';')
@@ -203,10 +330,26 @@ class VillaNovaAttendanceReportWizard(models.TransientModel):
         }])
         writer.writerow([])
 
-        if self.report_type in ('late', 'both'):
-            writer.writerow([_("RETARDS (arrivée après %s)") % self._format_threshold()])
+        if self.report_type == 'all':
+            rows = self._compute_synthesis(employees, late_lines, absent_lines)
+            writer.writerow([_("SYNTHESE PAR EMPLOYE")])
+            writer.writerow([_("Employé"), _("Département"), _("Jours dus"), _("Présents"),
+                             _("À l'heure"), _("Retards"), _("Cumul retard (min)"),
+                             _("Absences"), _("Ponctualité (%)")])
+            for row in rows:
+                writer.writerow([
+                    row['employee'].name,
+                    row['employee'].department_id.name or '',
+                    row['attendus'], row['presents'], row['a_lheure'],
+                    row['retards'], row['minutes_retard'], row['absences'],
+                    '%.1f' % row['ponctualite'],
+                ])
+            writer.writerow([])
+
+        if self.report_type in ('all', 'late'):
+            writer.writerow([_("DETAIL DES RETARDS (arrivée après %s)") % self._format_threshold()])
             writer.writerow([_("Employé"), _("Département"), _("Date"), _("Heure d'arrivée"), _("Retard")])
-            for line in sorted(late_lines, key=lambda l: (l['date'], l['employee'].name)):
+            for line in sorted(late_lines, key=lambda l: (l['date'], l['employee'].name or '')):
                 writer.writerow([
                     line['employee'].name,
                     line['employee'].department_id.name or '',
@@ -218,10 +361,10 @@ class VillaNovaAttendanceReportWizard(models.TransientModel):
                 writer.writerow([_("Aucun retard sur la période.")])
             writer.writerow([])
 
-        if self.report_type in ('absent', 'both'):
-            writer.writerow([_("NON POINTÉ")])
+        if self.report_type in ('all', 'absent'):
+            writer.writerow([_("DETAIL DES ABSENCES (jour dû, non pointé)")])
             writer.writerow([_("Employé"), _("Département"), _("Date")])
-            for line in sorted(absent_lines, key=lambda l: (l['date'], l['employee'].name)):
+            for line in sorted(absent_lines, key=lambda l: (l['date'], l['employee'].name or '')):
                 writer.writerow([
                     line['employee'].name,
                     line['employee'].department_id.name or '',

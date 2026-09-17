@@ -1,63 +1,396 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
 
+    <!--
+      Rapport de presence - document unique.
+
+      Deux contraintes ont dicte la forme de ce gabarit.
+
+      1. Rendu : wkhtmltopdf 0.12.6 embarque un WebKit ancien. Ni CSS Grid ni
+         flexbox fiable - toute la mise en colonnes passe donc par des <table>
+         et des largeurs explicites. Les polices declarees sont celles
+         reellement installees dans le conteneur (C059, Nimbus Sans) : declarer
+         une police absente produit un repli silencieux et un document qui ne
+         ressemble a rien, sans qu'aucune erreur ne soit levee.
+
+      2. Aucun operateur "%" ici. Tout le formatage (pourcentages, durees,
+         libelles) est prepare dans report/attendance_report.py. QWeb compile
+         les attributs en chaines de format Python, ou un "%" litteral se
+         transforme vite en "ValueError: incomplete format" a l'execution.
+    -->
     <template id="presence_report">
         <t t-call="web.html_container">
             <t t-foreach="docs" t-as="wizard">
                 <t t-call="web.external_layout">
-                    <div class="page">
-                        <h2>Rapport de présence</h2>
-                        <p>
-                            Période du <span t-esc="wizard.date_from.strftime('%d/%m/%Y')"/>
-                            au <span t-esc="wizard.date_to.strftime('%d/%m/%Y')"/>
-                            — seuil de retard : <span t-esc="threshold_label"/>
+                    <div class="page vn-rapport">
+
+                        <style>
+                            .vn-rapport {
+                                font-family: "Nimbus Sans", Helvetica, Arial, sans-serif;
+                                color: #2A2D2F;
+                                font-size: 9pt;
+                                line-height: 1.45;
+                                -webkit-print-color-adjust: exact;
+                            }
+                            .vn-rapport table { border-collapse: collapse; width: 100%; }
+                            .vn-rapport thead { display: table-header-group; }
+                            .vn-rapport tr { page-break-inside: avoid; }
+                            /* Le CSS global des rapports Odoo encadre chaque cellule.
+                               On ne garde que les filets horizontaux : la lecture d'un
+                               tableau se fait en lignes, les traits verticaux n'ajoutent
+                               que du bruit. */
+                            .vn-rapport th, .vn-rapport td {
+                                border-left: 0 !important; border-right: 0 !important;
+                            }
+                            .vn-rapport table { border: 0 !important; }
+
+                            /* --- En-tete ------------------------------------ */
+                            .vn-filet-accent { height: 3px; background: #DC143C; margin: 0 0 14px 0; }
+                            .vn-titre {
+                                font-family: "C059", "Century Schoolbook L", Georgia, serif;
+                                font-size: 21pt; font-weight: bold; margin: 0 0 2px 0;
+                                color: #2A2D2F; letter-spacing: -0.2px;
+                            }
+                            .vn-sous-titre { font-size: 10pt; color: #6B7A89; margin: 0 0 14px 0; }
+                            .vn-meta { margin-bottom: 20px; }
+                            .vn-meta td {
+                                border-top: 1px solid #E8EBEE; border-bottom: 1px solid #E8EBEE;
+                                padding: 7px 12px 7px 0; vertical-align: top;
+                            }
+                            .vn-meta-cle {
+                                display: block; font-size: 6.8pt; color: #8A97A3;
+                                text-transform: uppercase; letter-spacing: 0.9px; margin-bottom: 1px;
+                            }
+                            .vn-meta-val { font-size: 9pt; color: #2A2D2F; font-weight: bold; }
+
+                            /* --- Cartes de synthese ------------------------- */
+                            .vn-cartes { margin-bottom: 18px; }
+                            .vn-cartes td { vertical-align: top; }
+                            .vn-carte {
+                                border: 1px solid #E8EBEE; border-top: 3px solid #6B7A89;
+                                background: #FBFCFC; padding: 12px 14px 13px 14px;
+                            }
+                            .vn-carte-presence { border-top-color: #1F6F4A; }
+                            .vn-carte-retard   { border-top-color: #B26A00; }
+                            .vn-carte-absence  { border-top-color: #A80F2E; }
+                            .vn-carte-cle {
+                                font-size: 7pt; text-transform: uppercase;
+                                letter-spacing: 1.1px; color: #6B7A89; margin: 0 0 6px 0;
+                            }
+                            .vn-carte-nb {
+                                font-size: 27pt; font-weight: bold; line-height: 1;
+                                margin: 0 0 5px 0; letter-spacing: -1px;
+                            }
+                            .vn-nb-presence { color: #1F6F4A; }
+                            .vn-nb-absence  { color: #A80F2E; }
+                            .vn-carte-detail { font-size: 7.6pt; color: #6B7A89; margin: 0; }
+
+                            /* --- Bandeau d'ensemble ------------------------- */
+                            /* La ligne de totaux n'a plus de tableau nominatif au-dessus
+                               pour lui fournir ses en-tetes : elle porte donc les siens. */
+                            .vn-ensemble { margin-bottom: 26px; }
+                            .vn-ensemble th {
+                                font-size: 6.6pt; text-transform: uppercase; letter-spacing: 0.8px;
+                                color: #8A97A3; font-weight: bold; padding: 0 6px 4px 6px;
+                                border-bottom: 1px solid #E8EBEE; white-space: nowrap;
+                            }
+                            .vn-ensemble td {
+                                font-size: 11pt; font-weight: bold; color: #2A2D2F;
+                                padding: 8px 6px 0 6px; white-space: nowrap;
+                            }
+                            .vn-ensemble .vn-ensemble-cle {
+                                font-family: "C059", "Century Schoolbook L", Georgia, serif;
+                                font-size: 10pt;
+                            }
+
+                            /* --- Sections ---------------------------------- */
+                            .vn-section { margin-bottom: 22px; }
+                            .vn-section-titre {
+                                font-family: "C059", "Century Schoolbook L", Georgia, serif;
+                                font-size: 12.5pt; font-weight: bold; color: #2A2D2F;
+                                margin: 0 0 1px 0; border-bottom: 2px solid #2A2D2F; padding-bottom: 5px;
+                            }
+                            .vn-section-note { font-size: 7.6pt; color: #8A97A3; margin: 5px 0 9px 0; }
+
+                            /* --- Tableaux de donnees ------------------------ */
+                            .vn-table th {
+                                font-size: 6.9pt; text-transform: uppercase; letter-spacing: 0.8px;
+                                color: #6B7A89; font-weight: bold; text-align: left; padding: 7px 6px;
+                                border-bottom: 1px solid #C9D2DA; white-space: nowrap;
+                            }
+                            .vn-table td { padding: 6px; border-bottom: 1px solid #EFF2F4; vertical-align: middle; }
+                            .vn-num { text-align: right; white-space: nowrap; }
+
+                            /* --- Blocs de regroupement ---------------------- */
+                            /* Une liste a plat se lit sur trois jours et devient
+                               illisible sur trois semaines. Chaque bloc porte son
+                               en-tete et son sous-total ; le nom (ou la date) cesse
+                               de se repeter a chaque ligne. */
+                            .vn-groupe td {
+                                background: #EFF3F6 !important;
+                                border-bottom: 1px solid #DCE3E9 !important;
+                                border-top: 1px solid #DCE3E9 !important;
+                                padding: 0 !important;
+                                page-break-after: avoid;
+                            }
+                            .vn-groupe { page-break-inside: avoid; }
+                            /* Chaque bloc est un corps de tableau distinct : on demande au
+                               moteur de ne pas le couper, pour eviter l'en-tete
+                               orphelin en bas de page. Un bloc plus haut qu'une page
+                               sera coupe malgre tout, le moteur degradant au lieu
+                               d'echouer. */
+                            .vn-table tbody { page-break-inside: avoid; }
+                            .vn-bandeau { width: 100%; }
+                            .vn-bandeau td {
+                                background: transparent !important; border: 0 !important;
+                                padding: 6px 8px !important; vertical-align: baseline;
+                            }
+                            .vn-groupe-titre {
+                                font-family: "C059", "Century Schoolbook L", Georgia, serif;
+                                font-size: 10.5pt; font-weight: bold; color: #2A2D2F;
+                            }
+                            .vn-groupe-sous {
+                                font-size: 7.8pt; color: #6B7A89; padding-left: 8px;
+                            }
+                            .vn-groupe-resume {
+                                font-size: 8pt; font-weight: bold; color: #6B7A89;
+                                text-align: right; white-space: nowrap;
+                            }
+                            .vn-ligne td { padding-top: 5px; padding-bottom: 5px; }
+                            .vn-ligne-date { padding-left: 16px !important; }
+
+                            .vn-nom { font-weight: bold; }
+                            .vn-dept { color: #6B7A89; font-size: 8.2pt; }
+                            .vn-sourdine { color: #AEBDC1; }
+                            .vn-nb-retard { color: #B26A00; }
+
+                            /* --- Etats et pied ----------------------------- */
+                            .vn-vide {
+                                padding: 14px; text-align: center; color: #6B7A89;
+                                background: #FAFBFC; border: 1px solid #EFF2F4; font-size: 8.5pt;
+                            }
+                            .vn-methode {
+                                margin-top: 26px; padding-top: 10px; border-top: 1px solid #E8EBEE;
+                                font-size: 7.2pt; color: #8A97A3; line-height: 1.6;
+                            }
+                            .vn-methode strong { color: #6B7A89; }
+                        </style>
+
+                        <!-- ============ EN-TETE ============ -->
+                        <div class="vn-filet-accent"/>
+                        <h1 class="vn-titre">Rapport de présence</h1>
+                        <p class="vn-sous-titre">
+                            Du <span t-out="wizard.date_from.strftime('%d/%m/%Y')"/>
+                            au <span t-out="wizard.date_to.strftime('%d/%m/%Y')"/>
                         </p>
 
-                        <t t-if="wizard.report_type in ('late', 'both')">
-                            <h3>Retards</h3>
-                            <table class="table table-sm" t-if="late_lines">
+                        <table class="vn-meta">
+                            <tr>
+                                <td style="width:34%">
+                                    <span class="vn-meta-cle">Périmètre</span>
+                                    <span class="vn-meta-val" t-out="perimetre"/>
+                                </td>
+                                <td style="width:22%">
+                                    <span class="vn-meta-cle">Seuil de retard</span>
+                                    <span class="vn-meta-val" t-out="threshold_label"/>
+                                </td>
+                                <td style="width:22%">
+                                    <span class="vn-meta-cle">Effectif suivi</span>
+                                    <span class="vn-meta-val" t-out="effectif_txt"/>
+                                </td>
+                                <td style="width:22%">
+                                    <span class="vn-meta-cle">Édité le</span>
+                                    <span class="vn-meta-val" t-out="date_edition.strftime('%d/%m/%Y')"/>
+                                </td>
+                            </tr>
+                        </table>
+
+                        <!-- ============ CHIFFRES DE LA PERIODE ============ -->
+                        <t t-if="totaux">
+                            <table class="vn-cartes">
+                                <tr>
+                                    <td style="width:33.33%; padding-right:9px;">
+                                        <div class="vn-carte vn-carte-presence">
+                                            <p class="vn-carte-cle">Pr&#233;sences</p>
+                                            <p class="vn-carte-nb vn-nb-presence" t-out="totaux['presents']"/>
+                                            <p class="vn-carte-detail">
+                                                jours point&#233;s sur <span t-out="totaux['attendus']"/> dus
+                                                &#8212; assiduit&#233; <span t-out="totaux['assiduite_txt']"/>
+                                            </p>
+                                        </div>
+                                    </td>
+                                    <td style="width:33.33%; padding-right:9px;">
+                                        <div class="vn-carte vn-carte-retard">
+                                            <p class="vn-carte-cle">Retards</p>
+                                            <p class="vn-carte-nb vn-nb-retard" t-out="totaux['retards']"/>
+                                            <p class="vn-carte-detail">
+                                                arriv&#233;es apr&#232;s <span t-out="threshold_label"/>
+                                                &#8212; cumul <span t-out="totaux['cumul_txt']"/>
+                                            </p>
+                                        </div>
+                                    </td>
+                                    <td style="width:33.33%">
+                                        <div class="vn-carte vn-carte-absence">
+                                            <p class="vn-carte-cle">Absences</p>
+                                            <p class="vn-carte-nb vn-nb-absence" t-out="totaux['absences']"/>
+                                            <p class="vn-carte-detail">
+                                                jours dus sans aucun pointage,
+                                                cong&#233;s et jours f&#233;ri&#233;s d&#233;duits
+                                            </p>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </table>
+
+                            <table class="vn-ensemble">
                                 <thead>
                                     <tr>
-                                        <th>Employé</th>
-                                        <th>Département</th>
-                                        <th>Date</th>
-                                        <th>Heure d'arrivée</th>
-                                        <th>Retard</th>
+                                        <th style="width:18%">Ensemble</th>
+                                        <th style="width:12%" class="vn-num">Jours dus</th>
+                                        <th style="width:12%" class="vn-num">Pr&#233;sents</th>
+                                        <th style="width:12%" class="vn-num">Retards</th>
+                                        <th style="width:16%" class="vn-num">Cumul retard</th>
+                                        <th style="width:12%" class="vn-num">Absences</th>
+                                        <th style="width:18%" class="vn-num">Ponctualit&#233;</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <tr t-foreach="late_lines" t-as="line">
-                                        <td t-esc="line['employee'].name"/>
-                                        <td t-esc="line['employee'].department_id.name or ''"/>
-                                        <td t-esc="line['date'].strftime('%d/%m/%Y')"/>
-                                        <td t-esc="line['check_in_local'].strftime('%H:%M')"/>
-                                        <td t-esc="format_delay(line['delay_minutes'])"/>
+                                    <tr>
+                                        <td class="vn-ensemble-cle" t-out="totaux['effectif_txt']"/>
+                                        <td class="vn-num" t-out="totaux['attendus']"/>
+                                        <td class="vn-num" t-out="totaux['presents']"/>
+                                        <td class="vn-num" t-out="totaux['retards']"/>
+                                        <td class="vn-num" t-out="totaux['cumul_txt']"/>
+                                        <td class="vn-num" t-out="totaux['absences']"/>
+                                        <td class="vn-num" t-out="totaux['ponctualite_txt']"/>
                                     </tr>
                                 </tbody>
                             </table>
-                            <p t-else="">Aucun retard sur la période.</p>
                         </t>
 
-                        <t t-if="wizard.report_type in ('absent', 'both')">
-                            <h3>Non pointé</h3>
-                            <table class="table table-sm" t-if="absent_lines">
-                                <thead>
-                                    <tr>
-                                        <th>Employé</th>
-                                        <th>Département</th>
-                                        <th>Date</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr t-foreach="absent_lines" t-as="line">
-                                        <td t-esc="line['employee'].name"/>
-                                        <td t-esc="line['employee'].department_id.name or ''"/>
-                                        <td t-esc="line['date'].strftime('%d/%m/%Y')"/>
-                                    </tr>
-                                </tbody>
-                            </table>
-                            <p t-else="">Aucune absence sur la période.</p>
+                        <!-- ============ DETAIL DES RETARDS ============ -->
+                        <t t-if="wizard.report_type in ('all', 'late')">
+                            <div class="vn-section">
+                                <h2 class="vn-section-titre">Détail des retards</h2>
+                                <p class="vn-section-note">
+                                    Pointages d'entrée postérieurs à <span t-out="threshold_label"/>,
+                                    sur les seuls jours travaillés de l'employé.
+                                    <t t-if="par_employe">Un bloc par personne, dates classées par ordre chronologique.</t>
+                                    <t t-else="">Un bloc par journée.</t>
+                                </p>
+                                <table class="vn-table" t-if="groupes_retards">
+                                    <thead>
+                                        <tr t-if="par_employe">
+                                            <th style="width:46%">Date</th>
+                                            <th style="width:27%" class="vn-num">Arrivée</th>
+                                            <th style="width:27%" class="vn-num">Retard</th>
+                                        </tr>
+                                        <tr t-else="">
+                                            <th style="width:34%">Employé</th>
+                                            <th style="width:32%">Département</th>
+                                            <th style="width:17%" class="vn-num">Arrivée</th>
+                                            <th style="width:17%" class="vn-num">Retard</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody t-foreach="groupes_retards" t-as="groupe">
+                                        <tr class="vn-groupe">
+                                            <td colspan="9">
+                                                <table class="vn-bandeau">
+                                                    <tr>
+                                                        <td>
+                                                            <span class="vn-groupe-titre" t-out="groupe['titre']"/>
+                                                            <span class="vn-groupe-sous" t-out="groupe['sous_titre']"/>
+                                                        </td>
+                                                        <td class="vn-groupe-resume" t-out="groupe['resume']"/>
+                                                    </tr>
+                                                </table>
+                                            </td>
+                                        </tr>
+                                        <tr class="vn-ligne" t-foreach="groupe['lignes']" t-as="ligne">
+                                            <t t-if="par_employe">
+                                                <td class="vn-ligne-date" t-out="ligne['date_txt']"/>
+                                            </t>
+                                            <t t-else="">
+                                                <td class="vn-nom vn-ligne-date" t-out="ligne['employe']"/>
+                                                <td class="vn-dept" t-out="ligne['departement']"/>
+                                            </t>
+                                            <td class="vn-num" t-out="ligne['heure']"/>
+                                            <td class="vn-num vn-nb-retard" t-out="ligne['retard_txt']"/>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                                <div t-else="" class="vn-vide">
+                                    Aucun retard relevé sur la période.
+                                </div>
+                            </div>
                         </t>
+
+                        <!-- ============ DETAIL DES ABSENCES ============ -->
+                        <t t-if="wizard.report_type in ('all', 'absent')">
+                            <div class="vn-section">
+                                <h2 class="vn-section-titre">Détail des absences</h2>
+                                <p class="vn-section-note">
+                                    Jours où la présence était due et où aucun pointage n'a été
+                                    enregistré. Congés validés et jours fériés déjà exclus.
+                                </p>
+                                <table class="vn-table" t-if="groupes_absences">
+                                    <thead>
+                                        <tr t-if="par_employe">
+                                            <th style="width:56%">Date</th>
+                                            <th style="width:44%">Motif enregistré</th>
+                                        </tr>
+                                        <tr t-else="">
+                                            <th style="width:36%">Employé</th>
+                                            <th style="width:34%">Département</th>
+                                            <th style="width:30%">Motif enregistré</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody t-foreach="groupes_absences" t-as="groupe">
+                                        <tr class="vn-groupe">
+                                            <td colspan="9">
+                                                <table class="vn-bandeau">
+                                                    <tr>
+                                                        <td>
+                                                            <span class="vn-groupe-titre" t-out="groupe['titre']"/>
+                                                            <span class="vn-groupe-sous" t-out="groupe['sous_titre']"/>
+                                                        </td>
+                                                        <td class="vn-groupe-resume" t-out="groupe['resume']"/>
+                                                    </tr>
+                                                </table>
+                                            </td>
+                                        </tr>
+                                        <tr class="vn-ligne" t-foreach="groupe['lignes']" t-as="ligne">
+                                            <t t-if="par_employe">
+                                                <td class="vn-ligne-date" t-out="ligne['date_txt']"/>
+                                            </t>
+                                            <t t-else="">
+                                                <td class="vn-nom vn-ligne-date" t-out="ligne['employe']"/>
+                                                <td class="vn-dept" t-out="ligne['departement']"/>
+                                            </t>
+                                            <td class="vn-sourdine">aucun — à justifier</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                                <div t-else="" class="vn-vide">
+                                    Aucune absence relevée sur la période.
+                                </div>
+                            </div>
+                        </t>
+
+                        <!-- ============ NOTE DE METHODE ============ -->
+                        <div class="vn-methode">
+                            <strong>Méthode.</strong>
+                            Un <strong>retard</strong> est un pointage d'entrée postérieur au
+                            seuil retenu ci-dessus, sur un jour effectivement travaillé selon
+                            l'horaire de l'employé. Une <strong>absence</strong> est un jour dû
+                            &#8212; jour travaillé, hors jour férié et hors congé validé &#8212;
+                            sans aucun pointage enregistré : elle peut recouvrir un oubli de
+                            badge ou une panne du boîtier, et appelle donc une vérification
+                            avant toute décision. La <strong>ponctualité</strong> rapporte les
+                            jours pointés à l'heure au total des jours pointés ;
+                            l'<strong>assiduité</strong> rapporte les jours pointés aux jours dus.
+                        </div>
+
                     </div>
                 </t>
             </t>
