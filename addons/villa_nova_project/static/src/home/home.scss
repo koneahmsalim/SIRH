@@ -1,0 +1,628 @@
+// Accueil du module projet.
+//
+// La structure reprend la page d'accueil d'Asana (salutation, mes taches a
+// onglets, grille de projets) ; la palette reste celle du SIRH - graphite,
+// crimson, slate - pour que l'ecran n'ait pas l'air importe d'une autre
+// application. Les variables --vn-* viennent de villa_nova_theme.
+
+.vn-home {
+    --vn-home-encre: #{'var(--vn-graphite, #2A2D2F)'};
+    --vn-home-encre-2: #{'var(--vn-slate, #758696)'};
+    --vn-home-filet: #E6EAEE;
+    --vn-home-fond: #F6F7F9;
+    --vn-home-surface: #FFFFFF;
+
+    background: var(--vn-home-fond);
+    min-height: 100%;
+    padding: 2.5rem 1.5rem 3rem;
+    overflow: auto;
+    color: var(--vn-home-encre);
+
+    // ---------------------------------------------------------- En-tete --
+    .vn-home-entete {
+        max-width: 1180px;
+        margin: 0 auto 1.75rem;
+        text-align: center;
+    }
+    .vn-home-date {
+        font-size: .8125rem;
+        color: var(--vn-home-encre-2);
+        margin: 0 0 .35rem;
+        letter-spacing: .01em;
+    }
+    .vn-home-salut {
+        font-size: 2rem;
+        font-weight: 600;
+        letter-spacing: -.02em;
+        margin: 0 0 .85rem;
+        color: var(--vn-home-encre);
+    }
+    .vn-home-stats {
+        flex: 0 0 auto;
+        display: inline-flex;
+        align-items: center;
+        gap: .85rem;
+        padding: .4rem 1.1rem;
+        background: var(--vn-home-surface);
+        border: 1px solid var(--vn-home-filet);
+        border-radius: 999px;
+        font-size: .8125rem;
+    }
+    .vn-home-stat-nb {
+        font-weight: 700;
+        margin-right: .3rem;
+    }
+    .vn-home-stat-lib { color: var(--vn-home-encre-2); }
+    .vn-home-stat-sep {
+        width: 1px;
+        height: 14px;
+        background: var(--vn-home-filet);
+    }
+
+    // ----------------------------------------------------------- Grille --
+    // Colonnes maconnees plutot qu'une grille a deux colonnes fixes : avec
+    // une colonne de droite figee, les blocs s'y empilaient tous et le
+    // dernier sortait de l'ecran. Ici chacun se place selon sa hauteur, et
+    // l'espace laisse vide sous un bloc court est reutilise.
+    .vn-home-grille {
+        max-width: 1180px;
+        margin: 0 auto;
+        column-count: 2;
+        column-gap: 1.25rem;
+    }
+    @media (max-width: 1100px) {
+        .vn-home-grille { column-count: 1; }
+    }
+
+    .vn-home-carte {
+        background: var(--vn-home-surface);
+        border: 1px solid var(--vn-home-filet);
+        border-radius: 12px;
+        padding: 1.15rem 1.25rem 1.25rem;
+        // En disposition par colonnes, c'est la marge basse qui cree
+        // l'ecart vertical : "gap" n'a plus d'effet.
+        margin-bottom: 1.25rem;
+        break-inside: avoid;
+        -webkit-column-break-inside: avoid;
+        page-break-inside: avoid;
+    }
+
+    // --- Deplacement des blocs -------------------------------------
+    .vn-home-carte-tete[draggable="true"] {
+        cursor: grab;
+
+        &:active { cursor: grabbing; }
+    }
+    .vn-home-poignee {
+        color: #C6CFD7;
+        font-size: .75rem;
+        margin-right: .5rem;
+        vertical-align: middle;
+    }
+    .vn-home-carte:hover .vn-home-poignee { color: var(--vn-home-encre-2); }
+    .vn-home-bloc-deplace { opacity: .4; }
+    .vn-home-bloc-cible {
+        outline: 2px dashed var(--vn-crimson, #DC143C);
+        outline-offset: 3px;
+    }
+    .vn-home-carte-tete {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+        margin-bottom: .85rem;
+    }
+    .vn-home-carte-titre {
+        font-size: 1.0625rem;
+        font-weight: 600;
+        margin: 0;
+    }
+    .vn-home-lien {
+        border: 0;
+        background: transparent;
+        color: var(--vn-home-encre-2);
+        font-size: .8125rem;
+        padding: .2rem .4rem;
+        border-radius: 6px;
+        cursor: pointer;
+
+        &:hover { color: var(--vn-crimson, #DC143C); background: #F3F5F7; }
+    }
+
+    // ---------------------------------------------------------- Onglets --
+    .vn-home-onglets {
+        display: flex;
+        gap: .25rem;
+        border-bottom: 1px solid var(--vn-home-filet);
+        margin-bottom: .35rem;
+    }
+    .vn-home-onglet {
+        border: 0;
+        background: transparent;
+        padding: .45rem .7rem .6rem;
+        font-size: .875rem;
+        color: var(--vn-home-encre-2);
+        cursor: pointer;
+        border-bottom: 2px solid transparent;
+        margin-bottom: -1px;
+        display: inline-flex;
+        align-items: center;
+        gap: .4rem;
+
+        &:hover { color: var(--vn-home-encre); }
+    }
+    .vn-home-onglet-actif {
+        color: var(--vn-home-encre);
+        font-weight: 600;
+        border-bottom-color: var(--vn-crimson, #DC143C);
+    }
+    .vn-home-onglet-nb {
+        font-size: .6875rem;
+        font-weight: 600;
+        padding: .05rem .4rem;
+        border-radius: 999px;
+        background: #EDF0F3;
+        color: var(--vn-home-encre-2);
+    }
+    .vn-home-onglet-nb-alerte {
+        background: #FCE8EC;
+        color: #A80F2E;
+    }
+
+    // ----------------------------------------------------------- Taches --
+    .vn-home-taches {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+    }
+    .vn-home-tache {
+        display: flex;
+        align-items: center;
+        gap: .6rem;
+        padding: .55rem .15rem;
+        border-bottom: 1px solid #F1F3F5;
+
+        &:last-child { border-bottom: 0; }
+        &:hover { background: #FAFBFC; }
+    }
+    .vn-home-coche {
+        flex: 0 0 auto;
+        width: 18px;
+        height: 18px;
+        border-radius: 50%;
+        border: 1.5px solid #C6CFD7;
+        background: transparent;
+        color: transparent;
+        font-size: .625rem;
+        line-height: 1;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        padding: 0;
+
+        &:hover { border-color: #1F6F4A; color: #1F6F4A; }
+    }
+    .vn-home-coche-faite {
+        background: #1F6F4A;
+        border-color: #1F6F4A;
+        color: #FFFFFF;
+
+        &:hover { color: #FFFFFF; }
+    }
+    .vn-home-tache-nom {
+        flex: 1 1 auto;
+        font-size: .875rem;
+        cursor: pointer;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+
+        &:hover { text-decoration: underline; }
+    }
+    .vn-home-tache-nom-faite {
+        text-decoration: line-through;
+        color: var(--vn-home-encre-2);
+    }
+    .vn-home-tache-date {
+        flex: 0 0 auto;
+        font-size: .75rem;
+        color: var(--vn-home-encre-2);
+        white-space: nowrap;
+    }
+    .vn-home-tache-date-retard {
+        color: #A80F2E;
+        font-weight: 600;
+    }
+
+    // Pastille de projet : la couleur ne porte jamais l'information seule,
+    // le nom du projet est toujours ecrit a cote.
+    .vn-home-puce {
+        flex: 0 1 auto;
+        max-width: 11rem;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        font-size: .6875rem;
+        padding: .1rem .5rem;
+        border-radius: 999px;
+        background: #EDF0F3;
+        color: var(--vn-home-encre-2);
+    }
+
+    // ---------------------------------------------------------- Projets --
+    .vn-home-projets {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: .6rem;
+    }
+    @media (max-width: 520px) {
+        .vn-home-projets { grid-template-columns: 1fr; }
+    }
+    .vn-home-projet {
+        display: flex;
+        align-items: center;
+        gap: .65rem;
+        text-align: left;
+        padding: .7rem .75rem;
+        border: 1px solid var(--vn-home-filet);
+        border-radius: 10px;
+        background: var(--vn-home-surface);
+        cursor: pointer;
+        min-width: 0;
+
+        &:hover {
+            border-color: #C9D2DA;
+            background: #FAFBFC;
+        }
+    }
+    .vn-home-projet-creer {
+        border-style: dashed;
+        color: var(--vn-home-encre-2);
+    }
+    .vn-home-projet-icone {
+        flex: 0 0 auto;
+        width: 34px;
+        height: 34px;
+        border-radius: 8px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        color: #FFFFFF;
+        font-size: .875rem;
+        background: #758696;
+    }
+    .vn-home-projet-icone-plus {
+        background: transparent;
+        border: 1px dashed #C6CFD7;
+        color: var(--vn-home-encre-2);
+    }
+    .vn-home-projet-corps {
+        display: flex;
+        flex-direction: column;
+        min-width: 0;
+    }
+    .vn-home-projet-nom {
+        font-size: .8125rem;
+        font-weight: 600;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+    .vn-home-projet-sous {
+        font-size: .6875rem;
+        color: var(--vn-home-encre-2);
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+    .vn-home-projet-sous-retard { color: #A80F2E; }
+
+    // ------------------------------------------------------ Etats vides --
+    .vn-home-vide {
+        margin: 1.25rem 0 .5rem;
+        text-align: center;
+        font-size: .8125rem;
+        color: var(--vn-home-encre-2);
+    }
+    .vn-home-squelette {
+        height: 34px;
+        border-radius: 8px;
+        background: linear-gradient(90deg, #F1F3F5 25%, #E8EBEE 37%, #F1F3F5 63%);
+        background-size: 400% 100%;
+        animation: vn-home-scintille 1.4s ease infinite;
+        margin-bottom: .55rem;
+    }
+    @keyframes vn-home-scintille {
+        0% { background-position: 100% 50%; }
+        100% { background-position: 0 50%; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+        .vn-home-squelette { animation: none; }
+    }
+
+    // ------------------------------------------- Couleurs de projet (0-11)
+    // Reprend l'echelle de couleurs d'Odoo (project.color) pour que la
+    // pastille de l'accueil corresponde a celle du kanban.
+    .vn-home-couleur-0  { background: #8F9EAB; }
+    .vn-home-couleur-1  { background: #E4572E; }
+    .vn-home-couleur-2  { background: #E8A33D; }
+    .vn-home-couleur-3  { background: #C9A227; }
+    .vn-home-couleur-4  { background: #17A2B8; }
+    .vn-home-couleur-5  { background: #8E44AD; }
+    .vn-home-couleur-6  { background: #DC143C; }
+    .vn-home-couleur-7  { background: #16A085; }
+    .vn-home-couleur-8  { background: #2E86C1; }
+    .vn-home-couleur-9  { background: #B03A5B; }
+    .vn-home-couleur-10 { background: #27AE60; }
+    .vn-home-couleur-11 { background: #5D6D7E; }
+
+    // Sur une pastille de tache, la couleur sert de liseré : un fond plein
+    // rendrait le nom du projet illisible a cette taille.
+    .vn-home-puce[class*="vn-home-couleur-"] {
+        background: #EDF0F3;
+        color: var(--vn-home-encre-2);
+        border-left: 3px solid rgba(0, 0, 0, .25);
+    }
+
+    // ============================ Barre de reglages ====================
+    .vn-home-barre {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-wrap: wrap;
+        gap: .6rem;
+    }
+    .vn-home-periode,
+    .vn-home-bouton-widgets {
+        font-size: .8125rem;
+        padding: .4rem .75rem;
+        border: 1px solid var(--vn-home-filet);
+        border-radius: 999px;
+        background: var(--vn-home-surface);
+        color: var(--vn-home-encre-2);
+        cursor: pointer;
+
+        &:hover { border-color: #C9D2DA; color: var(--vn-home-encre); }
+    }
+    .vn-home-periode {
+        // Un select herite du style global d'Odoo, qui l'etire sur toute la
+        // largeur disponible : il faut le ramener a sa taille de pastille.
+        width: auto !important;
+        max-width: 12rem;
+        flex: 0 0 auto;
+        appearance: auto;
+        padding-right: .5rem;
+    }
+    .vn-home-bouton-widgets {
+        flex: 0 0 auto;
+        white-space: nowrap;
+        display: inline-flex;
+        align-items: center;
+        gap: .4rem;
+    }
+    .vn-home-bouton-widgets-actif {
+        border-color: var(--vn-crimson, #DC143C);
+        color: var(--vn-crimson, #DC143C);
+    }
+
+    .vn-home-widgets-zone { position: relative; }
+    .vn-home-panneau {
+        position: absolute;
+        z-index: 20;
+        top: calc(100% + .45rem);
+        right: 0;
+        width: 21rem;
+        text-align: left;
+        background: var(--vn-home-surface);
+        border: 1px solid var(--vn-home-filet);
+        border-radius: 10px;
+        box-shadow: 0 8px 24px rgba(42, 45, 47, .12);
+        padding: .75rem .85rem .6rem;
+    }
+    .vn-home-panneau-titre {
+        font-size: .6875rem;
+        text-transform: uppercase;
+        letter-spacing: .06em;
+        color: var(--vn-home-encre-2);
+        margin: 0 0 .5rem;
+    }
+    .vn-home-panneau-ligne {
+        display: flex;
+        align-items: flex-start;
+        gap: .55rem;
+        padding: .4rem .25rem;
+        border-radius: 6px;
+        cursor: pointer;
+        margin: 0;
+
+        &:hover { background: #F6F8FA; }
+
+        input { margin-top: .2rem; flex: 0 0 auto; }
+    }
+    .vn-home-panneau-corps { display: flex; flex-direction: column; }
+    .vn-home-panneau-lib { font-size: .8125rem; font-weight: 600; }
+    .vn-home-panneau-aide { font-size: .6875rem; color: var(--vn-home-encre-2); }
+    .vn-home-panneau-ligne-fixe {
+        opacity: .7;
+        cursor: default;
+    }
+    .vn-home-panneau-pied {
+        margin: .5rem 0 0;
+        padding-top: .5rem;
+        border-top: 1px solid var(--vn-home-filet);
+        font-size: .6875rem;
+        color: var(--vn-home-encre-2);
+    }
+
+    // ============================ Colonnes =============================
+    .vn-home-colonne {
+        display: flex;
+        flex-direction: column;
+        gap: 1.25rem;
+        min-width: 0;
+    }
+
+    // ============================ Creation rapide ======================
+    .vn-home-creation {
+        padding: .35rem 0 .15rem;
+        border-bottom: 1px solid #F1F3F5;
+    }
+    .vn-home-creation-appel {
+        border: 0;
+        background: transparent;
+        color: var(--vn-home-encre-2);
+        font-size: .8125rem;
+        padding: .4rem .2rem;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: .45rem;
+
+        &:hover { color: var(--vn-crimson, #DC143C); }
+    }
+    .vn-home-creation-champs {
+        display: flex;
+        align-items: center;
+        gap: .4rem;
+        padding: .25rem 0 .45rem;
+        flex-wrap: wrap;
+    }
+    .vn-home-creation-nom {
+        flex: 1 1 12rem;
+        min-width: 0;
+        font-size: .875rem;
+        padding: .4rem .6rem;
+        border: 1px solid #C9D2DA;
+        border-radius: 7px;
+
+        &:focus {
+            outline: none;
+            border-color: var(--vn-crimson, #DC143C);
+        }
+    }
+    .vn-home-creation-projet {
+        flex: 0 1 10rem;
+        min-width: 0;
+        font-size: .8125rem;
+        padding: .4rem .5rem;
+        border: 1px solid #C9D2DA;
+        border-radius: 7px;
+        background: var(--vn-home-surface);
+    }
+    .vn-home-creation-valider,
+    .vn-home-creation-annuler {
+        font-size: .8125rem;
+        padding: .4rem .8rem;
+        border-radius: 7px;
+        cursor: pointer;
+        border: 1px solid transparent;
+    }
+    .vn-home-creation-valider {
+        background: var(--vn-crimson, #DC143C);
+        color: #FFFFFF;
+
+        &:disabled { opacity: .6; cursor: default; }
+    }
+    .vn-home-creation-annuler {
+        background: transparent;
+        border-color: var(--vn-home-filet);
+        color: var(--vn-home-encre-2);
+    }
+
+    // ============================ Sante ================================
+    .vn-home-sante {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: .5rem;
+    }
+    .vn-home-sante-case {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: .15rem;
+        padding: .7rem .3rem;
+        border: 1px solid var(--vn-home-filet);
+        border-radius: 9px;
+    }
+    .vn-home-sante-nb {
+        font-size: 1.5rem;
+        font-weight: 700;
+        line-height: 1;
+    }
+    .vn-home-sante-lib {
+        font-size: .6875rem;
+        color: var(--vn-home-encre-2);
+        text-align: center;
+    }
+
+    // ============================ Objectifs ============================
+    .vn-home-objectifs {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+    }
+    .vn-home-objectif {
+        padding: .55rem .15rem .65rem;
+        border-bottom: 1px solid #F1F3F5;
+        cursor: pointer;
+
+        &:last-child { border-bottom: 0; }
+        &:hover { background: #FAFBFC; }
+    }
+    .vn-home-objectif-tete {
+        display: flex;
+        align-items: baseline;
+        justify-content: space-between;
+        gap: .6rem;
+    }
+    .vn-home-objectif-nom {
+        font-size: .8125rem;
+        font-weight: 600;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+    .vn-home-objectif-pct {
+        font-size: .75rem;
+        color: var(--vn-home-encre-2);
+        white-space: nowrap;
+    }
+    .vn-home-jauge {
+        height: 5px;
+        border-radius: 999px;
+        background: #EDF0F3;
+        margin: .35rem 0 .3rem;
+        overflow: hidden;
+    }
+    .vn-home-jauge-part {
+        height: 5px;
+        border-radius: 999px;
+        background: #1F6F4A;
+    }
+    .vn-home-objectif-etat {
+        font-size: .6875rem;
+        font-weight: 600;
+    }
+
+    // L'etat n'est jamais porte par la seule couleur : le libelle
+    // ("A risque", "En retard") est toujours ecrit a cote.
+    .vn-home-etat-ok      { color: #1F6F4A; background-color: #1F6F4A; }
+    .vn-home-etat-risque  { color: #B26A00; background-color: #B26A00; }
+    .vn-home-etat-retard  { color: #A80F2E; background-color: #A80F2E; }
+    .vn-home-etat-atteint { color: #2E86C1; background-color: #2E86C1; }
+    .vn-home-etat-neutre  { color: #8F9EAB; background-color: #8F9EAB; }
+
+    // Sur du texte, seule la couleur d'encre doit s'appliquer.
+    .vn-home-sante-nb,
+    .vn-home-objectif-etat {
+        background-color: transparent !important;
+    }
+
+    .vn-home-aucun-widget {
+        border: 1px dashed var(--vn-home-filet);
+        border-radius: 10px;
+        padding: 1.5rem 1rem;
+    }
+
+}

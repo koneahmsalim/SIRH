@@ -1,0 +1,255 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="villa_nova_project.Home">
+        <div class="vn-home o_action">
+
+            <!-- Bloc : en-tete -->
+            <div class="vn-home-entete">
+                <p class="vn-home-date" t-esc="dateDuJour"/>
+                <h1 class="vn-home-salut" t-esc="salutation"/>
+
+                <div class="vn-home-barre">
+                    <div class="vn-home-stats" t-if="!state.loading">
+                        <span class="vn-home-stat">
+                            <span class="vn-home-stat-nb" t-esc="state.data.stats.done"/>
+                            <span class="vn-home-stat-lib" t-esc="libelleStatTaches"/>
+                        </span>
+                        <span class="vn-home-stat-sep"/>
+                        <span class="vn-home-stat">
+                            <span class="vn-home-stat-nb" t-esc="state.data.stats.collaborators"/>
+                            <span class="vn-home-stat-lib">collaborateurs</span>
+                        </span>
+                    </div>
+
+                    <select class="vn-home-periode"
+                            t-on-change="(ev) => this.choisirPeriode(ev.target.value)">
+                        <option t-foreach="PERIODES" t-as="p" t-key="p.cle"
+                                t-att-value="p.cle"
+                                t-att-selected="p.cle === state.periode"
+                                t-esc="p.libelle"/>
+                    </select>
+
+                    <div class="vn-home-widgets-zone">
+                        <button class="vn-home-bouton-widgets"
+                                t-att-class="{ 'vn-home-bouton-widgets-actif': state.panneauWidgets }"
+                                t-on-click="() => this.basculerPanneauWidgets()">
+                            <i class="fa fa-plus"/>
+                            <span>Ajouter des widgets</span>
+                        </button>
+
+                        <div class="vn-home-panneau" t-if="state.panneauWidgets">
+                            <p class="vn-home-panneau-titre">Blocs de l'accueil</p>
+                            <label class="vn-home-panneau-ligne"
+                                   t-foreach="state.data.widgets_disponibles" t-as="w" t-key="w.cle"
+                                   t-att-class="{ 'vn-home-panneau-ligne-fixe': w.fixe }">
+                                <input type="checkbox"
+                                       t-att-checked="estActif(w.cle)"
+                                       t-att-disabled="w.fixe"
+                                       t-on-change="() => this.basculerWidget(w.cle)"/>
+                                <span class="vn-home-panneau-corps">
+                                    <span class="vn-home-panneau-lib" t-esc="w.libelle"/>
+                                    <span class="vn-home-panneau-aide" t-esc="w.aide"/>
+                                </span>
+                            </label>
+                            <p class="vn-home-panneau-pied">
+                                Glissez l'en-tête d'un bloc pour le déplacer sur l'accueil.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bloc : chargement -->
+            <div class="vn-home-grille" t-if="state.loading">
+                <div class="vn-home-carte">
+                    <div class="vn-home-squelette" t-foreach="[1,2,3,4,5]" t-as="i" t-key="i"/>
+                </div>
+                <div class="vn-home-carte">
+                    <div class="vn-home-squelette" t-foreach="[1,2,3]" t-as="i" t-key="i"/>
+                </div>
+            </div>
+
+            <!-- Bloc : contenu.
+                 Disposition en colonnes maconnees : les blocs se repartissent
+                 d'eux-memes selon leur hauteur au lieu d'empiler tout a droite,
+                 sinon le dernier bloc se retrouve hors de l'ecran. -->
+            <div class="vn-home-grille" t-else="">
+                <t t-foreach="blocs" t-as="cle" t-key="cle">
+                    <section class="vn-home-carte vn-home-bloc"
+                             t-att-class="{
+                                 'vn-home-bloc-deplace': state.blocDeplace === cle,
+                                 'vn-home-bloc-cible': state.blocSurvole === cle,
+                             }"
+                             t-on-dragover.prevent="() => this.survol(cle)"
+                             t-on-drop.prevent="() => this.depot(cle)">
+
+                        <header class="vn-home-carte-tete"
+                                draggable="true"
+                                t-on-dragstart="(ev) => this.debutDeplacement(cle, ev)"
+                                t-on-dragend="() => this.finDeplacement()">
+                            <h2 class="vn-home-carte-titre">
+                                <span class="vn-home-poignee" title="Glisser pour déplacer ce bloc">
+                                    <i class="fa fa-bars"/>
+                                </span>
+                                <span t-esc="titreBloc(cle)"/>
+                            </h2>
+                            <button class="vn-home-lien" t-if="cle === 'mes_taches'"
+                                    t-on-click="() => this.ouvrirMesTaches()">Vue complète</button>
+                            <button class="vn-home-lien" t-elif="cle === 'projets'"
+                                    t-on-click="() => this.ouvrirPortfolio()">Portfolio</button>
+                            <button class="vn-home-lien" t-elif="cle === 'sante'"
+                                    t-on-click="() => this.ouvrirPortfolio()">Détail</button>
+                            <button class="vn-home-lien" t-elif="cle === 'objectifs'"
+                                    t-on-click="() => this.ouvrirObjectifs()">Tous les objectifs</button>
+                        </header>
+
+                        <!-- Mes taches -->
+                        <t t-if="cle === 'mes_taches'">
+                            <nav class="vn-home-onglets">
+                                <button t-foreach="onglets" t-as="o" t-key="o.cle"
+                                        class="vn-home-onglet"
+                                        t-att-class="{ 'vn-home-onglet-actif': state.onglet === o.cle }"
+                                        t-on-click="() => this.choisirOnglet(o.cle)">
+                                    <span t-esc="o.libelle"/>
+                                    <span class="vn-home-onglet-nb"
+                                          t-att-class="{ 'vn-home-onglet-nb-alerte': o.alerte }"
+                                          t-if="o.nb" t-esc="o.nb"/>
+                                </button>
+                            </nav>
+
+                            <div class="vn-home-creation">
+                                <button class="vn-home-creation-appel"
+                                        t-if="!state.saisieOuverte"
+                                        t-on-click="() => this.ouvrirSaisie()">
+                                    <i class="fa fa-plus"/>
+                                    <span>Créer une tâche</span>
+                                </button>
+                                <div class="vn-home-creation-champs" t-else="">
+                                    <input type="text" class="vn-home-creation-nom"
+                                           t-ref="champNouvelleTache"
+                                           placeholder="Nom de la tâche, puis Entrée"
+                                           t-model="state.nouveauNom"
+                                           t-on-keydown="surToucheSaisie"/>
+                                    <select class="vn-home-creation-projet" t-model="state.nouveauProjet">
+                                        <option value="">Sans projet</option>
+                                        <option t-foreach="state.data.selectable_projects" t-as="p"
+                                                t-key="p.id" t-att-value="p.id" t-esc="p.name"/>
+                                    </select>
+                                    <button class="vn-home-creation-valider"
+                                            t-att-disabled="state.enCoursCreation"
+                                            t-on-click="() => this.validerSaisie()">Ajouter</button>
+                                    <button class="vn-home-creation-annuler"
+                                            t-on-click="() => this.fermerSaisie()">Fermer</button>
+                                </div>
+                            </div>
+
+                            <ul class="vn-home-taches" t-if="taches.length">
+                                <li class="vn-home-tache" t-foreach="taches" t-as="t" t-key="t.id">
+                                    <button class="vn-home-coche"
+                                            t-att-class="{ 'vn-home-coche-faite': t.done }"
+                                            t-att-title="t.done ? 'Rouvrir la tâche' : 'Marquer comme terminée'"
+                                            t-on-click="() => this.basculerTerminee(t)">
+                                        <i class="fa fa-check"/>
+                                    </button>
+                                    <span class="vn-home-tache-nom"
+                                          t-att-class="{ 'vn-home-tache-nom-faite': t.done }"
+                                          t-on-click="() => this.ouvrirTache(t.id)"
+                                          t-esc="t.name"/>
+                                    <span class="vn-home-puce" t-if="t.project_name"
+                                          t-att-class="'vn-home-couleur-' + t.project_color"
+                                          t-esc="t.project_name"/>
+                                    <span class="vn-home-tache-date"
+                                          t-att-class="{ 'vn-home-tache-date-retard': t.overdue }"
+                                          t-esc="t.date_label"/>
+                                </li>
+                            </ul>
+                            <p class="vn-home-vide" t-else="" t-esc="messageVide"/>
+                        </t>
+
+                        <!-- Projets -->
+                        <t t-elif="cle === 'projets'">
+                            <div class="vn-home-projets">
+                                <button class="vn-home-projet vn-home-projet-creer"
+                                        t-on-click="() => this.creerProjet()">
+                                    <span class="vn-home-projet-icone vn-home-projet-icone-plus">
+                                        <i class="fa fa-plus"/>
+                                    </span>
+                                    <span class="vn-home-projet-corps">
+                                        <span class="vn-home-projet-nom">Créer un projet</span>
+                                    </span>
+                                </button>
+                                <button class="vn-home-projet"
+                                        t-foreach="state.data.projects" t-as="p" t-key="p.id"
+                                        t-on-click="() => this.ouvrirProjet(p.id)">
+                                    <span class="vn-home-projet-icone"
+                                          t-att-class="'vn-home-couleur-' + p.color">
+                                        <i class="fa fa-list-ul"/>
+                                    </span>
+                                    <span class="vn-home-projet-corps">
+                                        <span class="vn-home-projet-nom" t-esc="p.name"/>
+                                        <span class="vn-home-projet-sous"
+                                              t-att-class="{ 'vn-home-projet-sous-retard': p.overdue_count }"
+                                              t-esc="p.subtitle"/>
+                                    </span>
+                                </button>
+                            </div>
+                        </t>
+
+                        <!-- Sante des projets -->
+                        <t t-elif="cle === 'sante'">
+                            <div class="vn-home-sante">
+                                <div class="vn-home-sante-case"
+                                     t-foreach="state.data.health" t-as="h" t-key="h.cle">
+                                    <span class="vn-home-sante-nb" t-att-class="h.classe" t-esc="h.nb"/>
+                                    <span class="vn-home-sante-lib" t-esc="h.libelle"/>
+                                </div>
+                            </div>
+                        </t>
+
+                        <!-- Objectifs -->
+                        <t t-elif="cle === 'objectifs'">
+                            <ul class="vn-home-objectifs" t-if="state.data.goals.length">
+                                <li class="vn-home-objectif" t-foreach="state.data.goals" t-as="g" t-key="g.id"
+                                    t-on-click="() => this.ouvrirObjectif(g.id)">
+                                    <div class="vn-home-objectif-tete">
+                                        <span class="vn-home-objectif-nom" t-esc="g.name"/>
+                                        <span class="vn-home-objectif-pct" t-esc="g.progress + ' %'"/>
+                                    </div>
+                                    <div class="vn-home-jauge">
+                                        <div class="vn-home-jauge-part" t-att-class="g.status_class"
+                                             t-attf-style="width: {{ g.progress }}%;"/>
+                                    </div>
+                                    <span class="vn-home-objectif-etat" t-att-class="g.status_class"
+                                          t-esc="g.status_label"/>
+                                </li>
+                            </ul>
+                            <p class="vn-home-vide" t-else="">Aucun objectif défini.</p>
+                        </t>
+
+                        <!-- Taches confiees -->
+                        <t t-elif="cle === 'confiees'">
+                            <ul class="vn-home-taches" t-if="state.data.delegated.length">
+                                <li class="vn-home-tache" t-foreach="state.data.delegated" t-as="t" t-key="t.id">
+                                    <span class="vn-home-tache-nom"
+                                          t-on-click="() => this.ouvrirTache(t.id)"
+                                          t-esc="t.name"/>
+                                    <span class="vn-home-puce" t-if="t.assignees.length"
+                                          t-esc="t.assignees.join(', ')"/>
+                                    <span class="vn-home-tache-date"
+                                          t-att-class="{ 'vn-home-tache-date-retard': t.overdue }"
+                                          t-esc="t.date_label"/>
+                                </li>
+                            </ul>
+                            <p class="vn-home-vide" t-else="">
+                                Vous n'avez confié aucune tâche en cours.
+                            </p>
+                        </t>
+
+                    </section>
+                </t>
+            </div>
+        </div>
+    </t>
+
+</templates>

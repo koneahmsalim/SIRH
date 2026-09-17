@@ -1,0 +1,84 @@
+// Boite de reception du module projet.
+// Reprend integralement l'habillage de l'accueil (.vn-home) : c'est le meme
+// ecran d'entree vu sous un autre angle, il ne doit pas avoir l'air d'une
+// autre application. Seuls les elements propres au fil sont definis ici.
+
+.vn-inbox {
+
+    .vn-inbox-section {
+        margin-bottom: 1.1rem;
+
+        &:last-child { margin-bottom: 0; }
+    }
+    .vn-inbox-section-titre {
+        display: flex;
+        align-items: center;
+        gap: .45rem;
+        font-size: .6875rem;
+        text-transform: uppercase;
+        letter-spacing: .06em;
+        color: var(--vn-home-encre-2);
+        margin: 0 0 .25rem;
+        padding-bottom: .3rem;
+        border-bottom: 1px solid var(--vn-home-filet);
+    }
+    .vn-inbox-section-alerte { color: #A80F2E; }
+
+    .vn-inbox-ligne { align-items: flex-start; }
+    .vn-inbox-corps {
+        flex: 1 1 auto;
+        display: flex;
+        flex-direction: column;
+        min-width: 0;
+        cursor: pointer;
+    }
+    .vn-inbox-detail {
+        font-size: .6875rem;
+        color: var(--vn-home-encre-2);
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .vn-inbox-fil {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+    }
+    .vn-inbox-message {
+        padding: .6rem .15rem .7rem;
+        border-bottom: 1px solid #F1F3F5;
+        cursor: pointer;
+
+        &:last-child { border-bottom: 0; }
+        &:hover { background: #FAFBFC; }
+    }
+    .vn-inbox-message-tete {
+        display: flex;
+        align-items: baseline;
+        justify-content: space-between;
+        gap: .6rem;
+    }
+    .vn-inbox-auteur {
+        font-size: .8125rem;
+        font-weight: 600;
+    }
+    .vn-inbox-message-sujet {
+        margin: .1rem 0 .15rem;
+        font-size: .75rem;
+        color: var(--vn-home-encre-2);
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+    .vn-inbox-message-extrait {
+        margin: 0;
+        font-size: .8125rem;
+        // Deux lignes puis coupure : un commentaire long ne doit pas pousser
+        // les suivants hors de l'ecran.
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+}

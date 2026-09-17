@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="villa_nova_project.Inbox">
+        <div class="vn-home vn-inbox o_action">
+
+            <div class="vn-home-entete">
+                <p class="vn-home-date">Boîte de réception</p>
+                <h1 class="vn-home-salut">Ce qui vous attend</h1>
+                <div class="vn-home-barre" t-if="!state.loading">
+                    <div class="vn-home-stats">
+                        <span class="vn-home-stat">
+                            <span class="vn-home-stat-nb" t-esc="state.data.nb_a_traiter"/>
+                            <span class="vn-home-stat-lib">à traiter</span>
+                        </span>
+                        <span class="vn-home-stat-sep"/>
+                        <span class="vn-home-stat">
+                            <span class="vn-home-stat-nb" t-esc="state.data.fil.length"/>
+                            <span class="vn-home-stat-lib">messages récents</span>
+                        </span>
+                    </div>
+                    <button class="vn-home-bouton-widgets" t-on-click="() => this.retourAccueil()">
+                        <i class="fa fa-home"/>
+                        <span>Accueil</span>
+                    </button>
+                </div>
+            </div>
+
+            <div class="vn-home-grille" t-if="state.loading">
+                <div class="vn-home-carte">
+                    <div class="vn-home-squelette" t-foreach="[1,2,3,4]" t-as="i" t-key="i"/>
+                </div>
+                <div class="vn-home-carte">
+                    <div class="vn-home-squelette" t-foreach="[1,2,3]" t-as="i" t-key="i"/>
+                </div>
+            </div>
+
+            <div class="vn-home-grille" t-else="">
+
+                <div class="vn-home-colonne">
+                    <section class="vn-home-carte">
+                        <header class="vn-home-carte-tete">
+                            <h2 class="vn-home-carte-titre">À traiter</h2>
+                        </header>
+
+                        <t t-if="state.data.nb_a_traiter">
+                            <div class="vn-inbox-section"
+                                 t-foreach="sectionsRemplies()" t-as="s" t-key="s.cle">
+                                <p class="vn-inbox-section-titre"
+                                   t-att-class="{ 'vn-inbox-section-alerte': s.alerte }">
+                                    <span t-esc="s.libelle"/>
+                                    <span class="vn-home-onglet-nb"
+                                          t-att-class="{ 'vn-home-onglet-nb-alerte': s.alerte }"
+                                          t-esc="lignes(s.cle).length"/>
+                                </p>
+                                <ul class="vn-home-taches">
+                                    <li class="vn-home-tache vn-inbox-ligne"
+                                        t-foreach="lignes(s.cle)" t-as="a" t-key="a.id">
+                                        <button class="vn-home-coche"
+                                                title="Marquer comme traité"
+                                                t-on-click="() => this.terminer(a)">
+                                            <i class="fa fa-check"/>
+                                        </button>
+                                        <span class="vn-inbox-corps"
+                                              t-on-click="() => this.ouvrirEnregistrement(a.res_model, a.res_id)">
+                                            <span class="vn-home-tache-nom" t-esc="a.record_name"/>
+                                            <span class="vn-inbox-detail">
+                                                <span t-esc="a.type"/>
+                                                <t t-if="a.summary">
+                                                    <span> — </span><span t-esc="a.summary"/>
+                                                </t>
+                                            </span>
+                                        </span>
+                                        <span class="vn-home-puce" t-if="a.project_name"
+                                              t-esc="a.project_name"/>
+                                        <span class="vn-home-tache-date"
+                                              t-att-class="{ 'vn-home-tache-date-retard': a.overdue }"
+                                              t-esc="a.date_label"/>
+                                    </li>
+                                </ul>
+                            </div>
+                        </t>
+                        <p class="vn-home-vide" t-else="">
+                            Rien à traiter. Aucune activité ne vous est assignée.
+                        </p>
+                    </section>
+                </div>
+
+                <div class="vn-home-colonne">
+                    <section class="vn-home-carte">
+                        <header class="vn-home-carte-tete">
+                            <h2 class="vn-home-carte-titre">Activité récente</h2>
+                        </header>
+                        <ul class="vn-inbox-fil" t-if="state.data.fil.length">
+                            <li class="vn-inbox-message" t-foreach="state.data.fil" t-as="m" t-key="m.id"
+                                t-on-click="() => this.ouvrirEnregistrement('project.task', m.res_id)">
+                                <div class="vn-inbox-message-tete">
+                                    <span class="vn-inbox-auteur" t-esc="m.author"/>
+                                    <span class="vn-home-tache-date" t-esc="m.date_label"/>
+                                </div>
+                                <p class="vn-inbox-message-sujet" t-esc="m.record_name"/>
+                                <p class="vn-inbox-message-extrait" t-esc="m.extrait"/>
+                            </li>
+                        </ul>
+                        <p class="vn-home-vide" t-else="">
+                            Aucun message sur vos tâches ces 14 derniers jours.
+                        </p>
+                    </section>
+                </div>
+
+            </div>
+        </div>
+    </t>
+
+</templates>

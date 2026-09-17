@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Boite de reception : ce qui attend une action, plus l'activite
+         recente sur mes taches. Asana reunit les deux dans son Inbox ; Odoo
+         les separe entre le systray et le fil de chaque tache, ce qui oblige
+         a ouvrir les taches une a une pour savoir ce qui s'y est dit. -->
+    <record id="action_villa_nova_inbox" model="ir.actions.client">
+        <field name="name">Boîte de réception</field>
+        <field name="tag">villa_nova_project.inbox</field>
+    </record>
+
+    <!-- Sequence 0 et non 1 : project.menu_projects occupe deja la 1 et
+         gagne sur l'identifiant. Asana place l'Inbox juste apres Home, avant
+         la liste des projets. -->
+    <menuitem id="menu_villa_nova_inbox"
+              name="Boîte de réception"
+              parent="project.menu_main_pm"
+              action="action_villa_nova_inbox"
+              sequence="0"/>
+
+</odoo>

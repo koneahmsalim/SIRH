@@ -15,6 +15,8 @@
         'views/project_task_list_view.xml',
         'views/project_task_form_view.xml',
         'views/project_project_form_view.xml',
+        'views/home_action.xml',
+        'views/inbox_action.xml',
         'views/my_tasks_action.xml',
         'views/portfolio_action.xml',
         'views/timeline_action.xml',
@@ -27,6 +29,12 @@
     'assets': {
         'web.assets_backend': [
             'villa_nova_project/static/src/scss/board.scss',
+            'villa_nova_project/static/src/home/home.scss',
+            'villa_nova_project/static/src/home/home.xml',
+            'villa_nova_project/static/src/home/home.js',
+            'villa_nova_project/static/src/inbox/inbox.scss',
+            'villa_nova_project/static/src/inbox/inbox.xml',
+            'villa_nova_project/static/src/inbox/inbox.js',
             'villa_nova_project/static/src/my_tasks/my_tasks.scss',
             'villa_nova_project/static/src/my_tasks/my_tasks.xml',
             'villa_nova_project/static/src/my_tasks/my_tasks.js',

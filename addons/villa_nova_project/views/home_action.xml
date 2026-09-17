@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Ecran d'accueil du module projet.
+
+         Odoo fait atterrir sur une liste de projets ; Asana fait atterrir sur
+         un point de situation personnel. Les equipes qui migrent depuis Asana
+         perdent ce point de depart, d'ou cet ecran - place en sequence 0 pour
+         devenir la premiere chose vue en ouvrant l'application, comme chez
+         elles. -->
+    <record id="action_villa_nova_home" model="ir.actions.client">
+        <field name="name">Accueil</field>
+        <field name="tag">villa_nova_project.home</field>
+    </record>
+
+    <menuitem id="menu_villa_nova_home"
+              name="Accueil"
+              parent="project.menu_main_pm"
+              action="action_villa_nova_home"
+              sequence="0"/>
+
+</odoo>
