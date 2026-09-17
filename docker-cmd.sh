@@ -11,6 +11,28 @@ DB_PASSWORD="${PASSWORD:-odoo}"
 DB_NAME="${DBNAME:-SIRH}"
 HTTP_PORT="${PORT:-8069}"
 
+# --- Mot de passe maitre ---------------------------------------------------
+# Coolify (comme tout deploiement depuis un depot git) ne dispose que des
+# fichiers versionnes : un odoo.conf contenant un secret ne peut donc pas
+# exister sur le serveur. Quand ODOO_ADMIN_PASSWD est fourni, on rend une
+# configuration a partir du modele et on la passe explicitement a Odoo.
+# Sans cette variable, rien ne change : Odoo lit /etc/odoo/odoo.conf comme
+# avant, ce qui preserve le fonctionnement du poste de developpement.
+CONF_ARGS=()
+MODELE_CONF="${ODOO_CONF_TEMPLATE:-/etc/odoo/odoo.conf}"
+if [ -n "${ODOO_ADMIN_PASSWD:-}" ] && [ -f "$MODELE_CONF" ]; then
+    CONF_RENDU=/tmp/odoo.rendu.conf
+    sed "s|^admin_passwd *=.*|admin_passwd = ${ODOO_ADMIN_PASSWD}|" \
+        "$MODELE_CONF" > "$CONF_RENDU"
+    chmod 600 "$CONF_RENDU"
+    if grep -qE '^admin_passwd = (REMPLACER_AVANT_DEMARRAGE|cosmic_admin|admin|)$' "$CONF_RENDU"; then
+        echo "ECHEC : le mot de passe maitre n'a pas ete injecte." >&2
+        exit 1
+    fi
+    CONF_ARGS=(-c "$CONF_RENDU")
+    echo "Configuration rendue depuis ${MODELE_CONF} (mot de passe maitre injecte)."
+fi
+
 # N'installe/n'initialise "base" que si la base cible n'a pas encore de
 # schema Odoo (verifie via la presence de la table ir_module_module) :
 # rejouer les donnees de base/data/*.xml sur une base deja peuplee peut
@@ -31,9 +53,9 @@ IS_INITIALIZED=$(PGPASSWORD="$DB_PASSWORD" psql -h "$DB_HOST" -p "$DB_PORT" -U "
 ALL_MODULES="account,account_add_gln,account_edi_ubl_cii,account_payment,analytic,attachment_indexation,auth_signup,auth_totp,auth_totp_mail,auth_totp_portal,barcodes,barcodes_gs1_nomenclature,base,base_automation,base_import,base_import_module,base_install_request,base_setup,bus,calendar,calendar_sms,digest,event,event_product,event_sms,gamification,google_gmail,google_recaptcha,hr,hr_attendance,hr_biometric_attendance,hr_calendar,hr_contract,hr_employee_transfer,hr_employee_updation,hr_expense,hr_gamification,hr_holidays,hr_holidays_attendance,hr_holidays_contract,hr_hourly_cost,hr_insurance,hr_leave_request_aliasing,hr_multi_company,hr_org_chart,hr_payroll_account_community,hr_payroll_community,hr_recruitment,hr_recruitment_skills,hr_recruitment_sms,hr_recruitment_survey,hr_reminder,hr_resignation,hr_reward_warning,hr_skills,hr_skills_survey,hr_timesheet,hr_timesheet_attendance,hrms_dashboard,html_editor,http_routing,iap,iap_mail,l10n_ci,l10n_syscohada,mail,mail_bot,mail_bot_hr,microsoft_outlook,oh_appraisal,oh_employee_creation_from_user,oh_employee_documents_expiry,ohrms_core,ohrms_loan,ohrms_loan_accounting,ohrms_salary_advance,ohrms_service_request,onboarding,partner_autocomplete,payment,phone_validation,portal,portal_rating,privacy_lookup,product,project,project_account,project_hr_expense,project_hr_skills,project_sms,project_stock,project_stock_account,project_timesheet_holidays,project_todo,rating,resource,resource_mail,sms,snailmail,snailmail_account,social_media,spreadsheet,spreadsheet_account,spreadsheet_dashboard,spreadsheet_dashboard_account,spreadsheet_dashboard_hr_timesheet,spreadsheet_dashboard_stock_account,stock,stock_account,stock_sms,survey,uom,utm,villa_nova_appraisal,villa_nova_biometric_attendance,villa_nova_dashboard,villa_nova_leaves,villa_nova_onboarding,villa_nova_recruitment,villa_nova_settings,villa_nova_shell,villa_nova_theme,villa_nova_timesheets,web,web_editor,web_hierarchy,web_tour,web_unsplash,website,website_hr_recruitment,website_mail,website_payment,website_project,website_sms"
 
 if [ "$IS_INITIALIZED" = "t" ]; then
-    exec odoo --db_host="$DB_HOST" --db_port="$DB_PORT" --db_user="$DB_USER" --db_password="$DB_PASSWORD" --http-port="$HTTP_PORT" -d "$DB_NAME" \
+    exec odoo "${CONF_ARGS[@]}" --db_host="$DB_HOST" --db_port="$DB_PORT" --db_user="$DB_USER" --db_password="$DB_PASSWORD" --http-port="$HTTP_PORT" -d "$DB_NAME" \
         --addons-path=/usr/lib/python3/dist-packages/odoo/addons,/mnt/extra-addons
 else
-    exec odoo --db_host="$DB_HOST" --db_port="$DB_PORT" --db_user="$DB_USER" --db_password="$DB_PASSWORD" --http-port="$HTTP_PORT" -d "$DB_NAME" -i base --without-demo=all \
+    exec odoo "${CONF_ARGS[@]}" --db_host="$DB_HOST" --db_port="$DB_PORT" --db_user="$DB_USER" --db_password="$DB_PASSWORD" --http-port="$HTTP_PORT" -d "$DB_NAME" -i base --without-demo=all \
         --addons-path=/usr/lib/python3/dist-packages/odoo/addons,/mnt/extra-addons
 fi

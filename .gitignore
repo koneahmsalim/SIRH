@@ -6,6 +6,8 @@ __pycache__/
 scripts/*.log
 .env
 config/odoo.conf
+# Genere par deploy/preparer_production.sh : contient le mot de passe maitre.
+deploy/odoo.runtime.conf
 
 # Configuration Claude Code personnelle : propre a chaque poste,
 # ne doit pas suivre le projet (regles de permission locales).

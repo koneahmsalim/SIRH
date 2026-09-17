@@ -1,0 +1,96 @@
+# ---------------------------------------------------------------------------
+# Pile de production du SIRH.
+#
+# Trois differences de fond avec docker-compose.yml (developpement) :
+#
+#   1. Odoo n'expose AUCUN port sur l'hote. Il n'est joignable que par Caddy,
+#      a travers le reseau interne. En developpement le port 8069 est publie ;
+#      sur un VPS public, cela revient a offrir Odoo en HTTP clair, mots de
+#      passe compris.
+#   2. Caddy termine le TLS et obtient le certificat Let's Encrypt tout seul.
+#      C'est lui qui rend "proxy_mode = True" legitime : sans proxy devant,
+#      ce reglage laisse n'importe qui forger les en-tetes X-Forwarded-*.
+#   3. Tout redemarre automatiquement et les journaux sont plafonnes : sur un
+#      disque de VPS, des journaux Docker sans limite finissent par remplir la
+#      partition et faire tomber le service qu'ils documentent.
+#
+# Usage :
+#     docker compose -f deploy/docker-compose.prod.yml up -d
+# ---------------------------------------------------------------------------
+services:
+
+  postgres:
+    image: postgres:16
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: postgres
+      POSTGRES_USER: ${POSTGRES_USER:?definissez POSTGRES_USER dans .env}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?definissez POSTGRES_PASSWORD dans .env}
+      # Les journees de presence sont calculees en heure d'Abidjan.
+      TZ: Africa/Abidjan
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    # Aucun port publie : la base n'est joignable que depuis le reseau interne.
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    logging:
+      driver: json-file
+      options: { max-size: "10m", max-file: "3" }
+
+  odoo:
+    build:
+      context: ..
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      HOST: postgres
+      USER: ${POSTGRES_USER:?}
+      PASSWORD: ${POSTGRES_PASSWORD:?}
+      TZ: Africa/Abidjan
+    volumes:
+      - odoo_data:/var/lib/odoo
+      - ../addons:/mnt/extra-addons:ro
+      # Genere par preparer_production.sh a partir de odoo.prod.conf :
+      # le modele est versionne, le fichier porteur du secret ne l'est pas.
+      - ./odoo.runtime.conf:/etc/odoo/odoo.conf:ro
+    expose:
+      - "8069"   # interface web
+      - "8072"   # bus temps reel (websocket), actif des que workers > 0
+    logging:
+      driver: json-file
+      options: { max-size: "10m", max-file: "3" }
+
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    depends_on:
+      - odoo
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      # Nom d'hote public. Le nom par defaut d'Hostinger
+      # (srvXXXXXX.hstgr.cloud) est un vrai nom DNS : Let's Encrypt sait lui
+      # delivrer un certificat, inutile d'acheter un domaine pour demarrer.
+      SIRH_DOMAIN: ${SIRH_DOMAIN:?definissez SIRH_DOMAIN dans .env}
+      SIRH_ADMIN_EMAIL: ${SIRH_ADMIN_EMAIL:?definissez SIRH_ADMIN_EMAIL dans .env}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data      # certificats : a conserver, sinon re-emission
+      - caddy_config:/config
+    logging:
+      driver: json-file
+      options: { max-size: "10m", max-file: "3" }
+
+volumes:
+  postgres_data:
+  odoo_data:
+  caddy_data:
+  caddy_config:

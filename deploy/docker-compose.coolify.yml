@@ -1,0 +1,81 @@
+# ---------------------------------------------------------------------------
+# Pile SIRH pour Coolify.
+#
+# Differences avec docker-compose.prod.yml (pile autonome) :
+#
+#   - AUCUN service Caddy. Coolify embarque son propre proxy (Traefik) sur les
+#     ports 80 et 443 et gere les certificats. Ajouter Caddy ici provoquerait
+#     un conflit de ports et empecherait toute la pile de demarrer.
+#   - AUCUN port publie. C'est Coolify qui associe le domaine au service et au
+#     port interne, depuis son interface.
+#   - Le mot de passe maitre d'Odoo arrive par ODOO_ADMIN_PASSWD, pas par un
+#     fichier : Coolify clone le depot, et un fichier porteur d'un secret n'est
+#     par definition pas versionne. docker-cmd.sh l'injecte au demarrage dans
+#     le modele embarque dans l'image (/etc/odoo/odoo.prod.conf).
+#
+# VARIABLES A DEFINIR DANS COOLIFY (onglet Environment Variables) :
+#     POSTGRES_USER         odoo
+#     POSTGRES_PASSWORD     openssl rand -base64 36
+#     ODOO_ADMIN_PASSWD     openssl rand -base64 36
+# ---------------------------------------------------------------------------
+services:
+
+  postgres:
+    image: postgres:16
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: postgres
+      POSTGRES_USER: ${POSTGRES_USER:?definissez POSTGRES_USER dans Coolify}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?definissez POSTGRES_PASSWORD dans Coolify}
+      # Les journees de presence sont calculees en heure d'Abidjan.
+      TZ: Africa/Abidjan
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  odoo:
+    build:
+      context: ..
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      HOST: postgres
+      USER: ${POSTGRES_USER:?}
+      PASSWORD: ${POSTGRES_PASSWORD:?}
+      TZ: Africa/Abidjan
+
+      # Modele embarque dans l'image par le Dockerfile. docker-cmd.sh en tire
+      # une configuration complete en y injectant le mot de passe maitre.
+      ODOO_CONF_TEMPLATE: /etc/odoo/odoo.prod.conf
+      ODOO_ADMIN_PASSWD: ${ODOO_ADMIN_PASSWD:?definissez ODOO_ADMIN_PASSWD dans Coolify}
+
+      # Routage assure par Coolify : l'interface sur 8069, le bus temps reel
+      # sur 8072. Ce second port n'existe que parce que odoo.prod.conf fixe
+      # workers = 3 ; en mono-processus, tout passerait par 8069.
+      #
+      # Si ces variables ne prennent pas effet sur votre version de Coolify,
+      # declarez les domaines a la main dans l'onglet Domains du service :
+      #     https://VOTRE_HOTE          -> port 8069
+      #     https://VOTRE_HOTE/websocket -> port 8072
+      # Sans la seconde route, l'application fonctionne normalement mais les
+      # notifications en direct ne remontent plus : une panne discrete, qui
+      # ne produit aucune erreur visible.
+      SERVICE_FQDN_ODOO_8069: /
+      SERVICE_FQDN_ODOO_8072: /websocket
+    volumes:
+      - odoo_data:/var/lib/odoo
+    expose:
+      - "8069"
+      - "8072"
+
+volumes:
+  postgres_data:
+  odoo_data:

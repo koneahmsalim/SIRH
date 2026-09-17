@@ -1,0 +1,59 @@
+# ---------------------------------------------------------------------------
+# Proxy public du SIRH.
+#
+# Caddy demande, installe et renouvelle seul le certificat Let's Encrypt pour
+# {$SIRH_DOMAIN}, et redirige HTTP vers HTTPS. C'est la partie la plus fragile
+# d'un premier deploiement quand elle est faite a la main avec nginx+certbot ;
+# ici elle tient en une declaration.
+# ---------------------------------------------------------------------------
+
+{
+	email {$SIRH_ADMIN_EMAIL}
+	# Journaux d'acces plafonnes : sur un petit VPS, un fichier de log sans
+	# limite finit par remplir le disque.
+	log {
+		output file /data/access.log {
+			roll_size 10mb
+			roll_keep 3
+		}
+		level INFO
+	}
+}
+
+{$SIRH_DOMAIN} {
+	encode zstd gzip
+
+	# Le bus temps reel d'Odoo 18 (notifications, chatter en direct) passe par
+	# /websocket et n'est servi par le processus gevent, sur le port 8072, que
+	# lorsque workers > 0. Sans cette route, l'interface fonctionne mais les
+	# mises a jour en direct ne remontent jamais - une panne discrete, qui ne
+	# produit aucune erreur visible.
+	@websocket path /websocket
+	reverse_proxy @websocket odoo:8072
+
+	reverse_proxy odoo:8069 {
+		# Odoo lit ces en-tetes grace a proxy_mode = True. C'est ce qui lui
+		# permet de construire des URL en https:// dans les courriels et les
+		# redirections plutot qu'en http://.
+		header_up X-Forwarded-Proto {scheme}
+		header_up X-Forwarded-Host {host}
+		header_up X-Real-IP {remote_host}
+	}
+
+	header {
+		# HSTS : une fois le site visite en HTTPS, le navigateur refuse de
+		# repasser en clair. A n'activer qu'une fois le certificat obtenu.
+		Strict-Transport-Security "max-age=31536000; includeSubDomains"
+		X-Content-Type-Options "nosniff"
+		X-Frame-Options "SAMEORIGIN"
+		Referrer-Policy "strict-origin-when-cross-origin"
+		-Server
+	}
+
+	# La route de gestion des bases permet de creer, supprimer et telecharger
+	# n'importe quelle base avec le seul mot de passe maitre. Elle n'a rien a
+	# faire sur l'internet public : on la coupe au niveau du proxy, en plus de
+	# list_db = False cote Odoo. Deux verrous valent mieux qu'un.
+	@gestion_bases path /web/database/manager /web/database/selector /web/database/create /web/database/duplicate /web/database/drop /web/database/backup /web/database/restore
+	respond @gestion_bases "Interdit" 403
+}
