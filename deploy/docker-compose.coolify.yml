@@ -40,7 +40,10 @@ services:
 
   odoo:
     build:
-      context: ..
+      # Racine du depot. Coolify lance docker compose avec --project-directory
+      # pointant sur cette racine : les chemins relatifs se resolvent par rapport
+      # a elle, et non par rapport a l'emplacement de ce fichier.
+      context: .
       dockerfile: Dockerfile
     restart: unless-stopped
     depends_on:
